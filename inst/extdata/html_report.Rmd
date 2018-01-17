@@ -1,0 +1,235 @@
+---
+title: "`r samplename` Analysis Report<BR>[`r data$meta$basic$manufacturer` `r data$meta$basic$type`]<BR><BR>"
+author: "Bioinformatics Core Facility"
+date: "`r format(Sys.time(), '%Y/%m/%d')`"
+output:
+  html_document:
+    background: black
+    fig_height: 10
+    fig_width: 15
+    number_sections: no
+    highlight: null
+    theme: cerulean
+    toc: yes
+    toc_float:
+        collapsed: true
+        smooth_scroll: true
+    keep_md: false
+    self_contained: yes
+always_allow_html: yes
+---
+
+```{r setup, echo = FALSE, include = FALSE}
+`%>%` <- magrittr::"%>%"
+show.flag <- if ((data$meta$basic$source == "microarray") & (data$meta$basic$manufacturer == "Affymetrix")) TRUE else FALSE
+knitr::opts_knit$set(base.dir = tempdir())
+```
+
+***
+***
+
+<BR><BR>
+
+```{r array_info, results = "asis", echo = FALSE, eval = as.logical(show.flag)}
+cat('# Microarray Information\n')
+DT::datatable(data = array.df, rownames = FALSE, caption = "", class = "cell-border display", selection = "none", filter = "none", extensions = list("Buttons" = NULL), options = list(dom = "Bt", lengthChange = FALSE, paging = FALSE, info = FALSE, autoWidth = FALSE, ordering = FALSE, buttons = list('copy', list(extend = 'print', message = paste0("Microarray information export for sample ", samplename)), list(extend = 'collection', buttons = list('csv', 'excel', list(extend = 'pdf', orientation = "landscape", pageSize = "A4")), text = 'Export')))) %>% DT::formatStyle(colnames(array.df), "text-align" = "center")
+cat("<HR><HR><BR><BR>\n")
+```
+
+<!-- *** -->
+<!-- *** -->
+
+<!-- <BR><BR> -->
+
+```{r intplot, results = "asis", fig.height = 10, fig.width = 10, fig.align="center", echo = FALSE, eval = as.logical(show.flag)}
+cat("# Microarray Intensity Plot\n")
+cat(paste0("\n![](", intplotf, ")\n"))
+cat("<HR><HR><BR><BR>\n")
+```
+
+<!-- *** -->
+<!-- *** -->
+
+<!-- <BR><BR> -->
+
+```{r qc_table, results = "asis", echo = FALSE, eval = as.logical(show.flag)}
+cat("# QC Metrics\n")
+DT::datatable(data = qc.df, rownames = FALSE, caption = "", class = "cell-border display", selection = "none", filter = "none", extensions = list("Buttons" = NULL), options = list(dom = "Bt", lengthChange = FALSE, paging = FALSE, info = FALSE, autoWidth = FALSE, ordering = FALSE, columnDefs = list(list(targets = c(7:9), visible = FALSE)), buttons = list('copy', list(extend = 'print', message = paste0("QC metrics table export for sample ", samplename)), list(extend = 'collection', buttons = list('csv', 'excel', list(extend = 'pdf', orientation = "landscape", pageSize = "A4")), text = 'Export')))) %>% DT::formatStyle('MAPD', 'mapd.flag', backgroundColor = qc.df$mapd.flag) %>% DT::formatStyle('SNPQC', 'snpqc.flag', backgroundColor = qc.df$snpqc.flag) %>% DT::formatStyle('WavinessSd', 'waviness.flag', backgroundColor = qc.df$waviness.flag) %>% DT::formatStyle(colnames(qc.df), "text-align" = "center") %>% DT::formatRound(columns = 1:4, 3)
+cat("<BR>\n<I>MAPD : Good < 0.20 ; Acceptable < 0.25<BR>SNPQC : Good >= 26<BR>WavinessSd : Good < 0.12</I><HR><HR><BR><BR>\n")
+```
+
+<!-- <BR> -->
+
+<!-- _MAPD : Good < 0.20 ; Acceptable < 0.25_   -->
+<!-- _SNPQC : Good >= 26_   -->
+<!-- _WavinessSd : Good < 0.12_   -->
+
+<!-- *** -->
+<!-- *** -->
+
+<!-- <BR><BR> -->
+
+# CNA Genomic Plots {.tabset .tabset-fade .tabset-pills}
+_Normalized, centered, segmented and called._
+
+```{r genoplots, results='asis', fig.height = 10, fig.width = 15, fig.align="center", echo = FALSE}
+pdisp <- c("L2R + BAF", "L2R", "BAF", "Predicted Germline")
+for (p in c(1:length(pdisp))) {
+  cat(paste0("\n## ", pdisp[p], "\n"))
+  gpng <- gplotlist[p]
+  cat(paste0("\n![](", gpng, ")\n"))
+}
+```
+
+#
+
+***
+***
+
+<BR><BR>
+
+# CNA Karyotypic Plot
+
+_Normalized, centered, segmented and called._
+
+```{r karyo, results = "asis", fig.height = 10, fig.width = 15, fig.align="center", echo = FALSE}
+cat(paste0("\n![](", karyoplotf, ")\n"))
+```
+
+***
+***
+
+<BR><BR>
+
+# Genomic Instability Metrics Table
+```{r instab_table, echo = FALSE}
+DT::datatable(data = gi.df, rownames = FALSE, caption = "", class = "cell-border display", selection = "none", filter = "none", extensions = list("Buttons" = NULL), plugins = "natural", options = list(dom = "Bt", lengthChange = FALSE, paging = FALSE, info = FALSE, autoWidth = FALSE, ordering = FALSE, buttons = list('copy', list(extend = 'print', message = paste0("Genomic instability mùetrics table export for sample ", samplename)), list(extend = 'collection', buttons = list('csv', 'excel', list(extend = 'pdf', orientation = "landscape", pageSize = "A4")), text = 'Export')))) %>% DT::formatStyle(colnames(gi.df)[1], "text-align" = "left") %>% DT::formatStyle(colnames(gi.df)[2:6], "text-align" = "right") %>% DT::formatRound(columns = 6, 2)
+```
+
+***
+***
+
+<BR><BR>
+
+# Segments Table {.tabset .tabset-fade .tabset-pills}
+
+_Any value (including gene symbols) can be queried in the 'Search' box. To search for an exact symbol try adding a coma (,) at the end of your query. Case is insensitive._
+
+## L2R
+
+```{r l2rseg_table, echo = FALSE}
+DT::datatable(data = segtab.df, rownames = FALSE, class = "cell-border display", filter = list(position = "bottom", clear = TRUE, plain = FALSE), extensions = list("Buttons" = NULL, "Scroller" = NULL, "ColReorder" = NULL), options = list(dom = "Bfti", searchHighlight = FALSE, lengthChange = FALSE, scrollY = "700px", scrollCollapse = TRUE, paging = TRUE, deferRender = TRUE, scrollX = TRUE, info = TRUE, search = list(regex = TRUE, smart = FALSE, caseInsen = TRUE), autoWidth = FALSE, columnDefs = list(list(targets = c(11,12), visible = FALSE), list(type = 'natural', targets = 0)), ordering = TRUE, buttons = list('copy', list(extend = 'collection', buttons = list('csv', 'excel'), text = 'Export'), I("colvis")), scroller = TRUE, colReorder = list(realtime = FALSE))) %>% DT::formatStyle('Status', backgroundColor = DT::styleEqual(l2r.segstat, l2r.segcol), fontWeight = 'bold', color = "white") %>% DT::formatStyle('L2R', 'l2rbold', fontWeight = DT::styleEqual(c(0, 1), c('normal', 'bold'))) %>% DT::formatStyle(colnames(segtab.df)[c(1,5,6,7)], "text-align" = "center") %>% DT::formatStyle(colnames(segtab.df)[c(2:4)], "text-align" = "right")
+```
+
+## BAF
+
+```{r bafseg_table, echo = FALSE}
+DT::datatable(data = segbaf.df, rownames = FALSE, class = "cell-border display", filter = list(position = "bottom", clear = TRUE, plain = FALSE), extensions = list("Buttons" = NULL, "Scroller" = NULL, "ColReorder" = NULL), plugins = "natural", options = list(dom = "Bfti", searchHighlight = FALSE, lengthChange = FALSE, scrollY = "700px", scrollCollapse = TRUE, paging = TRUE, deferRender = TRUE, scrollX = TRUE, info = TRUE, search = list(regex = TRUE, smart = FALSE, caseInsen = TRUE), autoWidth = FALSE, columnDefs = list(list(targets = c(10), visible = FALSE), list(type = 'natural', targets = 0)), ordering = TRUE, buttons = list('copy', list(extend = 'collection', buttons = list('csv', 'excel'), text = 'Export'), I("colvis")), scroller = TRUE, colReorder = list(realtime = FALSE))) %>% DT::formatStyle('Status', backgroundColor = DT::styleEqual(baf.segstat, baf.segcol), fontWeight = 'bold', color = "white") %>% DT::formatStyle(colnames(segtab.df)[c(1,5,6,7)], "text-align" = "center") %>% DT::formatStyle(colnames(segtab.df)[c(2:4)], "text-align" = "right")
+```
+
+#
+
+***
+***
+
+<BR><BR>
+
+# Target Genes Table
+
+_Any value can be queried in the 'Search' box. Case is insensitive._
+
+```{r target_table, echo = FALSE}
+DT::datatable(data = targ.regz, escape = FALSE, rownames = FALSE, class = "cell-border display", filter = list(position = "bottom", clear = TRUE, plain = FALSE), extensions = list("Buttons" = NULL, "FixedColumns" = NULL, "Scroller" = NULL, "ColReorder" = NULL), plugins = "natural", options = list(dom = "Bfti", searchHighlight = FALSE, lengthChange = FALSE, scrollY = "700px", scrollCollapse = TRUE, paging = TRUE, deferRender = TRUE, scrollX = TRUE, info = TRUE, search = list(regex = TRUE, smart = FALSE, caseInsen = TRUE), autoWidth = TRUE, ordering = TRUE, columnDefs = list(list(targets = c(16), visible = FALSE), list(type = 'natural', targets = c(0,1))), buttons = list('copy', list(extend = 'print', message = paste0("Targets table export for sample ", samplename)), list(extend = 'collection', buttons = list('csv', 'excel', list(extend = 'pdf', orientation = "landscape", pageSize = "A4")), text = 'Export'), I("colvis")), fixedColumns = TRUE, scroller = TRUE, colReorder = list(realtime = FALSE, fixedColumnsLeft = 1))) %>% DT::formatStyle('L2R Status', backgroundColor = DT::styleEqual(l2r.segstat, l2r.segcol), fontWeight = 'bold', color = "white") %>% DT::formatStyle('BAF Status', backgroundColor = DT::styleEqual(baf.segstat, baf.segcol), fontWeight = 'bold', color = "white") %>% DT::formatStyle('L2R Value', 'l2rbold', fontWeight = DT::styleEqual(c(0, 1), c('normal', 'bold'))) %>% DT::formatStyle('Target Symbol', fontWeight = 'bold') %>% DT::formatStyle(colnames(targ.regz)[c(1,2,6,7,11,14)], "text-align" = "center") %>% DT::formatStyle(colnames(targ.regz)[c(3:5,8:10,12,13,15,16)], "text-align" = "right")
+```
+
+***
+***
+
+<BR><BR>
+
+# Truncated Genes Table
+
+_Any value can be queried in the 'Search' box. Case is insensitive._
+
+_Blank cells correspond to genomic regions for which BAF is non-determined (no covering probe, thus no BAF segment)._
+
+Found __`r length(unique(trunc.regz[["Gene Symbol"]]))`__ truncated gene(s).
+
+```{r trunc_table, echo = FALSE}
+
+if (length(gen.trunk.idx) > 0) {
+  DT::datatable(data = trunc.regz, escape = FALSE, rownames = FALSE, class = "cell-border display", filter = list(position = "bottom", clear = TRUE, plain = FALSE), extensions = list("Buttons" = NULL, "FixedColumns" = NULL, "Scroller" = NULL, "ColReorder" = NULL), plugins = "natural", options = list(dom = "Bfti", searchHighlight = FALSE, lengthChange = FALSE, scrollY = "700px", scrollCollapse = TRUE, paging = TRUE, deferRender = TRUE, scrollX = TRUE, info = TRUE, search = list(regex = TRUE, smart = FALSE, caseInsen = TRUE), autoWidth = TRUE, ordering = TRUE, columnDefs = list(list(targets = c(16), visible = FALSE), list(type = 'natural', targets = c(0,1))), buttons = list('copy', list(extend = 'print', message = paste0("Targets table export for sample ", samplename)), list(extend = 'collection', buttons = list('csv', 'excel', list(extend = 'pdf', orientation = "landscape", pageSize = "A4")), text = 'Export'), I("colvis")), fixedColumns = TRUE, scroller = TRUE, colReorder = list(realtime = FALSE, fixedColumnsLeft = 1))) %>% DT::formatStyle('L2R Status', backgroundColor = DT::styleEqual(l2r.segstat, l2r.segcol), fontWeight = 'bold', color = "white") %>% DT::formatStyle('BAF Status', backgroundColor = DT::styleEqual(baf.segstat, baf.segcol), fontWeight = 'bold', color = "white") %>% DT::formatStyle('L2R Value', 'l2rbold', fontWeight = DT::styleEqual(c(0, 1), c('normal', 'bold'))) %>% DT::formatStyle('Gene Symbol', fontWeight = 'bold') %>% DT::formatStyle(colnames(trunc.regz)[c(1,2,6,7,11,14)], "text-align" = "center") %>% DT::formatStyle(colnames(trunc.regz)[c(3:5,8:10,12,13,15,16)], "text-align" = "right")
+} else print("No truncated gene found.")
+```
+
+***
+***
+
+<BR><BR>
+
+# CNA Chromosomal Plots {.tabset .tabset-fade .tabset-pills}
+
+_Normalized, centered, segmented and called._
+
+```{r chrplots, echo = FALSE, results='asis'}
+for (kr in 1:length(krA)) {
+    cat(paste0("\n## ", krA[kr], "\n"))
+    cat(paste0("\n![](", kplotlist[kr], ")\n"))
+}
+```
+
+#
+
+***
+***
+
+<BR><BR>
+
+```{r solo, echo = FALSE, results = 'asis', eval=as.logical(solo)}
+cat('# Annotated Regions\n')
+#cat(paste0("<a href='", samplename, "_solo.", genome, "/chr", l2r.seg.obj$pos$Chrom[1], ".html' target=_new> Open SOLO </a>\n"))
+cat(paste0("<a href='", samplename, "_solo.", genome, "/", segtab.df$Chr[segtab.df$Status != "Normal"][1], ".html' target=_new> Open SOLO </a>\n"))
+cat("<HR><HR><BR><BR>\n")
+```
+
+<!-- # Annotated Regions -->
+<!-- <a href='`r paste0(samplename, "_Cut.", genome, "/chr", l2r.seg.obj$pos$Chrom[1])`.html' target=_new> Open SOLO </a> -->
+
+<!-- *** -->
+<!-- *** -->
+
+<!-- <BR><BR> -->
+
+# Miscellaneous Information {.tabset .tabset-fade .tabset-pills}
+## R Session Info
+```{r sessioninfo, echo = FALSE}
+sessionInfo()
+```
+
+## Data summary
+```{r param_basic, echo = FALSE}
+meta.basic.unl <- unlist(data$meta$basic)
+meta.basic.df <- data.frame(Parameter = names(meta.basic.unl), Value = meta.basic.unl, stringsAsFactors = FALSE)
+DT::datatable(data = meta.basic.df, rownames = FALSE, class = "cell-border display", selection = "none", filter = "none", extensions = list("Buttons" = NULL, "Scroller" = NULL), options = list(dom = "Bfti", searchHighlight = FALSE, lengthChange = FALSE, paging = TRUE, info = FALSE, autoWidth = FALSE, ordering = FALSE, search = list(regex = TRUE, smart = FALSE, caseInsen = TRUE), scrollY = "700px", scrollCollapse = TRUE, buttons = list('copy', list(extend = 'print', message = paste0("Parameters table export for sample ", samplename)), list(extend = 'collection', buttons = list('csv', 'excel', list(extend = 'pdf', orientation = "landscape", pageSize = "A4")), text = 'Export')), scroller = TRUE))
+```
+
+## EaCoN Parameters
+```{r param_eacon, echo = FALSE}
+meta.eacon.unl <- unlist(data$meta$eacon)
+meta.eacon.df <- data.frame(Parameter = names(meta.eacon.unl), Value = meta.eacon.unl, stringsAsFactors = FALSE)
+DT::datatable(data = meta.eacon.df, rownames = FALSE, class = "cell-border display", selection = "none", filter = "none", extensions = list("Buttons" = NULL, "Scroller" = NULL), options = list(dom = "Bfti", searchHighlight = FALSE, lengthChange = FALSE, paging = TRUE, info = FALSE, autoWidth = FALSE, ordering = FALSE, search = list(regex = TRUE, smart = FALSE, caseInsen = TRUE), scrollY = "700px", scrollCollapse = TRUE, buttons = list('copy', list(extend = 'print', message = paste0("Parameters table export for sample ", samplename)), list(extend = 'collection', buttons = list('csv', 'excel', list(extend = 'pdf', orientation = "landscape", pageSize = "A4")), text = 'Export')), scroller = TRUE))
+```
+
+```{r param_affy, results= "asis", echo = FALSE, eval = as.logical(show.flag)}
+cat("## Affymetrix Parameters\n")
+meta.affy.unl <- unlist(data$meta$affy)
+meta.affy.df <- data.frame(Parameter = names(meta.affy.unl), Value = meta.affy.unl, stringsAsFactors = FALSE)
+meta2clean <- grep(pattern =  "affymetrix-partial-dat-header", x = meta.affy.df$Parameter)
+if(length(meta2clean) > 0) for(l in meta2clean) meta.affy.df$Value[l] <- gsub(x = meta.affy.df$Value[l], pattern = "[ ]+\024", replacement = "")
+DT::datatable(data = meta.affy.df, rownames = FALSE, class = "cell-border display", selection = "none", filter = "none", extensions = list("Buttons" = NULL, "Scroller" = NULL), options = list(dom = "Bfti", searchHighlight = FALSE, lengthChange = FALSE, paging = TRUE, info = FALSE, autoWidth = FALSE, ordering = FALSE, search = list(regex = TRUE, smart = FALSE, caseInsen = TRUE), scrollY = "700px", scrollCollapse = TRUE, buttons = list('copy', list(extend = 'print', message = paste0("Parameters table export for sample ", samplename)), list(extend = 'collection', buttons = list('csv', 'excel', list(extend = 'pdf', orientation = "landscape", pageSize = "A4")), text = 'Export')), scroller = TRUE))
+```
+
+#
+
+***
+***

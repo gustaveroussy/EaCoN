@@ -1,0 +1,212 @@
+EaCoN
+-----
+
+v0.2.8 (20180116) *Zzz*
+-----------------
+* Corrected a damn error in WES binning routine, which changed bin order (bad sort from numerical to alphanumerical ...) !
+* Converted some messages in EaCoN.WES.Bin.Batch() that still did not use tmsg().
+* Added the {.errorhandling = "remove"} option to *.Batch functions.
+* Reformed the handling of the genome version for WES, now completely compatible with BSgenome.
+
+v0.2.7 (20180109) *HappyNewYear*
+-----------------
+* Added a BAF level cutter to germline prediction, to deal with noisy (smeary/blurry) profiles. May help WES data too !
+* Added a new function to change the global option "bitmapType" (to allow plotting on stations without X, changing from default "Xlib" to "cairo")
+* Modified all foreach/doParallel calls to set the changed bitmapType value to any forked/child thread.
+
+v0.2.6 (20171222) *RoseSweety*
+-----------------
+* Re-introduced rawcopy's SNP selection to reduce BAF noise (WES in mind...).
+* Coincidently added a new 'BAF.filter' parameter to the germline prediction function (passed from Eacon.Segment()) to modify the level of BAF noise filtration (default is .90, ie 90% of probes kept).
+* Added few missing conversions of print() to message() for microarray processing functions.
+* Added a message giving the number of samples to process for microarray processing functions.
+
+v0.2.5 (20171214) *FeverStopped*
+-----------------
+* Added the intermediate_files parameter to the report rendering, to avoid (definitively ?) collisions in multithreaded mode with EaCoN.Annotate.ff.Batch().
+* Corrected a bug in the HTML QC report when solo = TRUE, where asked solo HTML page was not mandatorily directed to a chromosome with aberrations (rather chr1 by default).
+
+v0.2.4 (20171120) *BackFromRoscoff*
+-----------------
+* Docs, docs docs. And docs !
+* Corrected a bug (appeared in v0.2.3) where chromosomal plots in HTML report were not in good order (by filename rather than chromosome name, despite panel names were good).
+* Modified the EaCoN.WES.Bin.Batch() function to mimic the equivalent for microarrays processing (ie, using a target file rather than lists as arguments).
+* Rearranged the output BAF segmented table (informative columns selection, reordering and renaming).
+
+v0.2.3 (20171026) *ElevenMonths*
+-----------------
+* Several minor bug corrections thanks to Thibault.
+* Set a try() on text() calls (for chr names on plots) that fail on our cigogne server due to missing font we can't install.
+* Modified functions structure to allow easier piping of steps.
+* Set a custom tmpdir() in the report RMD to avoid collision of different report in generation when using EaCoN::Annotate.ff.batch().
+
+v0.2.2 (20171004) *SAFIRsBFucked*
+-----------------
+* Bug correction : undrawn gains/losses on weird (noisy) L2R distributions are now corrected. g.cut and l.cut now have the same absolute value, even for density mode.
+* Introduced a new filter for WES (in addition to the low-depth one), based on extreme GC% (<20% or >80%). Corresponding bins are imputed. It represents ~2.5% of 50b bins in a human WES.
+* Fragmented code for ASCN which can now be run independantly from ASCPF.
+* Fragmented code for WES normalization which can now be run independantly from binning.
+
+v0.2.1 (20170927) *TenMonths*
+-----------------
+* Bug correction : myGR.ex unknown variable in BED2BIN
+* Bug correction : deprecated option "silent=TRUE" removed in suppressWarnings() calls.
+
+v0.2.0 *Second*
+------
+* IDK (dedicace to affymetrix power tools help writer(s)!)
+
+v0.1.0 *First*
+------
+* First release
+* Renamed A2p (ASCAT 2 "plus") to EaCoN (Easy Copy Number !).
+* Integrated code from affy.CN.process and WES.CN.process packages.
+* Added a second-step centralization (based on normal segments post-calling).
+
+
+(logs from A2p)
+
+v0.0.4-1 (201709xx) *ThreeGoldenYears*
+-----------------
+* Exported all functions related to WES to a new package 'WES.CN.process'.
+* Modified report to handle WES results.
+* Completely rewrote methods for the germline prediction. It's now faster, more robust and compatible with both microarrays and WES data using the same parameters. Reduced the number of parameters, and defaults should fit most cases (I tested so far).
+
+v0.0.3-1 (20170629) *BBQ*
+-----------------
+* Debugging problems appeared with a newer version of the mclust package.
+* Reverting some changes made to the BAF segmentation using PELT.
+* Rewrote A2p.BedCheck() using GenomicRanges (faster and more accurate).
+
+v0.0.3-0 (20170511) *PupilsPair*
+-----------------
+* Added new functions/methods to prepare WES data :
+  . A2p.BAMConv : to generate RD (read depth) and SNP (single nucleotide polymorphisms) data from a pair (normal + tumor) of WES BAM files. This uses samtools (v1.4 mpileup), now included in the package as a linux x86_64 binary, and a in-house perl script included too.
+  . A2p.ExomeRun : to perform L2R GC-content normalization, BAF selection and generate files compatible with ASCAT.
+  . A2p.BAMConv.ExomeRun : as a wrapper to chained A2p.BAMConv > A2p.ExomeRun in a single run.
+  . A2p.BedGC and A2p.BedGC.chr : to compute GC-content tracks from a (binned) bed, using BioStrings. Both functions perform the same task, but the A2p.BedGC.chr is recommended as it works by chromosome (instead of at the whole genome level), thus consumes much less RAM than A2p.BedGC.
+  . A2p.BedCheck : To (control and) clean a be file, removing duplicates, merging overlaps and sorting by chr > start > end.
+* Renamed functions for the sake of homogeneity.
+* Added the generation of a CBS-like (with extended columns for allelic CN, ploidy and GoF) for ASCN results.
+
+v0.0.2-6 (20170426) *FirstByMyself*
+-----------------
+* Renamed some options of A2prun() concerning the germline prediction, to avoid confusion with other parameters (all in all, 3 different options refer to penalties...).
+* Tweaked germline prediction, mostly to adapt it to WES data. Rough BAF segmentation by PELT is now much better looking to the eye. Also changed the mclust parameters (clusters computed on bsm, max clusters = 3, model = "E"). Also changed the unizomy rescue routine, now computed AFTER calling the undecided probes.
+* Modified the ascat.plotGenotypes2() function (simpler, faster code).
+* Reworked the HomoCut plot : now at the same size as other plots, includes BAF clusters as well.
+* Pulled out old versions of the germline prediction main function ascat.predictGermlineGenotypes.auto().
+
+v0.0.2-5 (20170303) *KidBookz*
+-----------------
+* Other slight modifications to the report.
+* Now BAF is rounded in report segmentation table.
+* Added a pc.outliers entry to the returned list of celstruc(), to display outliers as a fraction of all cels in the report
+* Set penalty evaluation method to "BIC0" (was "BIC") in the PELT (cpt.var) segmentation of BAF signals, for a better sensitivity (in particular for WES data).
+
+v0.0.2-4 (20170302) *Plagio*
+-----------------
+* Filled several requests concerning the HTML report (submitted by Etienne Rouleau).
+* Corrected a bug where BAF calling was not properly made for some homozygous regions, as their value (numeric) was compared to homocut as read in the META file (character).
+* Changed again nrf to 0.5 by default.
+
+v0.0.2-3 (20170220) *WolfBurner*
+-----------------
+* Increased sensitivity for PELT segmentation in smallevents rescue mode (set to AIC0).
+* Deactivated ascn for A2p.run() by default as non-required for MP results.
+* Added cool export buttons to the report.
+* Finaly solved the import warnings at package loading.
+* Synched meta handling for OncoScan when tags were present in a CEL file but not in the other one.
+
+v0.0.2-2 (20170217) *SleepingBeauty*
+-----------------
+* Removed the over-complicated routine for BAF calling, replaced by a simple cut-off as a new parameter : homoCut, defaults to 0.05.
+* Debugged a problem with mclust on small populations, the try() method was not properly implemented.
+
+v0.0.2-1 (20170215) *LostBread*
+-----------------
+* Merged BAF and L2R segmentation results in the report for the targets table.
+* Several ameliorations in the HTML report :
+  . Page width/margins hacks by Yannick BOURSIN.
+  . Better readability of scan date in array info table.
+  . More readable plots, especially for BAF (slightly increased ylim and line width, nice colors, ...).
+  . Added germline prediction plot.
+  . Fixed Symbol column in the target table (usefull for small-res 4:3 screens).
+  . Added missing parameters in the last last pane.
+
+v0.0.2-0 (20170214) *CoulFaZ Edition*
+-----------------
+* Tuned the "auto" mode for germline prediction, adjusting PELT (BIC on bsm with values below 0 set to 0) and mclust (tbsam with 5 classes max on direct values), plus handling of special cases (small populations).
+* Changed default value for "proportionOpen" from 0.03 to 0.05 (tested for CytoScanHD, to evaluate for OncoScan).
+* Added BAF calling with corresponding colors for segments (homo / hetero / unbalanced status).
+* Added BAF support in the report (table, plots).
+* All plots are now generated using Cairo.
+
+v0.0.1-4 (20170210)
+-----------------
+* Modified the "auto" mode for germline prediction, using PELT with BIC and mclust with 3 classes max on bsm with values below 0 set to 0.
+
+v0.0.1-3 (20170208)
+-----------------
+* Changed the 'auto' mode for the germline prediction : now homozygous probes are directly taken from the mclust results.
+* Added a routine to "rescue" unizomy BAF regions from the PELT/Mclust segmentation/clustering (when fraction of homozygous probes is above 80%). This should allow detection of unizomy regions.
+* Changed rectangles border for the karyotypic l2r plot from transparent to same color as internal (keeping the alpha), to prevent invisible small gains/losses on the plot.
+* Homogeneized sampe parameter names (CELs.list changed to CEL.list.file in A2p.annotate).
+* Rounded (ceiling) the median width in the genomic instability table.
+
+v0.0.1-2 (20170203)
+-----------------
+* Added a first "waveeffect" normalization track (from P25_AUAU2) for OncoScan arrays.
+* Added the automatic HTML report to A2p.annotate()
+* Corrected a rare bug in the centralization (method "l2r.centeredpeak") when a peak is found on an edge of the distribution.
+* Corrected a bug (loss of dimensionality) when the gcdata or wavedata objects had a single track.
+* Removed parameter "genome" from A2p.annotate() as its value can be obtained from the META file.
+* Added intensity plot(s) from the CEL files (needed to get the median intensity for CytoScan arrays).
+* Corrected some bugs considering meta tags.
+
+v0.0.1-1 (20170120)
+-----------------
+* Added a routine based on PELT to rescue small events ignored by ASCAT.
+* Restored detection of gender for data normalized with APT 1.16.1.
+* Intermediate version to release A2p.annotate() for automatic SOLO.
+
+v0.0.1-0 (20170119)
+-----------------
+* Added the cnchp2ascat() function to support results produced by package apt.cytoscan.1.16.1. This donction is built from oschp2ascat().
+* Added controls in oschp2ascat() to check correspondance between ProbesetNames in GCdata and analyzed sample.
+* Renamed first argument of A2p.batchrun() for clarity.
+* Rebuilt the two GC-related Rdata packs, which are now ordered by numerical chromosomes (instead of alphanumerical).
+* Corrected some errors/typos/inconsistences in doc.
+
+v0.0.0-4 (20170117)
+-----------------
+* Added a function to generate a table for target genes.
+* Patched to support the 'OncoScan_CNV' design.
+
+v0.0.0-3 (20161221)
+-----------------
+* Modified oschp2ascat() to work in batch mode using a directory (but not recommended yet).
+* oschp2ascat() is now compatible with OSCHP files generated for CytoScanHD arrays (maybe with CytoScan750K too but untested.
+* Consequently, added GC-content tracks for CytoScanHD to the package.
+* Now GC-content data are embedded as datasets rather than TSV files.
+* oschp2ascat() is now faster in multihreaded mode when GC.renorm is TRUE (by setting .inorder = FALSE in foreach call).
+* Re-centering is now possible but limited to a basis from the log2(ratio) profile, with 4 possible methods (default is 'l2r.centeredpeak) :
+* . "recenter = [value]" then this l2r value is used to shift the profile.
+* . "recenter = 'l2r.median'" then the median of the l2r profile is used.
+* . "recenter = 'l2r.mainpeak'" then the most populated peak from the l2r density is used.
+* . "recenter = 'l2r.centeredpeak'" then the most centered peak from the l2r density is used (like in GC5).
+* Added a wrapper to run A2p.run in batch.
+* Resolved some bugs in this new function.
+* Reshaped oschp2ascat() to reduce memory imprint with numerous threads.
+
+v0.0.0-2 (20161027)
+-----------------
+* Now the GC tracks file for OS format is included in the package (included in the 'inst' folder).
+* Bug solved : the workidir is set back to its initial value when returning the main function run.ascat()
+  (in v0.0-1, results were written in [infinite] recursive folders when processing multiple samples...).
+* Better handling of sample name, now set to default NULL in all functions.
+* Added the rawcopy2ascat() function as a start for the implementation of CytoScan HD support.
+
+v0.0.0-1 (20161017)
+----------------
+* First early-beta-wip-ongoing-under-construction-use-at-your-own-risk-i-decline-all-responsibility version.
