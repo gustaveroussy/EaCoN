@@ -1,0 +1,2 @@
+# EaCoN
+Easy Copy Number !
