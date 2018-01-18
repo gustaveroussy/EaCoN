@@ -311,22 +311,40 @@ EaCoN.WES.Bin.Batch <- function(BAM.list.file = NULL, BINpack = NULL, nthread = 
 ## Performs the normalization of WES L2R and BAF signals
 EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20, L2R.RD.min.Test = 20, BAF.RD.min = 25, out.dir = getwd(), return.data = FALSE) {
 
-  # setwd("/home/job/WORKSPACE/SNP6/TCGA/LEVEL1/BRCA/WXS/test2")
-  # data <- readRDS("BEAUX_b50_GRCh37-lite_binned.RDS")
-  # BINpack <- "/home/job/WORKSPACE/A2p_WES/RESOURCES/GC/hg19/bin50/SureSelect_ClinicalResearchExome.padded_GRCh37-lite_b50.rda"
-  # L2R.RD.min.Ref = 0
-  # L2R.RD.min.Test = 0
-  # BAF.RD.min = 25
-  # out.dir = getwd()
-  # return.data = FALSE
+  setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-A7-A0CE-01A_vs_11A/")
+  data <- readRDS("TCGA-A7-A0CE-01A_vs_11A_hs37d5_b50_binned.RDS")
+  BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.rda"
+  L2R.RD.min.Ref = 20
+  L2R.RD.min.Test = 20
+  BAF.RD.min = 25
+  out.dir = getwd()
+  return.data = FALSE
+  source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
 
+  
+  
   ## CHECKS
   if (is.null(BINpack)) stop(tmsg("A BINpack file is required !"))
   if (!file.exists(BINpack)) stop(tmsg("Could not find the BINpack file !"))
 
-  ## Loading data
-  # data <- data
-
+  ## Loading BINpack
+  load(BINpack)
+  genome.pkg <- GC.data$info$genome.pkg
+  if (!genome.pkg %in% BSgenome::installed.genomes()) {
+    if (genome.pkg %in% BSgenome::available.genomes()) {
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+    } else {
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+    }
+  }
+  
+  ### Loading genome
+  print(paste0("Loading ", genome.pkg, " ..."))
+  suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
+  BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
+  genome <- BSgenome::providerVersion(BSg.obj)
+  
+  
   ## DEPTH controls
   ### L2R.TEST
   LT <- length(which(data$RD$RD.test.mean < L2R.RD.min.Test)) / nrow(data$RD)
@@ -359,8 +377,8 @@ EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20
   # ldbins <- data$RD$RD_B < L2R.RD.min & data$RD$RD_A < L2R.RD.min
   ldbins <- data$RD$RD.test.mean < L2R.RD.min.Test | data$RD$RD.ref.mean < L2R.RD.min.Ref
   message(tmsg(paste0(" Found ", length(which(ldbins)), " low-depth bin(s).")))
+  
   ### GC outlier
-  load(BINpack)
   gcobins <- GC.data$GC[,5] < .2 | GC.data$GC[,5] > .8
   message(tmsg(paste0(" Found ", length(which(gcobins)), " GC%-outlier bin(s).")))
   ### Pooled

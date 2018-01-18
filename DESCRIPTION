@@ -3,7 +3,7 @@ Package: EaCoN
 Type: Package
 Title: EaCoN : Easy Copy Number !
 Version: 0.2.8
-Date: 2018-01-10
+Date: 2018-01-18
 Author: Bastien Job
 Maintainer: Bastien JOB <bastien.job@inserm.fr>
 Depends: R(>= 3.1.0)
