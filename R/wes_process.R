@@ -44,7 +44,7 @@ EaCoN.BINpack.Maker <- function(bed.file = NULL, bin.size = 50, genome.pkg = "BS
 
 ## Performs the whole processing for WES data from BAMs and a BINpack
 EaCoN.WES.Process <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = "SAMPLE", Q = 20, L2R.RD.min.Ref = 10, L2R.RD.min.Test = 10, BAF.RD.min = 25, out.dir = getwd(), return.data = FALSE) {
-  ifret <- EaCoN.WES.Bin(refBAM = refBAM, testBAM = testBAM, BINpack = BINpack, samplename = samplename, Q = Q, out.dir = out.dir, return.data = TRUE) %>% EaCoN.WES.Normalize(BINpack = BINpack, L2R.RD.min.Ref = L2R.RD.min.Ref, L2R.RD.min.Test = L2R.RD.min.Test, BAF.RD.min = BAF.RD.min, out.dir = out.dir, return.data = TRUE)
+  ifret <- EaCoN.WES.Bin(refBAM = refBAM, testBAM = testBAM, BINpack = BINpack, samplename = samplename, Q = Q, out.dir = out.dir, return.data = TRUE)
   ifret2 <- EaCoN.WES.Normalize(data = ifret, BINpack = BINpack, L2R.RD.min.Ref = L2R.RD.min.Ref, L2R.RD.min.Test = L2R.RD.min.Test, BAF.RD.min = BAF.RD.min, out.dir = out.dir, return.data = return.data)
   message("EaCoN.WES.Process : done.")
   if (return.data) return(ifret2)

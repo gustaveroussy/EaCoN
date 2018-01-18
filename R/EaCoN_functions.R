@@ -353,11 +353,12 @@ EaCoN.Segment.ff.Batch <- function (RDS.files = list.files(path = getwd(), patte
 ## Total Copy Number
 EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) {
   
-  data <- readRDS("/home/job/WORKSPACE/tempo/MR050/20180111134713/MR050.EaCoN.ASPCF.RDS")
-  gammaRange <- 0.45
-  out.dir <- "/home/job/WORKSPACE/tempo/"
-  source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
-  
+  # data <- readRDS("/home/job/WORKSPACE/tempo/MR050/20180111134713/MR050.EaCoN.ASPCF.RDS")
+  # gammaRange <- c(0.40,.60)
+  # out.dir <- "/home/job/WORKSPACE/tempo/"
+  # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # require(foreach)
+  # 
   
   samplename <- data$meta$basic$samplename
   genome <- data$meta$basic$genome
@@ -385,11 +386,12 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
       # wt.tcn <- my.tcn * (my.ascat.seg.ascn$segments$endpos - my.ascat.seg.ascn$segments$startpos + 1)
       # sum(wt.tcn) / sum(my.ascat.seg.ascn$segments$endpos - my.ascat.seg.ascn$segments$startpos + 1)
       
-      tcn.tbl <- dplyr::as.tbl(cbind(my.ascat.seg.ascn$segments, nTotal = my.ascat.seg.ascn$segments$nMajor + my.ascat.seg.ascn$segments$nMinor, width = my.ascat.seg.ascn$segments$endpos - my.ascat.seg.ascn$segments$startpos + 1)) %>% dplyr::group_by(nTotal)
+      tcn.tbl.ung <- dplyr::as.tbl(cbind(my.ascat.seg.ascn$segments, nTotal = my.ascat.seg.ascn$segments$nMajor + my.ascat.seg.ascn$segments$nMinor, width = my.ascat.seg.ascn$segments$endpos - my.ascat.seg.ascn$segments$startpos + 1))
+      tcn.tbl <- dplyr::group_by(tcn.tbl.ung, nTotal)
       tcn.tbl.prop <- dplyr::summarise(tcn.tbl, tot_width = sum(width))
       ascat.ploidy <- my.ascat.seg.ascn$ploidy
       median.ploidy <- median(tcn.tbl$nTotal)
-      baseline.ploidy <- tcn.tbl$nTotal[which.max(tcn.tbl$width)]
+      baseline.ploidy <- tcn.tbl.prop$nTotal[which.max(tcn.tbl.prop$tot_width)]
       weighted.ploidy <- sum(tcn.tbl.prop$nTotal * (tcn.tbl.prop$tot_width / sum(tcn.tbl.prop$tot_width)))
       
       my.ascat.seg.ascn$ploidy <- list(ascat = as.numeric(my.ascat.seg.ascn$ploidy), median = median.ploidy, most.width = baseline.ploidy, width.weighted = weighted.ploidy)
@@ -403,14 +405,18 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
       outdf$chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", outdf$chr)]) else unlist(cs$chrom2chr[outdf$chr])
       outdf$Width <- outdf$endpos - outdf$startpos + 1
       outdf$TCN <- outdf$nMajor + outdf$nMinor
-      outdf$Ploidy <- my.ascat.seg.ascn$ploidy
+      outdf$Ploidy.ASCAT <- my.ascat.seg.ascn$ploidy$ascat
+      outdf$Ploidy.Median <- my.ascat.seg.ascn$ploidy$median
+      outdf$Ploidy.MostWidth <- my.ascat.seg.ascn$ploidy$most.width
+      outdf$Ploidy.WidthWeighted <- my.ascat.seg.ascn$ploidy$width.weighted
       outdf$GoF <- my.ascat.seg.ascn$goodnessOfFit
-      outdf <- outdf[,c(1:4,7,8,5,6,9,10)]
+      outdf <- outdf[,c(1:4,7,8,5,6,9:12)]
       colnames(outdf)[1:4] <- c(samplename, "Chr", "Start", "End")
       write.table.fast(x = outdf, file = outfile)
 
       ## Reploting
       ylim <- 6
+      ### TCN
       segments.posN <- my.ascat.seg.ascn$segments$chr
       segments.posN[segments.posN == "X"] <- 23
       segments.posN[segments.posN == "Y"] <- 24
@@ -419,7 +425,7 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
       segments.genoend <- cs$chromosomes$chr.length.toadd[segments.posN] + my.ascat.seg.ascn$segments$endpos
       png(paste0(samplename, ".ASCATprofile.png"), width = 1850, height = 980)
       par(mar = c(1, 4, 5, 1), mfrow = c(2, 1))
-      plot(0, 0, type = "n", xlim = c(0,max(segments.genoend)), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " Allele-Specific Copy Number (Gamma = ", gamma, ")\n // Cellularity = ", my.ascat.seg.ascn$aberrantcellfraction, " // Ploidy = (A:", round(my.ascat.seg.ascn$ploidy$ascat, digits = 2), ", M:", round(my.ascat.seg.ascn$ploidy$median, digits = 2), ", MW:", round(my.ascat.seg.ascn$ploidy$most.width, digits = 2), ", WW:", round(my.ascat.seg.ascn$ploidy$width.weighted, digits = 2), ") // Goodness of fit = ", round(my.ascat.seg.ascn$goodnessOfFit, digits = 2), "% // Psi = ", my.ascat.seg.ascn$psi, " // nSeg = ", nrow(my.ascat.seg.ascn$segments), " // Predicted gender = ", data$data$gender), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
+      plot(0, 0, type = "n", xlim = c(0,max(segments.genoend)), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " Allele-Specific Copy Number (Gamma = ", gamma, ")\n Cellularity = ", my.ascat.seg.ascn$aberrantcellfraction, " // Ploidy = (A:", round(my.ascat.seg.ascn$ploidy$ascat, digits = 2), ", M:", round(my.ascat.seg.ascn$ploidy$median, digits = 2), ", MW:", round(my.ascat.seg.ascn$ploidy$most.width, digits = 2), ", WW:", round(my.ascat.seg.ascn$ploidy$width.weighted, digits = 2), ") // Goodness of fit = ", round(my.ascat.seg.ascn$goodnessOfFit, digits = 2), "% // Psi = ", my.ascat.seg.ascn$psi, " // nSeg = ", nrow(my.ascat.seg.ascn$segments), " // Predicted gender = ", data$data$gender), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
       abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
       segments(segments.genostart, my.ascat.seg.ascn$segments$nMajor + 0.05, segments.genoend, my.ascat.seg.ascn$segments$nMajor + 0.05, pch = ".", col = 2, lwd = 6)
       segments(segments.genostart, my.ascat.seg.ascn$segments$nMinor - 0.05, segments.genoend, my.ascat.seg.ascn$segments$nMinor - 0.05, pch = ".", col = 3, lwd = 6)
@@ -450,7 +456,8 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
       try(text(x = cs$chromosomes$mid.chr.geno, y = ylim, labels = cs$chromosomes$chrA, pos = 1, cex = 1.5))
       graphics::plot(0, 0, type = "n", xlim = c(0, max(segments.genoend)), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
       abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
-      abline(h = my.ascat.seg.ascn$ploidy, col = 2, lty = 2)
+      abline(h = my.ascat.seg.ascn$ploidy$median, col = 2, lty = 2)
+      abline(h = my.ascat.seg.ascn$ploidy$most.width, col = "purple", lty = 2)
       nTotal <- my.ascat.seg.ascn$segments$nMajor + my.ascat.seg.ascn$segments$nMinor
       up.nTotal <- which(nTotal > ylim)
       dn.nTotal <- which(nTotal == 0)
@@ -461,6 +468,61 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
       abline(h = 0:ylim, col = "grey75", lty = 3)
       try(text(x = cs$chromosomes$mid.chr.geno, y = ylim, labels = cs$chromosomes$chrA, pos = 1, cex = 1.5))
       dev.off()
+      
+      ### RAW CN
+      segments.posN <- my.ascat.seg.ascn$segments_raw$chr
+      segments.posN[segments.posN == "X"] <- 23
+      segments.posN[segments.posN == "Y"] <- 24
+      segments.posN <- as.numeric(segments.posN)
+      segments.genostart <- cs$chromosomes$chr.length.toadd[segments.posN] + my.ascat.seg.ascn$segments_raw$startpos
+      segments.genoend <- cs$chromosomes$chr.length.toadd[segments.posN] + my.ascat.seg.ascn$segments_raw$endpos
+      png(paste0(samplename, ".rawprofile.png"), width = 1850, height = 980)
+      par(mar = c(1, 4, 5, 1), mfrow = c(2, 1))
+      plot(0, 0, type = "n", xlim = c(0,max(segments.genoend)), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " RAW Allele-Specific Copy Number (Gamma = ", gamma, ")"), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
+      abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
+      segments(segments.genostart, my.ascat.seg.ascn$segments_raw$nAraw + 0.05, segments.genoend, my.ascat.seg.ascn$segments_raw$nAraw + 0.05, pch = ".", col = 2, lwd = 6)
+      segments(segments.genostart, my.ascat.seg.ascn$segments_raw$nBraw - 0.05, segments.genoend, my.ascat.seg.ascn$segments_raw$nBraw - 0.05, pch = ".", col = 3, lwd = 6)
+      up.nMajor <- which(my.ascat.seg.ascn$segments_raw$nAraw > ylim)
+      up.nMinor <- which(my.ascat.seg.ascn$segments_raw$nBraw > ylim)
+      dn.nMajor <- which(my.ascat.seg.ascn$segments_raw$nAraw == 0)
+      dn.nMinor <- which(my.ascat.seg.ascn$segments_raw$nBraw == 0)
+      if (length(up.nMajor) > 0)
+        segments(segments.genostart[up.nMajor],
+                 (ylim + 0.2) + 0.05, segments.genoend[up.nMajor],
+                 (ylim + 0.2) + 0.05, pch = ".", col = "orange",
+                 lwd = 6)
+      if (length(up.nMinor) > 0)
+        segments(segments.genostart[up.nMinor],
+                 (ylim + 0.2) - 0.05, segments.genoend[up.nMinor],
+                 (ylim + 0.2) - 0.05, pch = ".", col = "lightgreen",
+                 lwd = 6)
+      if (length(dn.nMajor) > 0)
+        segments(segments.genostart[dn.nMajor],
+                 0.05, segments.genoend[dn.nMajor], 0.05,
+                 pch = ".", col = "darkred", lwd = 6)
+      if (length(dn.nMinor) > 0)
+        segments(segments.genostart[dn.nMinor],
+                 -0.05, segments.genoend[dn.nMinor], -0.05,
+                 pch = ".", col = "darkgreen", lwd = 6)
+      abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
+      abline(h = 0:ylim, col = "grey75", lty = 3)
+      try(text(x = cs$chromosomes$mid.chr.geno, y = ylim, labels = cs$chromosomes$chrA, pos = 1, cex = 1.5))
+      graphics::plot(0, 0, type = "n", xlim = c(0, max(segments.genoend)), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " RAW Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
+      abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
+      abline(h = my.ascat.seg.ascn$ploidy$median, col = 2, lty = 2)
+      abline(h = my.ascat.seg.ascn$ploidy$most.width, col = "purple", lty = 2)
+      nTotal <- my.ascat.seg.ascn$segments_raw$nMajor + my.ascat.seg.ascn$segments_raw$nMinor
+      up.nTotal <- which(nTotal > ylim)
+      dn.nTotal <- which(nTotal == 0)
+      segments(segments.genostart, nTotal, segments.genoend, nTotal, pch = ".", col = 4, lwd = 6)
+      if (length(up.nTotal) > 0) segments(segments.genostart[up.nTotal], (ylim + 0.2) + 0.05, segments.genoend[up.nTotal], (ylim + 0.2) + 0.05, pch = ".", col = "cyan", lwd = 6)
+      if (length(dn.nTotal) > 0) segments(segments.genostart[dn.nTotal], 0, segments.genoend[dn.nTotal], 0, pch = ".", col = "midnightblue", lwd = 6)
+      abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
+      abline(h = 0:ylim, col = "grey75", lty = 3)
+      try(text(x = cs$chromosomes$mid.chr.geno, y = ylim, labels = cs$chromosomes$chrA, pos = 1, cex = 1.5))
+      dev.off()
+      
+      ### TCNvsL2R
       cnpTotal <- my.ascat.seg.ascn$nA + my.ascat.seg.ascn$nB
       my.xlim <- c(min(cnpTotal, na.rm = TRUE) - 0.5, max(cnpTotal, na.rm = TRUE) + 0.5)
       png(paste0(samplename, ".TCNvsL2R.png"), width = 980, height = 980)
@@ -494,24 +556,31 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
 
       message(tmsg(paste0("    ", round(my.ascat.seg.ascn$goodnessOfFit, digits = 3), " / ", my.ascat.seg.ascn$psi)))
       setwd(oridirx)
-      return(c(gamma, my.ascat.seg.ascn$ploidy, round(my.ascat.seg.ascn$ploidy), my.ascat.seg.ascn$aberrantcellfraction, my.ascat.seg.ascn$goodnessOfFit, my.ascat.seg.ascn$psi))
+      return(c(gamma, unlist(my.ascat.seg.ascn$ploidy), my.ascat.seg.ascn$aberrantcellfraction, my.ascat.seg.ascn$goodnessOfFit, my.ascat.seg.ascn$psi))
     }
   }, stringsAsFactors = FALSE)
   rownames(fit.val) <- gammavec
-  colnames(fit.val) <- c("gamma", "ploidy", "rounded.ploidy", "aberrant.cell.fraction", "GoF", "psi")
+  # colnames(fit.val) <- c("gamma", "ploidy", "rounded.ploidy", "aberrant.cell.fraction", "GoF", "psi")
+  colnames(fit.val) <- c("gamma", "ploidy.ASCAT", "ploidy.Median", "ploidy.Most.width", "ploidy.Width.weighted", "aberrant.cell.fraction", "GoF", "psi")
   if (any(!is.na(fit.val$gamma))) {
     gammaOpt.idx <- which.max(fit.val$GoF)
     gammaOpt <- fit.val$gamma[gammaOpt.idx]
-    # saveRDS(fit.val, file = paste0(out.dir, "/", samplename, ".gammaEval.RDS"), compress = "bzip2")
     write.table(fit.val, file = paste0(out.dir, "/", samplename, ".gammaEval.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
     png(paste0(out.dir, "/", samplename, ".gammaEval.png"), width = 1850, height = 980)
-    par(mfrow = c(2, 1))
+    par(mfrow = c(3, 1), mar = c(2, 4, 3, 1), cex = 1)
     graphics::plot(fit.val$gamma, fit.val$GoF, xlab = "Gamma", ylab = "Goodness of fit", main = "Goodness of fit curve", type = "b", pch = 20)
     points(fit.val$gamma[gammaOpt.idx], fit.val$GoF[gammaOpt.idx], pch = 20, col = 2)
     abline(v = fit.val$gamma[gammaOpt.idx], lty = 2, col = 2)
     abline(h = fit.val$GoF[gammaOpt.idx], lty = 2, col = 2)
     graphics::plot(fit.val$gamma, fit.val$psi, xlab = "Gamma", ylab = "Psi", main = "Psi curve", type = "b", pch = 20)
     points(fit.val$gamma[gammaOpt.idx], fit.val$psi[gammaOpt.idx], pch = 20, col = 2)
+    
+    ploidy.mat <- as.matrix(fit.val[,2:5])
+    plo.ylim <- c(0, max(ploidy.mat, na.rm = TRUE))
+    graphics::plot(fit.val$gamma, fit.val$ploidy.ASCAT, xlab = "Gamma", ylab = "Ploidy", main = "Ploidy : ASCAT (A=black), Median (M=red), Most width (MW=blue), Width-weighted (WW=purple)", type = "b", pch = 20, col = "black", ylim = plo.ylim)
+    lines(fit.val$gamma, fit.val$ploidy.Median, type = "b", pch = 20, col = "red")
+    lines(fit.val$gamma, fit.val$ploidy.Most.width, type = "b", pch = 20, col = "blue")
+    lines(fit.val$gamma, fit.val$ploidy.Width.weighted, type = "b", pch = 20, col = "purple")
     dev.off()
     file.rename(from = paste0(out.dir, "/gamma", sprintf("%.2f", gammaOpt)), to = paste0(out.dir, "/gamma", sprintf("%.2f", gammaOpt), "_optimal"))
   } else {
