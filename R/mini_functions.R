@@ -36,7 +36,7 @@ get.mad <- function(val = NULL) {
 }
 
 get.valid.genomes <- function() {
-  return(list("hg18" = "BSgenome.Hsapiens.UCSC.hg18", "hg19" = "BSgenome.Hsapiens.UCSC.hg19", "hg38" = "BSgenome.Hsapiens.UCSC.hg38", "GRCh37-lite" = "BSgenome.Hsapiens.TCGA.GRCh37.lite"))
+  return(list("hg18" = "BSgenome.Hsapiens.UCSC.hg18", "hg19" = "BSgenome.Hsapiens.UCSC.hg19", "hg38" = "BSgenome.Hsapiens.UCSC.hg38", "hs37d5" = "BSgenome.Hsapiens.1000genomes.hs37d5"))
 }
 
 num2mat <- function(num=NULL) {

@@ -1,11 +1,11 @@
-EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut = .05, mc.range = c(2,4), bafbin.size = 1E+07, prior = "G", BAF.filter = .9, BAF.cutter = 0, smooth.k = NULL, ASPCF.pen = 50, gammaRange = c(0.35, .95), recenter = "l2r.centeredpeak", calling.method = "mad", nrf = 0.5, SER.PELT.pen = .9999, out.dir = getwd(), return.data = FALSE) {
+EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut = .05, mc.range = c(2,4), bafbin.size = 1E+07, prior = "G", BAF.filter = .9, BAF.cutter = 0, smooth.k = NULL, ASPCF.pen = 50, gammaRange = c(0.35, .95), recenter = "l2r.centeredpeak", calling.method = "mad", nrf = 0.5, SER.pen = .9999, out.dir = getwd(), return.data = FALSE) {
 
   calling.method <- tolower(calling.method)
 
   if(!dir.exists(out.dir)) stop(tmsg(paste0("Output directory [", out.dir, "] does not exist !")))
   if (!(calling.method %in% c("mad", "density"))) stop(tmsg("calling.method should be 'MAD' or 'density' !"))
   if (calling.method == "mad" & is.null(nrf)) stop(tmsg("If calling.method is set to 'MAD', nrf is required !"))
-  if (!is.null(SER.PELT.pen)) if (!is.character(SER.PELT.pen)) if (SER.PELT.pen <= 0 | SER.PELT.pen >= 1) stop(tmsg("SER.PELT.pen should be a value > 0 and < 1 (or NULL) !"))
+  if (!is.null(SER.pen)) if (!is.character(SER.pen)) if (SER.pen <= 0 | SER.pen >= 1) stop(tmsg("SER.pen should be a value > 0 and < 1 (or NULL) !"))
 
   ## Extract samplename
   samplename <- data$meta$basic$samplename
@@ -39,7 +39,7 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
     "ASCAT.ASPCF.penalty" = ASPCF.pen,
     "calling.method" = calling.method,
     "calling.nrf" = nrf,
-    "small.events.rescue.PELT.penalty" = SER.PELT.pen
+    "small.events.rescue.PELT.penalty" = SER.pen
   )
 
   ## Germline prediction
@@ -137,7 +137,7 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
   # saveRDS(data$data, paste0(samplename, ".ascat.ASPCF.RDS"), compress = "bzip2")
 
   ## PELT rescue
-  if (!is.null(SER.PELT.pen)) {
+  if (!is.null(SER.pen)) {
     message(tmsg("Rescuing small events ..."))
     seg.maxwidth <- 5e+06
     seg.maxn <- 500
@@ -145,13 +145,13 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
     mydf$chrs <- as.character(mydf$chrs)
     mydf <- mydf[!is.na(mydf$l2r), ]
     chrends <- cumsum(rle(as.character(data$data$SNPpos$chrs[!is.na(data$data$Tumor_LogR[,1])]))$lengths)
-    if (is.character(SER.PELT.pen)) {
-      seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = SER.PELT.pen, method = "PELT", param.estimates = FALSE, minseglen = segmentLength)@cpts))
-    } else if (is.numeric(SER.PELT.pen)) {
-      seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = 'Asymptotic', pen.value = SER.PELT.pen, method = "PELT", param.estimates = FALSE, minseglen = segmentLength)@cpts))
-    } else stop(tmsg("SER.PELT.pen should be a character or a numeric !"))
+    if (is.character(SER.pen)) {
+      seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = segmentLength)@cpts))
+    } else if (is.numeric(SER.pen)) {
+      seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = 'Asymptotic', pen.value = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = segmentLength)@cpts))
+    } else stop(tmsg("SER.pen should be a character or a numeric !"))
     if (is.character(seg.end)) {
-      message(tmsg(" PELT segmentation failed with this combination of SER.PELT.pen and segmentLength options !"))
+      message(tmsg(" PELT segmentation failed with this combination of SER.pen and segmentLength options !"))
       data$meta$eacon[["small.events.rescue.PELT.penalty"]] <- "ERROR"
     } else {
       seg.end <- sort(unique(c(seg.end, chrends)))
@@ -334,8 +334,6 @@ EaCoN.Segment.ff <- function(RDS.file = NULL, ...) {
 ## Run EaCoN.Segment.ff() in batch mode
 EaCoN.Segment.ff.Batch <- function (RDS.files = list.files(path = getwd(), pattern = "_processed.RDS$", full.names = TRUE, recursive = TRUE, ignore.case = TRUE, include.dirs = FALSE), nthread = 1, cluster.type = "PSOCK", ...) {
   if (length(RDS.files) == 0) stop("A list of RDS files is required !")
-  # if (length(out.dir) == 0) stop("A list of output directories is required !")
-  # if (length(RDS.files) != length(out.dir)) stop("The list of RDS files and the list of output directories do not have the same length !")
   message("Running EaCoN.Segment.ff() in batch mode ...")
   message(paste0(" Found ", length(RDS.files), " files to process."))
   current.bitmapType <- getOption("bitmapType")
@@ -343,7 +341,7 @@ EaCoN.Segment.ff.Batch <- function (RDS.files = list.files(path = getwd(), patte
   `%dopar%` <- foreach::"%dopar%"
   cl <- parallel::makeCluster(spec = nthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cl)
-  eacon.batchres <- foreach::foreach(r = seq_along(RDS.files), .inorder = TRUE, .errorhandling = "remove") %dopar% {
+  eacon.batchres <- foreach::foreach(r = seq_along(RDS.files), .inorder = TRUE, .errorhandling = "pass") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
     EaCoN.Segment.ff(RDS.file = RDS.files[r], ...)
   }
@@ -353,13 +351,16 @@ EaCoN.Segment.ff.Batch <- function (RDS.files = list.files(path = getwd(), patte
 ## Total Copy Number
 EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) {
   
-  # data <- readRDS("/home/job/WORKSPACE/tempo/MR050/20180111134713/MR050.EaCoN.ASPCF.RDS")
-  # gammaRange <- c(0.40,.60)
-  # out.dir <- "/home/job/WORKSPACE/tempo/"
+  # # data <- readRDS("/home/job/WORKSPACE/tempo/MR050/20180111134713/MR050.EaCoN.ASPCF.RDS")
+  # setwd("/home/job/WORKSPACE/MP/ONCO")
+  # data <- readRDS("/home/job/WORKSPACE/MP/ONCO/17R02793.EaCoN.ASPCF.RDS")
+  # # gammaRange <- c(0.40,.60)
+  # gammaRange <- c(0.35,.45)
+  # out.dir <- getwd()
   # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # require(foreach)
-  # 
-  
+
+
   samplename <- data$meta$basic$samplename
   genome <- data$meta$basic$genome
   data(list = genome, package = "chromosomes", envir = environment())
@@ -390,7 +391,7 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
       tcn.tbl <- dplyr::group_by(tcn.tbl.ung, nTotal)
       tcn.tbl.prop <- dplyr::summarise(tcn.tbl, tot_width = sum(width))
       ascat.ploidy <- my.ascat.seg.ascn$ploidy
-      median.ploidy <- median(tcn.tbl$nTotal)
+      median.ploidy <- limma::weighted.median(tcn.tbl.prop$nTotal, tcn.tbl.prop$tot_width)
       baseline.ploidy <- tcn.tbl.prop$nTotal[which.max(tcn.tbl.prop$tot_width)]
       weighted.ploidy <- sum(tcn.tbl.prop$nTotal * (tcn.tbl.prop$tot_width / sum(tcn.tbl.prop$tot_width)))
       
@@ -456,8 +457,8 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
       try(text(x = cs$chromosomes$mid.chr.geno, y = ylim, labels = cs$chromosomes$chrA, pos = 1, cex = 1.5))
       graphics::plot(0, 0, type = "n", xlim = c(0, max(segments.genoend)), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
       abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
-      abline(h = my.ascat.seg.ascn$ploidy$median, col = 2, lty = 2)
-      abline(h = my.ascat.seg.ascn$ploidy$most.width, col = "purple", lty = 2)
+      abline(h = my.ascat.seg.ascn$ploidy$median, col = "red", lty = 2)
+      abline(h = my.ascat.seg.ascn$ploidy$most.width, col = "cyan", lty = 2)
       nTotal <- my.ascat.seg.ascn$segments$nMajor + my.ascat.seg.ascn$segments$nMinor
       up.nTotal <- which(nTotal > ylim)
       dn.nTotal <- which(nTotal == 0)
@@ -556,7 +557,7 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
 
       message(tmsg(paste0("    ", round(my.ascat.seg.ascn$goodnessOfFit, digits = 3), " / ", my.ascat.seg.ascn$psi)))
       setwd(oridirx)
-      return(c(gamma, unlist(my.ascat.seg.ascn$ploidy), my.ascat.seg.ascn$aberrantcellfraction, my.ascat.seg.ascn$goodnessOfFit, my.ascat.seg.ascn$psi))
+      return(c(gamma, unlist(my.ascat.seg.ascn$ploidy, use.names = FALSE), my.ascat.seg.ascn$aberrantcellfraction, my.ascat.seg.ascn$goodnessOfFit, my.ascat.seg.ascn$psi))
     }
   }, stringsAsFactors = FALSE)
   rownames(fit.val) <- gammavec
@@ -566,6 +567,7 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
     gammaOpt.idx <- which.max(fit.val$GoF)
     gammaOpt <- fit.val$gamma[gammaOpt.idx]
     write.table(fit.val, file = paste0(out.dir, "/", samplename, ".gammaEval.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
+    
     png(paste0(out.dir, "/", samplename, ".gammaEval.png"), width = 1850, height = 980)
     par(mfrow = c(3, 1), mar = c(2, 4, 3, 1), cex = 1)
     graphics::plot(fit.val$gamma, fit.val$GoF, xlab = "Gamma", ylab = "Goodness of fit", main = "Goodness of fit curve", type = "b", pch = 20)
@@ -574,15 +576,18 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
     abline(h = fit.val$GoF[gammaOpt.idx], lty = 2, col = 2)
     graphics::plot(fit.val$gamma, fit.val$psi, xlab = "Gamma", ylab = "Psi", main = "Psi curve", type = "b", pch = 20)
     points(fit.val$gamma[gammaOpt.idx], fit.val$psi[gammaOpt.idx], pch = 20, col = 2)
-    
+    abline(v = fit.val$gamma[gammaOpt.idx], lty = 2, col = 2)
     ploidy.mat <- as.matrix(fit.val[,2:5])
-    plo.ylim <- c(0, max(ploidy.mat, na.rm = TRUE))
-    graphics::plot(fit.val$gamma, fit.val$ploidy.ASCAT, xlab = "Gamma", ylab = "Ploidy", main = "Ploidy : ASCAT (A=black), Median (M=red), Most width (MW=blue), Width-weighted (WW=purple)", type = "b", pch = 20, col = "black", ylim = plo.ylim)
-    lines(fit.val$gamma, fit.val$ploidy.Median, type = "b", pch = 20, col = "red")
-    lines(fit.val$gamma, fit.val$ploidy.Most.width, type = "b", pch = 20, col = "blue")
-    lines(fit.val$gamma, fit.val$ploidy.Width.weighted, type = "b", pch = 20, col = "purple")
+    plo.ymax <- max(ploidy.mat, na.rm = TRUE)
+    graphics::plot(fit.val$gamma, fit.val$ploidy.ASCAT, xlab = "Gamma", ylab = "Ploidy", main = "Ploidy : ASCAT (A=black), Median (M=red), Most width (MW=cyan), Width-weighted (WW=yellow)", type = "b", pch = 20, col = "black", ylim = c(0,plo.ymax), lwd = 2)
+    abline(h = seq.int(2, plo.ymax, 2), lty = 2, col = "grey50")
+    lines(fit.val$gamma, fit.val$ploidy.Median, type = "b", pch = 20, col = "red", lwd = 2)
+    lines(fit.val$gamma, fit.val$ploidy.Most.width, type = "b", pch = 20, col = "cyan", lwd = 2)
+    lines(fit.val$gamma, fit.val$ploidy.Width.weighted, type = "b", pch = 20, col = "yellow", lwd = 2)
+    abline(v = fit.val$gamma[gammaOpt.idx], lty = 2, col = 2)
     dev.off()
-    file.rename(from = paste0(out.dir, "/gamma", sprintf("%.2f", gammaOpt)), to = paste0(out.dir, "/gamma", sprintf("%.2f", gammaOpt), "_optimal"))
+    
+    try(file.rename(from = paste0(out.dir, "/gamma", sprintf("%.2f", gammaOpt)), to = paste0(out.dir, "/gamma", sprintf("%.2f", gammaOpt), "_optimal")))
   } else {
     message(tmsg("WARNING : ASCN failed for all evaluated gamma values !"))
   }
@@ -610,7 +615,7 @@ EaCoN.ASCN.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern =
   cl <- parallel::makeCluster(spec = nthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cl)
   r <- ""
-  eacon.batchres <- foreach::foreach(r = seq_along(RDS.files), .inorder = TRUE, .errorhandling = "remove") %dopar% {
+  eacon.batchres <- foreach::foreach(r = seq_along(RDS.files), .inorder = TRUE, .errorhandling = "pass") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
     EaCoN.ASCN.ff(RDS.file = RDS.files[r], ...)
   }
@@ -620,14 +625,14 @@ EaCoN.ASCN.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern =
 ## Generate the HTML report
 EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, report = TRUE, solo = FALSE, ldb = "/mnt/data_cigogne/bioinfo/", out.dir = getwd()) {
 
-  # setwd("/home/job/WORKSPACE/MP/testBJ/M2441_K01_normal")
-  # out.dir <- "20170912101813/"
-  # refGene.table = NULL
-  # solo = TRUE
-  # report = TRUE
-  # ldb = "/mnt/data_cigogne/bioinfo/"
-  # # out.dir <- "20170912101813/"
-  # ## Loaded get.valid.genomes()
+  setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-E9-A1NH-01A_vs_11A/20180119203804")
+  data <- readRDS("TCGA-E9-A1NH-01A_vs_11A.EaCoN.ASPCF.RDS")
+  targets.table <- NULL
+  out.dir <- getwd()
+  refGene.table = NULL
+  solo = TRUE
+  report = TRUE
+  ldb = "/mnt/data_cigogne/bioinfo/"
 
   oridir <- getwd()
   # setwd(out.dir)
@@ -731,7 +736,7 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
   cbsNC.df$Status <- "Normal"
   cbsNC.df$Status[cbs.df$Log2Ratio > 0] <- "Gain"
   cbsNC.df$Status[cbs.df$Log2Ratio < 0] <- "Loss"
-  if (is.null(targets.table) & genome == "hg19") {
+  if (is.null(targets.table) & (genome %in% c("hg19", "hs37d5"))) {
     self.pkg.name <- "EaCoN"
     data(targetlist_475, package = self.pkg.name, envir = environment())
   } else load(targets.table)
@@ -746,7 +751,8 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     return(ginreg)
   }
   targ.regz <- foreach::foreach(g = 1:nrow(targ.regz), .combine = "rbind") %do% {
-    ginreg.idx <- which(paste0("chr", baf.seg$chrA) == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
+    # ginreg.idx <- which(paste0("chr", baf.seg$chrA) == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
+    ginreg.idx <- which(baf.seg$chrA == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
     ginreg <- foreach::foreach(gg = ginreg.idx, .combine = "rbind") %do% {
       match.start <- max(baf.seg$Start[gg], targ.regz$match.start[g])
       match.end <- min(baf.seg$End[gg], targ.regz$match.end[g])
@@ -1185,7 +1191,7 @@ EaCoN.Annotate.ff.Batch <- function(RDS.files = list.files(path = getwd(), patte
   cl <- parallel::makeCluster(spec = nthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cl)
   s <- ""
-  targ.all <- foreach::foreach(s = 1:length(RDS.files), .inorder = FALSE, .errorhandling = "remove") %dopar% {
+  targ.all <- foreach::foreach(s = 1:length(RDS.files), .inorder = FALSE, .errorhandling = "pass") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
     EaCoN.Annotate.ff(RDS.file = RDS.files[s], ...)
   }

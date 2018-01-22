@@ -266,7 +266,7 @@ EaCoN.CS.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.ty
   doParallel::registerDoParallel(cl)
 
   p <- 0
-  csres <- foreach::foreach(p = seq_len(nrow(myCELs)), .inorder = FALSE, .errorhandling = "remove") %dopar% {
+  csres <- foreach::foreach(p = seq_len(nrow(myCELs)), .inorder = FALSE, .errorhandling = "pass") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
     EaCoN.CS.Process(CEL = myCELs$cel_files[p], samplename = myCELs$SampleName[p], ...)
   }

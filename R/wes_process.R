@@ -4,7 +4,7 @@ EaCoN.BINpack.Maker <- function(bed.file = NULL, bin.size = 50, genome.pkg = "BS
   ## Checks
   if (is.null(bed.file)) stop("A BED file is required !")
   if (!file.exists(bed.file)) stop("Could not find the BED file !")
-  if (is.null(out.dir)) print("NOTE : Checked / cleaned bed will be written in the same directory as source.") else {
+  if (is.null(out.dir)) message("NOTE : Checked / cleaned bed will be written in the same directory as source.") else {
     if (!file.exists(out.dir)) stop("Could not find the output directory !")
     if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !")
   }
@@ -17,7 +17,7 @@ EaCoN.BINpack.Maker <- function(bed.file = NULL, bin.size = 50, genome.pkg = "BS
   }
 
   ### Loading genome
-  print(paste0("Loading ", genome.pkg, " ..."))
+  message(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   genome <- BSgenome::providerVersion(BSg.obj)
@@ -27,18 +27,18 @@ EaCoN.BINpack.Maker <- function(bed.file = NULL, bin.size = 50, genome.pkg = "BS
   bed.clean <- EaCoN.BedCheck(bed.file = bed.file, genome = genome, out.dir = out.dir, return.data = TRUE)
 
   ## Binning
-  print(paste0("Performing binning (", bin.size, ") ..."))
+  message(paste0("Performing binning (", bin.size, ") ..."))
   bed.binned <- bedBinner(bed = bed.clean, bin.size = bin.size, nthread = nthread)
 
   bed.binned <- data.frame(ProbeSetName = paste0("B", seq_len(nrow(bed.binned))), bed.binned, stringsAsFactors = FALSE)
 
-  print("Generating GC% tracks ...")
+  message("Generating GC% tracks ...")
   wes.gc <- loc.nt.gcc.hs.multi(loc.df = bed.binned, genome.pkg = genome.pkg, extend.multi = extend.multi, blocksize = blocksize, nthread = nthread)
 
   GC.data <- list(GC = wes.gc, info = list(genome.pkg = genome.pkg, genome = genome, bin.size = bin.size), bed.clean = bed.clean, bed.binned = bed.binned)
   save("GC.data", file = paste0(out.dir, "/", sub(pattern = "\\.bed$", replacement = paste0("_", genome, "_b", bin.size, ".rda"), x = basename(bed.file), ignore.case = TRUE)), compress = "xz")
 
-  print("Done.")
+  message("Done.")
   if (return.data) return(GC.data)
 }
 
@@ -110,7 +110,7 @@ EaCoN.WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplen
   }
 
   ### Loading genome
-  print(paste0("Loading ", genome.pkg, " ..."))
+  message(tmsg(paste0("Loading ", genome.pkg, " ...")))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   genome <- BSgenome::providerVersion(BSg.obj)
@@ -299,7 +299,7 @@ EaCoN.WES.Bin.Batch <- function(BAM.list.file = NULL, BINpack = NULL, nthread = 
   message(paste0("Found ", nrow(myBAMs), " samples to process ..."))
   current.bitmapType <- getOption("bitmapType")
   `%dopar%` <- foreach::"%dopar%"
-  cl <- parallel::makeCluster(spec = nthread, type = cluster.type)
+  cl <- parallel::makeCluster(spec = nthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cl)
   eacon.batchres <- foreach::foreach(r = seq_len(nrow(myBAMs)), .inorder = TRUE, .errorhandling = "remove") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
@@ -311,15 +311,15 @@ EaCoN.WES.Bin.Batch <- function(BAM.list.file = NULL, BINpack = NULL, nthread = 
 ## Performs the normalization of WES L2R and BAF signals
 EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20, L2R.RD.min.Test = 20, BAF.RD.min = 25, out.dir = getwd(), return.data = FALSE) {
 
-  setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-A7-A0CE-01A_vs_11A/")
-  data <- readRDS("TCGA-A7-A0CE-01A_vs_11A_hs37d5_b50_binned.RDS")
-  BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.rda"
-  L2R.RD.min.Ref = 20
-  L2R.RD.min.Test = 20
-  BAF.RD.min = 25
-  out.dir = getwd()
-  return.data = FALSE
-  source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-A7-A0CE-01A_vs_11A/")
+  # data <- readRDS("TCGA-A7-A0CE-01A_vs_11A_hs37d5_b50_binned.RDS")
+  # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.rda"
+  # L2R.RD.min.Ref = 20
+  # L2R.RD.min.Test = 20
+  # BAF.RD.min = 25
+  # out.dir = getwd()
+  # return.data = FALSE
+  # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
 
   
   
@@ -339,7 +339,7 @@ EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20
   }
   
   ### Loading genome
-  print(paste0("Loading ", genome.pkg, " ..."))
+  message(tmsg(paste0("Loading ", genome.pkg, " ...")))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   genome <- BSgenome::providerVersion(BSg.obj)
@@ -517,7 +517,7 @@ EaCoN.WES.Normalize.ff.Batch <- function(BIN.RDS.files = list.files(path = getwd
   message(paste0("Found ", length(BIN.RDS.files), " samples to process ..."))
   current.bitmapType <- getOption("bitmapType")
   `%dopar%` <- foreach::"%dopar%"
-  cl <- parallel::makeCluster(spec = nthread, type = cluster.type)
+  cl <- parallel::makeCluster(spec = nthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cl)
   eacon.batchres <- foreach::foreach(r = seq_along(BIN.RDS.files), .inorder = TRUE, .errorhandling = "pass") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
@@ -527,11 +527,11 @@ EaCoN.WES.Normalize.ff.Batch <- function(BIN.RDS.files = list.files(path = getwd
 }
 
 bedBinner <- function(bed = NULL, bin.size = 50, nthread = 1) {
-  cl <- parallel::makeCluster(spec = nthread, type = "PSOCK")
+  cl <- parallel::makeCluster(spec = nthread, type = "PSOCK", outfile = "")
   doParallel::registerDoParallel(cl)
   `%dopar%` <- foreach::"%dopar%"
   bed.binned <- foreach::foreach(b = seq_len(nrow(bed)), .combine = "rbind") %dopar% {
-    print(b)
+    # print(b)
     ### Smaller exon
     exon.length <- (bed$end[b] - bed$start[b] + 1)
     if (exon.length <= bin.size) return(bed[b,])
@@ -616,7 +616,7 @@ loc.nt.count.hs <- function(loc.df = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC.
 
   print("Starting cluster ...")
   if (length(unique(instep)) < nthread) nthread <- length(unique(instep))
-  cl <- parallel::makeCluster(spec = nthread, type = "PSOCK")
+  cl <- parallel::makeCluster(spec = nthread, type = "PSOCK", outfile = "")
   doParallel::registerDoParallel(cl)
   `%dopar%` <- foreach::"%dopar%"
   xcounts <- foreach::foreach(x = unique(instep), .combine = "rbind", .packages = c("Biostrings", "BSgenome"), .export = c("BSg.obj", "getSeq", "myGR.ex", "instep")) %dopar% {

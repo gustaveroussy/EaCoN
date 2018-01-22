@@ -268,7 +268,7 @@ EaCoN.SNP6.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.
   doParallel::registerDoParallel(cl)
 
   p <- 0
-  s6res <- foreach::foreach(p = seq_len(nrow(myCELs)), .inorder = FALSE, .errorhandling = "remove") %dopar% {
+  s6res <- foreach::foreach(p = seq_len(nrow(myCELs)), .inorder = FALSE, .errorhandling = "pass") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
     EaCoN.SNP6.Process(CEL = myCELs$cel_files[p], samplename = myCELs$SampleName[p], return.data = FALSE, ...)
   }

@@ -17,7 +17,7 @@ importFrom("graphics", "abline", "boxplot", "par", "plot", "points", "rect", "se
 importFrom("grDevices", "adjustcolor", "cm", "dev.off", "pdf", "colorRampPalette", "col2rgb", "png")
 importFrom("iotools", "write.csv.raw")
 importFrom("IRanges", "IRanges")
-importFrom("limma", "loessFit")
+importFrom("limma", "loessFit", "weighted.median")
 importFrom("mclust", "defaultPrior", "Mclust")
 importFrom("parallel", "makeCluster", "stopCluster", "detectCores")
 importFrom("rhdf5", "h5read")

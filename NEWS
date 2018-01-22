@@ -1,7 +1,7 @@
 EaCoN
 -----
 
-v0.2.8 (20180118) *Krank*
+v0.2.8 (20180119) *Krank*
 -----------------
 * Corrected a damn error in WES binning routine, which changed bin order (bad sort from numerical to alphanumerical ...) !
 * Converted some messages in EaCoN.WES.Bin.Batch() that still did not use tmsg().
@@ -11,6 +11,11 @@ v0.2.8 (20180118) *Krank*
 * Proposed alternative measures for ploidy over the one computed by ASCAT (A) : median CN value (M), most-width CN value (MW) and width-weighted CN (WW).
 * Modified CN plots, and activated the replot of the RAW CN profile (earlier versions kept default ASCAT plot).
 * Edited the gammaEval plot to include the ploidy metrics as third panel.
+* Renamed the SER.PELT.pen option to SER.pen.
+* Added missing 'outfile = ""' parameter to parallel::makeCluster in all WES *.Batch() functions, that prevented forwarding messages to the node.
+* Added BSgenome.Hsapiens.1000genomes.hs37d5 to the list of valid genomes.
+* Added corresponding refGene table rdata (which is a simple spoof of hg19 with different chrom names).
+* Recompressed all refGene table rdata to xz.
 
 v0.2.7 (20180109) *HappyNewYear*
 -----------------
