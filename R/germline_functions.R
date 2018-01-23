@@ -34,6 +34,7 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1
   baf.Xin <- bafcdf.nna$value >= BAF.cutter & bafcdf.nna$value <= (1-BAF.cutter)
 
   ## Computing genome-wide prior (if needed)
+  set.seed(123456)
   if (!is.null(prior)) {
     if (prior == "G") {
       message(tmsg("Computing whole genome BAF clustering prior ..."))
@@ -52,6 +53,7 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1
 
     if (!is.null(prior)) {
       if (prior == "K") {
+        set.seed(123456)
         priorX <- mclust::defaultPrior(WESk$value, G = mcMin:mcMax, modelName = modelName)
       }
     }
@@ -80,6 +82,7 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1
       # saveRDS(BAFk, "BAFk.RDS")
       # if (length(unique(BAFk)) == 1) return(rep(NA, len.BAFk))
       if (length(unique(BAFk)) == 1) return(retvec)
+      set.seed(123456)
       if (is.null(prior)) {
         mcBAFk <- try(suppressWarnings(mclust::Mclust(BAFk, G = mcMin:mcMax, modelNames = modelName, verbose = FALSE)))
       } else  {

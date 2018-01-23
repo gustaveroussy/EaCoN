@@ -16,6 +16,7 @@ v0.2.8 (20180119) *Krank*
 * Added BSgenome.Hsapiens.1000genomes.hs37d5 to the list of valid genomes.
 * Added corresponding refGene table rdata (which is a simple spoof of hg19 with different chrom names).
 * Recompressed all refGene table rdata to xz.
+* Set a fixed seed (123456) for mclust section.
 
 v0.2.7 (20180109) *HappyNewYear*
 -----------------

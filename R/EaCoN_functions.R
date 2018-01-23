@@ -625,17 +625,16 @@ EaCoN.ASCN.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern =
 ## Generate the HTML report
 EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, report = TRUE, solo = FALSE, ldb = "/mnt/data_cigogne/bioinfo/", out.dir = getwd()) {
 
-  setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-E9-A1NH-01A_vs_11A/20180119203804")
-  data <- readRDS("TCGA-E9-A1NH-01A_vs_11A.EaCoN.ASPCF.RDS")
-  targets.table <- NULL
-  out.dir <- getwd()
-  refGene.table = NULL
-  solo = TRUE
-  report = TRUE
-  ldb = "/mnt/data_cigogne/bioinfo/"
-
-  oridir <- getwd()
-  # setwd(out.dir)
+  # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-E9-A1NH-01A_vs_11A/20180119203804")
+  # data <- readRDS("TCGA-E9-A1NH-01A_vs_11A.EaCoN.ASPCF.RDS")
+  # targets.table <- NULL
+  # out.dir <- getwd()
+  # refGene.table = NULL
+  # solo = TRUE
+  # report = TRUE
+  # ldb = "/mnt/data_cigogne/bioinfo/"
+  # 
+  # oridir <- getwd()
 
   valid.genomes <- get.valid.genomes()
   my.ascat.seg <- data$data
