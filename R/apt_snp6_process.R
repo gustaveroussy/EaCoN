@@ -196,7 +196,7 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   colnames(my.ascat.obj$data$Tumor_LogR) <- samplename
   colnames(my.ascat.obj$data$Tumor_BAF) <- samplename
 
-  saveRDS(my.ascat.obj, paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_processed.RDS"), compress = "bzip2")
+  saveRDS(my.ascat.obj, paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_processed.RDS"), compress = "xz")
 
   ## Rough plot
   print(tmsg("Plotting ..."))
@@ -264,7 +264,7 @@ EaCoN.SNP6.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.
   current.bitmapType <- getOption("bitmapType")
   `%dopar%` <- foreach::"%dopar%"
   `%do%` <- foreach::"%do%"
-  cl <- parallel::makeCluster(spec = nthread, type = cluster.type)
+  cl <- parallel::makeCluster(spec = nthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cl)
 
   p <- 0

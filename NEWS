@@ -1,7 +1,7 @@
 EaCoN
 -----
 
-v0.2.8 (20180119) *Krank*
+v0.2.8 (20180124) *Krank*
 -----------------
 * Corrected a damn error in WES binning routine, which changed bin order (bad sort from numerical to alphanumerical ...) !
 * Converted some messages in EaCoN.WES.Bin.Batch() that still did not use tmsg().
@@ -17,6 +17,8 @@ v0.2.8 (20180119) *Krank*
 * Added corresponding refGene table rdata (which is a simple spoof of hg19 with different chrom names).
 * Recompressed all refGene table rdata to xz.
 * Set a fixed seed (123456) for mclust section.
+* Fixed case in germline prediction where execution halted if no variant (thus, no BAF) exist for a chromosome.
+* Changed compression of all RDS files to xz (from bzip2) as on our data types we gain 30 to 50% at a cost of few seconds.
 
 v0.2.7 (20180109) *HappyNewYear*
 -----------------

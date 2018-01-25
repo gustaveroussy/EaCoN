@@ -249,7 +249,7 @@ EaCoN.WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplen
   names(meta.w$BAF.RD.test.summary) <- names(meta.w$RD.test.mean.summary) <- names(meta.w$RD.ref.mean.summary) <- c("min", "q25", "median", "mean", "q75", "max")
   WESobj <- list(RD = CN, SNP = BAF, meta = list(basic = meta.b, WES = meta.w))
   dir.create(paste0(out.dir, "/", samplename))
-  saveRDS(WESobj, file = paste0(out.dir, "/", samplename, "/", samplename, "_", genome, "_b", meta.w$bin.size, "_binned.RDS"), compress = "bzip2")
+  saveRDS(WESobj, file = paste0(out.dir, "/", samplename, "/", samplename, "_", genome, "_b", meta.w$bin.size, "_binned.RDS"), compress = "xz")
   if (return.data) return(WESobj)
 }
 
@@ -311,15 +311,23 @@ EaCoN.WES.Bin.Batch <- function(BAM.list.file = NULL, BINpack = NULL, nthread = 
 ## Performs the normalization of WES L2R and BAF signals
 EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20, L2R.RD.min.Test = 20, BAF.RD.min = 25, out.dir = getwd(), return.data = FALSE) {
 
-  # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-A7-A0CE-01A_vs_11A/")
-  # data <- readRDS("TCGA-A7-A0CE-01A_vs_11A_hs37d5_b50_binned.RDS")
-  # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.rda"
-  # L2R.RD.min.Ref = 20
-  # L2R.RD.min.Test = 20
-  # BAF.RD.min = 25
+  # # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-A7-A0CE-01A_vs_11A/")
+  # setwd("/mnt/data_cigogne/job/OS2006/WES/OS2K6/EaCoN_0.2.8/00_TONORM/OS_046")
+  # # data <- readRDS("TCGA-A7-A0CE-01A_vs_11A_hs37d5_b50_binned.RDS")
+  # data <- readRDS("OS_046_hg19_b50_binned.RDS")
+  # # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.rda"
+  # BINpack <- "/mnt/data_cigogne/job/OS2006/WES/RESOURCES/SureSelect_ClinicalResearchExome.padded_hg19_b50.rda"
+  # # L2R.RD.min.Ref = 20
+  # L2R.RD.min.Ref = 10
+  # # L2R.RD.min.Test = 20
+  # L2R.RD.min.Test = 10
+  # # BAF.RD.min = 25
+  # BAF.RD.min = 10
   # out.dir = getwd()
   # return.data = FALSE
   # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # source("/home/job/git_gustaveroussy/EaCoN/R/fit_functions.R")
+  # require(foreach)
 
   
   
@@ -354,7 +362,6 @@ EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20
   message(tmsg(paste0("Using L2R.RD.min.Ref = ", L2R.RD.min.Ref, ", ", round(LR*100, digits = 2), "% of bins are discarded.")))
   message(tmsg(paste0("Using both, ", round(LB*100, digits = 2), "% of bins are discarded.")))
   if (LB >= .5) stop(tmsg("More than 50% of bins would have been set to get imputed, which is not possible ! Please lower the L2R.RD.min.Test and/or L2R.RD.min.Ref parameters, when possible. Note that this will increase profile noise."))
-
 
   meta.b <- data$meta$basic
   meta.w <- data$meta$WES
@@ -460,14 +467,13 @@ EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20
       wes = meta.w
     )
   )
-  colnames(my.ascat.obj$data$Tumor_LogR) <- samplename
-  colnames(my.ascat.obj$data$Tumor_BAF) <- samplename
+  colnames(my.ascat.obj$data$Tumor_LogR) <- colnames(my.ascat.obj$data$Tumor_BAF) <- samplename
 
   ## Saving normalized object
   message(tmsg("Saving normalized / prepared data ..."))
   # new.rds.name <- sub(pattern = "\\.RDS$", replacement = "_normalized.RDS", x = data.file)
   # saveRDS(my.ascat.obj, file = new.rds.name, compress = "bzip2")
-  saveRDS(my.ascat.obj, paste0(out.dir, "/", samplename, "_", data$meta$basic$genome, "_b", data$meta$WES$bin.size, "_processed.RDS"), compress = "bzip2")
+  saveRDS(my.ascat.obj, paste0(out.dir, "/", samplename, "_", data$meta$basic$genome, "_b", data$meta$WES$bin.size, "_processed.RDS"), compress = "xz")
 
   ## Rough plot
   message(tmsg("Plotting ..."))

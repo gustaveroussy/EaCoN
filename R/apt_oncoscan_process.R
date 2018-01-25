@@ -198,7 +198,7 @@ EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplenam
   colnames(my.ascat.obj$data$Tumor_LogR) <- samplename
   colnames(my.ascat.obj$data$Tumor_BAF) <- samplename
 
-  saveRDS(my.ascat.obj, paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_processed.RDS"), compress = "bzip2")
+  saveRDS(my.ascat.obj, paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_processed.RDS"), compress = "xz")
 
   ## Rough plot
   message(tmsg("Plotting ..."))

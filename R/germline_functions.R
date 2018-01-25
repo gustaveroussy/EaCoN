@@ -13,6 +13,9 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1
   # genome = "hg19"
   # BAF.filter <- .90
   # BAF.cutter <- .02
+  # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # require(foreach)
+  # require(mclust)
 
   Homozygous = matrix(nrow = dim(ASCATobj$Tumor_LogR)[1], ncol = dim(ASCATobj$Tumor_LogR)[2])
   colnames(Homozygous) = colnames(ASCATobj$Tumor_LogR)
@@ -47,7 +50,9 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1
   message(tmsg("BAF fragments clustering ..."))
   `%do%` <- foreach::"%do%"
   mcreslist <- foreach::foreach(k = unique(ASCATobj$SNPpos$chrs), .combine = "c") %do% {
+    print(k)
     WESk <- bafcdf.nna[bafcdf.nna$chrs == k,]
+    if(nrow(WESk) == 0) return(NULL)
     krange <- range(WESk$pos, na.rm = TRUE)
     binmax <- ceiling(diff(krange) / bafbin.size)
 

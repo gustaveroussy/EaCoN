@@ -275,7 +275,7 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
   write.table(data$cbs$cut, paste0(samplename, ".Cut.cbs"), sep = "\t", row.names = FALSE, quote = FALSE)
 
   ## Saving segmentation object
-  saveRDS(data, paste0(samplename, ".EaCoN.ASPCF.RDS"), compress = "bzip2")
+  saveRDS(data, paste0(samplename, ".EaCoN.ASPCF.RDS"), compress = "xz")
 
   ## REPLOTS
   message(tmsg("Plotting ..."))
@@ -398,7 +398,7 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
       my.ascat.seg.ascn$ploidy <- list(ascat = as.numeric(my.ascat.seg.ascn$ploidy), median = median.ploidy, most.width = baseline.ploidy, width.weighted = weighted.ploidy)
       
       ## Saving ASCN object
-      saveRDS(my.ascat.seg.ascn, paste0(samplename, ".ascat.ASCN.RDS"), compress = "bzip2")
+      saveRDS(my.ascat.seg.ascn, paste0(samplename, ".ascat.ASCN.RDS"), compress = "xz")
 
       ## Generating TCN-CBS
       outfile <- paste0(samplename, ".gamma", gamma, ".TCN.cbs")
@@ -627,14 +627,20 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
 
   # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-E9-A1NH-01A_vs_11A/20180119203804")
   # data <- readRDS("TCGA-E9-A1NH-01A_vs_11A.EaCoN.ASPCF.RDS")
+  # setwd("/home/job/WORKSPACE/MP/SNP6/BITES_p_TCGAb61_SNP_S_GenomeWideSNP_6_B12_697124/20180123165450")
+  # data <- readRDS("BITES_p_TCGAb61_SNP_S_GenomeWideSNP_6_B12_697124.EaCoN.ASPCF.RDS")
+  # setwd("/home/job/WORKSPACE/MP/ONCO/M2530_FFPE/20180124150505")
+  # data <- readRDS("M2530_FFPE.EaCoN.ASPCF.RDS")
   # targets.table <- NULL
   # out.dir <- getwd()
   # refGene.table = NULL
   # solo = TRUE
   # report = TRUE
   # ldb = "/mnt/data_cigogne/bioinfo/"
-  # 
-  # oridir <- getwd()
+  # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # require(foreach)
+
+  oridir <- getwd()
 
   valid.genomes <- get.valid.genomes()
   my.ascat.seg <- data$data
@@ -750,8 +756,8 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     return(ginreg)
   }
   targ.regz <- foreach::foreach(g = 1:nrow(targ.regz), .combine = "rbind") %do% {
-    # ginreg.idx <- which(paste0("chr", baf.seg$chrA) == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
-    ginreg.idx <- which(baf.seg$chrA == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
+    ginreg.idx <- which(paste0("chr", baf.seg$chrA) == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
+    # ginreg.idx <- which(baf.seg$chrA == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
     ginreg <- foreach::foreach(gg = ginreg.idx, .combine = "rbind") %do% {
       match.start <- max(baf.seg$Start[gg], targ.regz$match.start[g])
       match.end <- min(baf.seg$End[gg], targ.regz$match.end[g])
@@ -823,7 +829,7 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     if ( (source == "microarray") & (manufacturer == "Affymetrix") ) {
 
       ## Getting meta data
-      message("Getting META keys ...")
+      message(tmsg("Getting META keys ..."))
       meta.tags <- data.frame(
         key = c("affymetrix-algorithm-param-option-set-analysis-name",
                 "affymetrix-array-type",
