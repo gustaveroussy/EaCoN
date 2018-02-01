@@ -1,6 +1,12 @@
 EaCoN
 -----
 
+v0.2.9 (20180130) *TumorBoost*
+-----------------
+* Added nsubthread parameter to slow WES functions, to allow multithreading at the chromosome level.
+* Added optional (recommended, active by default) BAF normalization using TumorBoost for WES data(as implemented in aroma.light).
+* Added coverage of bins and SNP positions for test and ref as QC for WES data. A new plot is generated for several minimum depth values.
+
 v0.2.8 (20180124) *Krank*
 -----------------
 * Corrected a damn error in WES binning routine, which changed bin order (bad sort from numerical to alphanumerical ...) !

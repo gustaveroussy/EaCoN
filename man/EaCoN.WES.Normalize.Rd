@@ -3,7 +3,8 @@
 \title{Normalization of binned WES data.}
 \usage{
   EaCoN.WES.Normalize(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20,
-  L2R.RD.min.Test = 20, BAF.RD.min = 25, out.dir = getwd(), return.data = FALSE)
+  L2R.RD.min.Test = 20, BAF.RD.min = 25, TumorBoost = TRUE, out.dir = getwd(),
+  return.data = FALSE)
 }
 \arguments{
   \item{data}{Data object contained in a RDS file generated with \code{EaCoN.WES.Bin()}.}
@@ -11,6 +12,7 @@
   \item{L2R.RD.min.Ref}{Minimum read depth in the reference to keep a log2(ratio) bin.}
   \item{L2R.RD.min.Test}{Minimum read depth in the test to keep a log2(ratio) bin.}
   \item{BAF.RD.min}{Minimum read depth in the test to keep a BAF position.}
+  \item{TumorBoost}{Perform a normalization of the Test BAF profile using the Ref BAF profile, thanks to the TumorBoost methods (see \code{?aroma.light::normalizeTumorBoost())}).}
   \item{out.dir}{Output directory.}
   \item{return.data}{Return the results.}
 }

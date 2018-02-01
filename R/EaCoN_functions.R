@@ -29,17 +29,17 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
   data$meta$eacon <- list(
     # "proportionOpen" = proportionOpen,
     "segmentLength" = segmentLength,
-    "prior" = prior,
+    "prior" = if(is.null(prior)) "NA" else prior,
     "BAF.binning.size" = bafbin.size,
     "BAF.filter" = BAF.filter,
     "BAF.cutter" = BAF.cutter,
     "mclust.Krange" = mc.range,
     "BAF.segments.homo.limit" = homoCut,
-    "winsorize.k" = smooth.k,
+    "winsorize.k" = if(is.null(smooth.k)) "NA" else smooth.k,
     "ASCAT.ASPCF.penalty" = ASPCF.pen,
     "calling.method" = calling.method,
     "calling.nrf" = nrf,
-    "small.events.rescue.PELT.penalty" = SER.pen
+    "small.events.rescue.PELT.penalty" = if(is.null(SER.pen)) "NA" else SER.pen
   )
 
   ## Germline prediction

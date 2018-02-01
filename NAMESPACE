@@ -1,6 +1,7 @@
 import(chromosomes)
 import(mclust)
 importFrom("affxparser", "readCel", "readCelHeader")
+importFrom("aroma.light", "normalizeTumorBoost")
 importFrom("ASCAT", "ascat.aspcf", "ascat.runAscat")
 importFrom("Biostrings", "fasta.seqlengths", "readDNAStringSet", "alphabetFrequency", "subseq")
 importFrom("BSgenome", "getSeq", "installed.genomes", "available.genomes", "providerVersion")

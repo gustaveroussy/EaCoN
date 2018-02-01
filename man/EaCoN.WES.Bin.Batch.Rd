@@ -11,7 +11,7 @@
 \arguments{
   \item{BAM.list.file}{A tab-separated file giving the file names of the test and ref BAM files and corresponding sample name (see Details section).}
   \item{BINpack}{A data pack generated with \code{EaCoN.BINpack.Maker()} containing to a binned version of the capture BED used to generate the BAM files, and corresponding precomputed GC\% tracks.}
-  \item{nthread}{Number of threads for multithreading (see Details).}
+  \item{nthread}{Number of threads for multithreading.}
   \item{cluster.type}{Type of multithreading cluster (see \code{?parallel::makeCluster()}).}
   \item{...}{Any parameter for the function \code{EaCoN.WES.Bin()}, except \code{testBAM}, \code{refBAM} and \code{samplename}.}
 }

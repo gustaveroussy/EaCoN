@@ -50,7 +50,7 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1
   message(tmsg("BAF fragments clustering ..."))
   `%do%` <- foreach::"%do%"
   mcreslist <- foreach::foreach(k = unique(ASCATobj$SNPpos$chrs), .combine = "c") %do% {
-    print(k)
+    # print(k)
     WESk <- bafcdf.nna[bafcdf.nna$chrs == k,]
     if(nrow(WESk) == 0) return(NULL)
     krange <- range(WESk$pos, na.rm = TRUE)
