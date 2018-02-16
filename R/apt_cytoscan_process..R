@@ -1,5 +1,5 @@
 ## Performs CS CEL processing
-EaCoN.CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.diploid = FALSE, l2r.level = "weighted", renormalize = TRUE, renorm.rda = NULL, out.dir = getwd(), oschp.keep = TRUE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r4", return.data = FALSE) {
+EaCoN.CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.diploid = FALSE, l2r.level = "weighted", renormalize = TRUE, renorm.rda = NULL, out.dir = getwd(), oschp.keep = TRUE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r4", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE) {
 
   # setwd("/home/job/svn/genomics/CGH/R/00_PIPELINE/TEST_ZONE/CSHD")
   # CEL = "M2271_K03.CEL"
@@ -22,6 +22,14 @@ EaCoN.CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, n
   if (is.null(samplename)) stop(tmsg("A samplename is required !"))
   if (!file.exists(CEL)) stop(tmsg(paste0("Could not find CEL file ", CEL, " !")))
   if (renormalize) { if (!is.null(renorm.rda)) { if (!file.exists(renorm.rda)) stop(tmsg(paste0("Could not find renorm.rda file ", renorm.rda))) } }
+  if (is.null(genome.pkg)) stop(tmsg("A BSgenome package name is required !"))
+  if (!genome.pkg %in% BSgenome::installed.genomes()) {
+    if (genome.pkg %in% BSgenome::available.genomes()) {
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+    } else {
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+    }
+  }
 
   sup.array <- c("CytoScanHD_Array", "CytoScan750k_Array")
   arraytype.cel = affxparser::readCelHeader(filename = CEL)$chiptype
@@ -38,7 +46,7 @@ EaCoN.CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, n
   ## Checking apt-copynumber-cyto-ssa package loc
   apt.cyto.pkg.name <- paste0("apt.cytoscan.", apt.version)
   if (!(apt.cyto.pkg.name %in% installed.packages())) stop(tmsg(paste0("Package ", apt.cyto.pkg.name, " not found !")))
-  require(package = apt.cyto.pkg.name, character.only = TRUE)
+  suppressPackageStartupMessages(require(package = apt.cyto.pkg.name, character.only = TRUE))
 
   ## Processing CEL to an OSCHP file
   oscf <- apt.cytoscan.process(CEL = CEL, samplename = samplename, dual.norm = dual.norm, normal.diploid = normal.diploid, out.dir = out.dir, temp.files.keep = FALSE, force.OS = force.OS, apt.build = apt.build)
@@ -54,17 +62,17 @@ EaCoN.CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, n
   # rm(meta.a1.df)
   if (!("affymetrix-chipsummary-snp-qc" %in% names(my.oschp$Meta$analysis))) my.oschp$Meta$analysis[["affymetrix-chipsummary-snp-qc"]] <- NA
 
+  ### Loading genome info
+  message(paste0("Loading ", genome.pkg, " ..."))
+  suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
+  BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
+  genome2 <- BSgenome::providerVersion(BSg.obj)
+  cs <- chromobjector(BSg.obj)
+  
   ### Getting genome build version
-  # genome <- getmeta("affymetrix-algorithm-param-genome-version", meta.a1)
-  # data(list = genome, package = "chromosomes", envir = environment())
-  # arraytype <- getmeta("affymetrix-array-type", meta.a1)
-  # manufacturer <- getmeta("program-company", meta.a1)
-  # species <- getmeta("affymetrix-algorithm-param-genome-species", meta.a1)
-  # predicted.gender <- getmeta("affymetrix-chipsummary-Y-gender-call", meta.a1)
-  # gender.conv <- list("female" = "XX", "male" = "XY", "NA" = NA)
-
   genome <- getmeta("affymetrix-algorithm-param-genome-version", my.oschp$Meta$analysis)
-  data(list = genome, package = "chromosomes", envir = environment())
+  if (genome != genome2) stop(tmsg(paste0("Genome build name given with BSgenome package '", genome.pkg, "', (", genome2, ") is different from the genome build specified by provided APT build version '", apt.build, "' (", genome, ") !")))
+  # data(list = genome, package = "chromosomes", envir = environment())
   arraytype <- getmeta("affymetrix-array-type", my.oschp$Meta$analysis)
   manufacturer <- getmeta("program-company", my.oschp$Meta$analysis)
   species <- getmeta("affymetrix-algorithm-param-genome-species", my.oschp$Meta$analysis)
@@ -95,6 +103,7 @@ EaCoN.CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, n
     manufacturer = manufacturer,
     species = species,
     genome = genome,
+    genome.pkg = genome.pkg,
     predicted.gender = pgender
   )
 
@@ -174,10 +183,12 @@ EaCoN.CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, n
       Tumor_BAF_segmented = NULL,
       Germline_LogR = NULL,
       Germline_BAF = NULL,
-      SNPpos = data.frame(chrs = ao.df$chrA, pos = ao.df$pos, row.names = rownames(ao.df)),
+      # SNPpos = data.frame(chrs = ao.df$chrA, pos = ao.df$pos, row.names = rownames(ao.df)),
+      SNPpos = data.frame(chrs = ao.df$chr, pos = ao.df$pos, row.names = rownames(ao.df)),
       ch = my.ch,
       chr = my.ch,
-      chrs = unique(ao.df$chrA),
+      # chrs = unique(ao.df$chrA),
+      chrs = unique(ao.df$chr),
       samples = samplename,
       gender = as.vector(meta.b$predicted.gender),
       sexchromosomes = c("X", "Y"),

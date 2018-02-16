@@ -1,5 +1,5 @@
 ## Performs OS CEL pairs processing
-EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NULL, dual.norm = TRUE, l2r.level = "weighted", renormalize = TRUE, renorm.rda = NULL, out.dir = getwd(), oschp.keep = FALSE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r2", return.data = FALSE) {
+EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NULL, dual.norm = TRUE, l2r.level = "weighted", renormalize = TRUE, renorm.rda = NULL, out.dir = getwd(), oschp.keep = TRUE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r2", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE) {
 
   # ## TEMP
   # setwd("/home/job/svn/genomics/CGH/R/00_PIPELINE/TEST_ZONE/OS")
@@ -44,7 +44,7 @@ EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplenam
   ## Checking apt-copynumber-onco-ssa package loc
   apt.onco.pkg.name <- paste0("apt.oncoscan.", apt.version)
   if (!(apt.onco.pkg.name %in% installed.packages())) stop(tmsg(paste0("Package ", apt.onco.pkg.name, " not found !")))
-  require(package = apt.onco.pkg.name, character.only = TRUE)
+  suppressPackageStartupMessages(require(package = apt.onco.pkg.name, character.only = TRUE))
 
   ## Processing CELs to an OSCHP file
   oscf <- apt.oncoscan.process(ATChannelCel = ATChannelCel, GCChannelCel = GCChannelCel, samplename = samplename, dual.norm = dual.norm, out.dir = out.dir, temp.files.keep = FALSE, force.OS = force.OS, apt.build = apt.build)
@@ -61,27 +61,23 @@ EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplenam
   # meta.a1[["L2R.level"]] <- l2r.level
   # rm(meta.a1.df)
   if (!("affymetrix-chipsummary-snp-qc" %in% names(my.oschp$Meta$analysis))) my.oschp$Meta$analysis[["affymetrix-chipsummary-snp-qc"]] <- NA
+  
+  ### Loading genome info
+  message(paste0("Loading ", genome.pkg, " ..."))
+  suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
+  BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
+  genome2 <- BSgenome::providerVersion(BSg.obj)
+  cs <- chromobjector(BSg.obj)
 
   ### Getting basic meta
-  # genome <- getmeta("affymetrix-algorithm-param-genome-version", meta.a1)
+  # genome <- getmeta("affymetrix-algorithm-param-genome-version", my.oschp$Meta$analysis)
   genome <- getmeta("affymetrix-algorithm-param-genome-version", my.oschp$Meta$analysis)
-  data(list = genome, package = "chromosomes", envir = environment())
-  # arraytype <- getmeta("affymetrix-array-type", meta.a1)
-  arraytype <- getmeta("affymetrix-array-type", my.oschp$Meta$analysis)
-  # manufacturer <- getmeta("program-company", meta.a1)
-  manufacturer <- getmeta("program-company", my.oschp$Meta$analysis)
-  # species <- getmeta("affymetrix-algorithm-param-genome-species", meta.a1)
-  species <- getmeta("affymetrix-algorithm-param-genome-species", my.oschp$Meta$analysis)
-  # pgender <- as.character(as.numeric(getmeta("affymetrix-chipsummary-Gender", meta.a1)))
-
-  ### Getting genome build version
-  # genome <- getmeta("affymetrix-algorithm-param-genome-version", meta.a1)
+  if (genome != genome2) stop(tmsg(paste0("Genome build name given with BSgenome package '", genome.pkg, "', (", genome2, ") is different from the genome build specified by provided APT build version '", apt.build, "' (", genome, ") !")))
   # data(list = genome, package = "chromosomes", envir = environment())
-  # sup.array <- c("OncoScan", "OncoScan_CNV")
-  # arraytype <- getmeta("affymetrix-array-type", meta.a1)
-  # manufacturer <- getmeta("program-company", meta.a1)
-  # species <- getmeta("affymetrix-algorithm-param-genome-species", meta.a1)
-  # predicted.gender <- getmeta("affymetrix-chipsummary-Y-gender-call", meta.a1)
+  arraytype <- getmeta("affymetrix-array-type", my.oschp$Meta$analysis)
+  manufacturer <- getmeta("program-company", my.oschp$Meta$analysis)
+  species <- getmeta("affymetrix-algorithm-param-genome-species", my.oschp$Meta$analysis)
+  
   gender.conv <- list("female" = "XX", "male" = "XY", "NA" = NA)
   pgender <- gender.conv[[(getmeta("affymetrix-chipsummary-Y-gender-call", my.oschp$Meta$analysis))]]
 
@@ -114,6 +110,7 @@ EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplenam
     manufacturer = manufacturer,
     species = species,
     genome = genome,
+    genome.pkg = genome.pkg,
     predicted.gender = pgender
   )
 
@@ -177,10 +174,12 @@ EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplenam
       Tumor_BAF_segmented = NULL,
       Germline_LogR = NULL,
       Germline_BAF = NULL,
-      SNPpos = data.frame(chrs = ao.df$chrA, pos = ao.df$pos, row.names = rownames(ao.df)),
+      # SNPpos = data.frame(chrs = ao.df$chrA, pos = ao.df$pos, row.names = rownames(ao.df)),
+      SNPpos = data.frame(chrs = ao.df$chr, pos = ao.df$pos, row.names = rownames(ao.df)),
       ch = my.ch,
       chr = my.ch,
-      chrs = unique(ao.df$chrA),
+      # chrs = unique(ao.df$chrA),
+      chrs = unique(ao.df$chr),
       samples = samplename,
       gender = as.vector(meta.b$predicted.gender),
       sexchromosomes = c("X", "Y"),

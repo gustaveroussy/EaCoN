@@ -9,7 +9,8 @@ EaCoN.OS.Process(ATChannelCel = NULL, GCChannelCel = NULL,
 samplename = NULL, dual.norm = TRUE, l2r.level = "weighted",
 renormalize = TRUE, renorm.rda = NULL, out.dir = getwd(),
 oschp.keep = FALSE, force.OS = NULL, apt.version = "2.4.0",
-apt.build = "na33.r2", return.data = FALSE)
+apt.build = "na33.r2", genome.pkg = 
+"BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE)
 }
 \arguments{
 \item{ATChannelCel}{The first CEL file (version A).}
@@ -24,6 +25,7 @@ apt.build = "na33.r2", return.data = FALSE)
 \item{force.OS}{Specifiy the OS type of the execution machine (see Details).}
 \item{apt.version}{Version of the APT tool \code{apt-copynumber-cyto}.}
 \item{apt.build}{Affymetrix genome build version.}
+\item{genome.pkg}{The name of an installed \code{BSgenome} package. Please verify that provided package is compatible with the provided \code{apt.build} genome version.}
 \item{return.data}{Return data when finished.}
 }
 \details{

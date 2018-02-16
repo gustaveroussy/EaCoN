@@ -1,11 +1,18 @@
 EaCoN
 -----
 
-v0.2.9 (20180130) *TumorBoost*
+v0.2.9 (20180213) *TumorBoost*
 -----------------
 * Added nsubthread parameter to slow WES functions, to allow multithreading at the chromosome level.
 * Added optional (recommended, active by default) BAF normalization using TumorBoost for WES data(as implemented in aroma.light).
 * Added coverage of bins and SNP positions for test and ref as QC for WES data. A new plot is generated for several minimum depth values.
+* Implementing universal chromosome names support for WES data (to avoid problems with non-canonical chr names like used in the TCGA data, by example) using BSgenome, and for microarray data too. Now, "chromosomes" is only required by EaCoN::Annotate() for plotting karyotypic view and per-chr plots.
+* Accordingly changed bits of code in plots to display 'new' chromosome names and discard reference chr not covered in the source design. Now chr names appear in tom-bottom flip-flop on genomic plots.
+* Again, modified the reporting parts of EaCoN::Annotate() to handle new chr structure.
+* Introduced a functionality of the ASCAT package to detect gaps based on a minimum size, implemented as the 'mingap' parameter un EaCoN.Segment(). This allows to avoid coverage of gaps like some human chr centromeres by segmentation. Default is 5 Mb.
+* Removed startup messages when running EaCoN.*.Process() functions.
+* Fixed PELT segmentation minimum segment length to 5 (to make it independant from the minsegLen parameter dedicated to germline prediction, which may have to be truly variable depending on the data source).
+* Corrected error that generated an ugly (though harmless) warning in EaCoN::EaCoN.ASCN() (under-dimensioned the NA-filled returned vector when ASCN failed, since adding more ploidy measurement methods).
 
 v0.2.8 (20180124) *Krank*
 -----------------

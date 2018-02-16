@@ -1,22 +1,38 @@
-EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1E+07, modelName = "E", toclustname = "BAF", mcMin = 2, mcMax = 4, nfactor = 4, BAF.filter = .9, BAF.cutter = 0, segmentLength = 5, genome = "hg19") {
+EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1E+07, modelName = "E", toclustname = "BAF", mc.G = 2:4, nfactor = 4, BAF.filter = .9, BAF.cutter = 0, segmentLength = 5, genome.pkg = "BSgenome.Hsapiens.UCSC.hg19") {
 
-  ## TEMP
+  # ## TEMP
   # ASCATobj = my.ascat.data
   # prior = "G"
   # bafbin.size = 1E+07
   # modelName = "E"
   # toclustname = "BAF"
-  # mcMin = 2
-  # mcMax = 4
+  # # mcMin = 2
+  # # mcMax = 4
+  # mc.G = 2:4
   # nfactor = 4
   # segmentLength = 5
-  # genome = "hg19"
+  # genome.pkg = "BSgenome.Hsapiens.UCSC.hg19"
   # BAF.filter <- .90
-  # BAF.cutter <- .02
+  # BAF.cutter <- 0
   # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # require(foreach)
   # require(mclust)
 
+  ## Loading genome data
+  if (!genome.pkg %in% BSgenome::installed.genomes()) {
+    if (genome.pkg %in% BSgenome::available.genomes()) {
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+    } else {
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+    }
+  }
+  # data(list = genome, package = "chromosomes", envir = environment())
+  message(tmsg(paste0("Loading ", genome.pkg, " ...")))
+  suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
+  BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
+  genome <- BSgenome::providerVersion(BSg.obj)
+  cs <- chromobjector(BSg.obj)
+  
   Homozygous = matrix(nrow = dim(ASCATobj$Tumor_LogR)[1], ncol = dim(ASCATobj$Tumor_LogR)[2])
   colnames(Homozygous) = colnames(ASCATobj$Tumor_LogR)
   rownames(Homozygous) = rownames(ASCATobj$Tumor_LogR)
@@ -41,8 +57,8 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1
   if (!is.null(prior)) {
     if (prior == "G") {
       message(tmsg("Computing whole genome BAF clustering prior ..."))
-      # priorX <- mclust::defaultPrior(bafcdf.nna$value, G = mcMin:mcMax, modelName = modelName)
-      priorX <- mclust::defaultPrior(bafcdf.nna$value[baf.Xin], G = mcMin:mcMax, modelName = modelName)
+      # priorX <- mclust::defaultPrior(bafcdf.nna$value[baf.Xin], G = mcMin:mcMax, modelName = modelName)
+      priorX <- mclust::defaultPrior(bafcdf.nna$value[baf.Xin], G = mc.G, modelName = modelName)
     }
   }
 
@@ -59,7 +75,8 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1
     if (!is.null(prior)) {
       if (prior == "K") {
         set.seed(123456)
-        priorX <- mclust::defaultPrior(WESk$value, G = mcMin:mcMax, modelName = modelName)
+        # priorX <- mclust::defaultPrior(WESk$value, G = mcMin:mcMax, modelName = modelName)
+        priorX <- mclust::defaultPrior(WESk$value, G = mc.G, modelName = modelName)
       }
     }
 
@@ -89,9 +106,11 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1
       if (length(unique(BAFk)) == 1) return(retvec)
       set.seed(123456)
       if (is.null(prior)) {
-        mcBAFk <- try(suppressWarnings(mclust::Mclust(BAFk, G = mcMin:mcMax, modelNames = modelName, verbose = FALSE)))
+        # mcBAFk <- try(suppressWarnings(mclust::Mclust(BAFk, G = mcMin:mcMax, modelNames = modelName, verbose = FALSE)))
+        mcBAFk <- try(suppressWarnings(mclust::Mclust(BAFk, G = mc.G, modelNames = modelName, verbose = FALSE)))
       } else  {
-        mcBAFk <- try(suppressWarnings(mclust::Mclust(BAFk, G = mcMin:mcMax, modelNames = modelName, verbose = FALSE, prior = priorControl(scale = priorX$scale))))
+        # mcBAFk <- try(suppressWarnings(mclust::Mclust(BAFk, G = mcMin:mcMax, modelNames = modelName, verbose = FALSE, prior = priorControl(scale = priorX$scale))))
+        mcBAFk <- try(suppressWarnings(mclust::Mclust(BAFk, G = mc.G, modelNames = modelName, verbose = FALSE, prior = priorControl(scale = priorX$scale))))
       }
       ## Handling case of failed mclust
       # if (is.null(mcBAFk)) return(rep(NA, len.BAFk))
@@ -243,18 +262,11 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1
   ## Applying 95% BAF noise filtering
   unl.rescued[is.na(Hom)] <- TRUE
 
-  # summary(unl.rescued)
-  # table(unl.rescued)
-
-  # message('PLOT')
   hoObj <- list(germlinegenotypes = matrix(NA, nrow = nrow(ASCATobj$Tumor_BAF), ncol = 1, dimnames = list(rownames(ASCATobj$SNPpos), ASCATobj$samples[1])), failedarrays = NULL)
-  # message('chk1')
   hoObj$germlinegenotypes[bafcdf.nna$idx,1] <- unl.rescued
-  # message('chk2')
   mcreslist.col <- unl.mcres
   mcreslist.col[is.na(mcreslist.col)] <- 4
   mcreslist.col <- c("black", "red", "green4", "purple", "blue", "pink")[mcreslist.col]
-  # message('chk3')
   mclogic.col <- unl.logic
   mclogic.col <- as.numeric(mclogic.col)
   mclogic.col[is.na(mclogic.col)] <- 2
@@ -265,10 +277,11 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, prior = "G", bafbin.size = 1
   mcres.col[is.na(mcres.col)] <- 2
   mcres.col <- c("red", "blue", "grey50")[(mcres.col+1)]
   # message('chk6')
-  data(list = genome, package = "chromosomes", envir = environment())
-  if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) {
-    bafcdf.nna$genopos <- bafcdf.nna$pos + cs$chromosomes$chr.length.toadd[unlist(cs$chrom2chr[paste0("chr", bafcdf.nna$chrs)])]
-  } else bafcdf.nna$genopos <- bafcdf.nna$pos + cs$chromosomes$chr.length.toadd[unlist(cs$chrom2chr[as.character(bafcdf.nna$chrs)])]
+  # data(list = genome, package = "chromosomes", envir = environment())
+  # if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) {
+  #   bafcdf.nna$genopos <- bafcdf.nna$pos + cs$chromosomes$chr.length.toadd[unlist(cs$chrom2chr[paste0("chr", bafcdf.nna$chrs)])]
+  # } else bafcdf.nna$genopos <- bafcdf.nna$pos + cs$chromosomes$chr.length.toadd[unlist(cs$chrom2chr[as.character(bafcdf.nna$chrs)])]
+  bafcdf.nna$genopos <- bafcdf.nna$pos + cs$chromosomes$chr.length.toadd[unlist(cs$chrom2chr[as.character(bafcdf.nna$chrs)])]
   # message(str(bafcdf.nna$genopos))
   # message('chk6')
   png(paste0(ASCATobj$samples[1], ".PredictedGermline.png"), width = 1700, height = 950)

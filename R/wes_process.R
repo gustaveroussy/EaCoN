@@ -8,6 +8,7 @@ EaCoN.BINpack.Maker <- function(bed.file = NULL, bin.size = 50, genome.pkg = "BS
     if (!file.exists(out.dir)) stop("Could not find the output directory !")
     if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !")
   }
+  if (is.null(genome.pkg)) stop(tmsg("A BSgenome package name is required !"))
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
       stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
@@ -15,6 +16,7 @@ EaCoN.BINpack.Maker <- function(bed.file = NULL, bin.size = 50, genome.pkg = "BS
       stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
     }
   }
+  
 
   ### Loading genome
   message(paste0("Loading ", genome.pkg, " ..."))
@@ -54,21 +56,25 @@ EaCoN.WES.Process <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, sam
 EaCoN.WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = "SAMPLE", Q = 20, nsubthread = 1, cluster.type = "PSOCK", out.dir = getwd(), return.data  = FALSE) {
   
   # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/MATCHR/TEST")
+  # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8")
   # refBAM <- "/mnt/data_cigogne/job/PUBLI_EaCoN/MATCHR/BAMS/MR009.normal.MARKdup.bam"
+  # refBAM <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/BAMS/TCGA-A7-A0CE-11A-21W-A100-09_IlluminaGA-DNASeq_exome.bam"
   # testBAM <- "/mnt/data_cigogne/job/PUBLI_EaCoN/MATCHR/BAMS/MR009.MARKdup.bam"
+  # testBAM <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/BAMS/TCGA-A7-A0CE-01A-11W-A019-09_IlluminaGA-DNASeq_exome.bam"
   # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/MATCHR/RESOURCES/SureSelect_ClinicalResearchExome.padded_hg19_b50.rda"
+  # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.rda"
   # samplename <- "MR09TEST_TUMORBOOST"
+  # samplename <- "TCGAtest"
   # Q <- 20
   # out.dir = getwd()
-  # nsubthread = 6
+  # nsubthread = 3
   # cluster.type = "PSOCK"
   # source("/home/job/svn/genomics/CGH/R/00_PIPELINE/MAIN_MODULES/EaCoN/R/mini_functions.R")
-  # # CLEANED !
   # require(foreach)
   # require(magrittr)
   # `%do%` <- foreach::"%do%"
   # `%dopar%` <- foreach::"%dopar%"
-  
+
   ## CHECKS (files/parameters)
   if (is.null(BINpack)) stop(tmsg("A BINpack file is required !"))
   if (!file.exists(BINpack)) stop(tmsg("Could not find the BINpack file !"))
@@ -582,17 +588,18 @@ EaCoN.WES.Bin.Batch <- function(BAM.list.file = NULL, BINpack = NULL, nthread = 
 ## Performs the normalization of WES L2R and BAF signals
 EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20, L2R.RD.min.Test = 20, BAF.RD.min = 25,TumorBoost = TRUE, out.dir = getwd(), return.data = FALSE) {
 
-  # # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-A7-A0CE-01A_vs_11A/")
+  # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-A7-A0CE-01A_vs_11A/")
+  # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-BH-A0DT-01A_vs_11A/")
   # setwd("/mnt/data_cigogne/job/OS2006/WES/OS2K6/EaCoN_0.2.8/00_TONORM/OS_046")
-  # # data <- readRDS("TCGA-A7-A0CE-01A_vs_11A_hs37d5_b50_binned.RDS")
+  # data <- readRDS("TCGA-BH-A0DT-01A_vs_11A_hs37d5_b50_binned.RDS")
   # data <- readRDS("OS_046_hg19_b50_binned.RDS")
-  # # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.rda"
+  # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.rda"
   # BINpack <- "/mnt/data_cigogne/job/OS2006/WES/RESOURCES/SureSelect_ClinicalResearchExome.padded_hg19_b50.rda"
-  # # L2R.RD.min.Ref = 20
+  # L2R.RD.min.Ref = 20
   # L2R.RD.min.Ref = 10
-  # # L2R.RD.min.Test = 20
+  # L2R.RD.min.Test = 20
   # L2R.RD.min.Test = 10
-  # # BAF.RD.min = 25
+  # BAF.RD.min = 25
   # BAF.RD.min = 10
   # TumorBoost = TRUE
   # out.dir = getwd()
@@ -623,6 +630,7 @@ EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   genome <- BSgenome::providerVersion(BSg.obj)
+  cs <- chromobjector(BSg.obj)
   
   ## DEPTH controls
   ### L2R.TEST
@@ -646,9 +654,10 @@ EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20
   meta.w$TumorBoost <- as.character(TumorBoost)
 
   ## Normalizing L2R
-  data(list = data$meta$basic$genome, package = "chromosomes", envir = environment())
+  # data(list = data$meta$basic$genome, package = "chromosomes", envir = environment())
   rownames(data$RD) <- paste0(data$RD$chr, ":", data$RD$start, "-", data$RD$end)
-  data$RD$chrN <- unlist(cs$chrom2chr[data$RD$chr])
+  # data$RD$chrN <- unlist(cs$chrom2chr[data$RD$chr])
+  data$RD$chrN <- unclass(data$RD$chr)
   smo <- round(nrow(data$RD)/200)
   data$RD$L2R <- log2((data$RD$RD.test.mean+1) / (data$RD$RD.ref.mean+1))
 
@@ -727,7 +736,8 @@ EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20
   rownames(baf.ao.df) <- rownames(data$SNP)
   ao.df <- rbind(l2r.ao.df, baf.ao.df)
   ao.df$chrN <- unlist(cs$chrom2chr[ao.df$chr])
-  ao.df$chrs <- sub(pattern = "chr", replacement = "", ao.df$chr)
+  # ao.df$chrN <- unclass(as.vector(ao.df$chr))
+  ao.df$chrs <- ao.df$chr
   ao.df <- ao.df[order(ao.df$chrN, ao.df$pos),]
 
   my.ch <- sapply(unique(ao.df$chrs), function(x) { which(ao.df$chrs == x) })
@@ -743,7 +753,7 @@ EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20
       SNPpos = data.frame(chrs = ao.df$chrs, pos = ao.df$pos),
       ch = my.ch,
       chr = my.ch,
-      chrs = unique(ao.df$chrs),
+      chrs = levels(ao.df$chrs),
       samples = samplename,
       gender = "NA",
       sexchromosomes = c("X", "Y"),
@@ -791,7 +801,7 @@ EaCoN.WES.Normalize <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref = 20
   abline(h = .5, col = 2, lty = 2, lwd = 2)
   dev.off()
 
-  message("Done.")
+  message(tmsg("Done."))
   if(return.data) return(my.ascat.obj)
 }
 
@@ -1088,7 +1098,8 @@ loc.nt.count.hs <- function(loc.df = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC.
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   # requireNamespace(GenomicRanges, quietly = TRUE)
   genome <- BSgenome::providerVersion(BSg.obj)
-  data(list = genome, package = "chromosomes", envir = environment())
+  # data(list = genome, package = "chromosomes", envir = environment())
+  cs <- chromobjector(BSg.obj)
 
 
   print("Removing replicated locations ...")

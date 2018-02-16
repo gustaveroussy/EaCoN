@@ -2,18 +2,20 @@
 \alias{EaCoN.Segment}
 \title{L2R and BAF joint segmentation using ASCAT.}
 \usage{
-  EaCoN.Segment(data = NULL, ascn = TRUE, segmentLength = 5, homoCut = .05,
-  mc.range = c(2,4), bafbin.size = 1E+07, prior = "G", BAF.filter = .90,
-  BAF.cutter = 0, smooth.k = NULL, ASPCF.pen = 50, gammaRange = c(0.35, .95),
-  recenter = "l2r.centeredpeak",  calling.method = "mad", nrf = .5,
-  SER.pen = .9999,  out.dir = getwd(), return.data = FALSE)
+  EaCoN.Segment(data = NULL, ascn = TRUE, mingap = 5E+06, segmentLength = 10,
+  homoCut = .05, mc.G = 2:4, bafbin.size = 1E+07, prior = "G",
+  BAF.filter = .90, BAF.cutter = 0, smooth.k = 5, ASPCF.pen = 100,
+  gammaRange = c(0.35, .95), recenter = "l2r.centeredpeak",
+  calling.method = "mad", nrf = .5, SER.pen = .9999,  out.dir = getwd(),
+  return.data = FALSE)
 }
 \arguments{
   \item{data}{Data object contained in a RDS file generated with \code{EaCoN.WES.Normalize()} (for WES data), \code{EaCoN.CS.Process()} (for Affymetrix CytoScan data), \code{EaCoN.OS.Process()} (for Affymetrix OncoScan data), or \code{EaCoN.SNP6.Process()} (for Affymetrix GenomeWideSNP_6 data).}
   \item{ascn}{Also perform Allele-Specific Copy Number estimation (by running \code{EaCoN.ASCN()}).}
+  \item{mingap}{Minimum size (in nt) of a genomic gap (mainly, centromere), to allow ASCAT to treat flanking parts independently.}
   \item{segmentLength}{Minimal segment size for germline prediction and (optional) PELT segmentation.}
   \item{homoCut}{Threshold value to consider a BAF segment as homozygote.}
-  \item{mc.range}{Number of BAF clusters to evaluate for germline prediction (see parameter \code{G} in \code{?mclust::Mclust()}.}
+  \item{mc.G}{Number of BAF clusters to evaluate for germline prediction (see parameter \code{G} in \code{?mclust::Mclust()}.}
   \item{bafbin.size}{Size (in nucleotide) of the window for the BAF germline prediction.}
   \item{prior}{Compute a prior for the BAF clustering in germline prediction. Can be \code{"G"} (whole-genome prior), \code{"K"} (per-chromosome priors), or \code{NULL} (no prior).}
   \item{BAF.filter}{Perform a filtering of BAF noise, keeping a fraction of heterozygous BAF markers, represented by this parameter. Can be avoided if set to \code{NULL}.}

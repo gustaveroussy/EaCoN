@@ -1,5 +1,33 @@
-EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut = .05, mc.range = c(2,4), bafbin.size = 1E+07, prior = "G", BAF.filter = .9, BAF.cutter = 0, smooth.k = NULL, ASPCF.pen = 50, gammaRange = c(0.35, .95), recenter = "l2r.centeredpeak", calling.method = "mad", nrf = 0.5, SER.pen = .9999, out.dir = getwd(), return.data = FALSE) {
+EaCoN.Segment <- function(data = NULL, ascn = TRUE, mingap = 5E+06, segmentLength = 10, homoCut = .05, mc.G = 2:4, bafbin.size = 1E+07, prior = "G", BAF.filter = .9, BAF.cutter = 0, smooth.k = 5, ASPCF.pen = 100, gammaRange = c(0.35,.95), recenter = "l2r.centeredpeak", calling.method = "mad", nrf = 0.5, SER.pen = .9999, out.dir = getwd(), return.data = FALSE) {
 
+  # setwd("/home/job/WORKSPACE/MP/ONCO/B12015_F1H1")
+  # data = readRDS("/home/job/WORKSPACE/MP/ONCO/B12015_F1H1/B12015_F1H1_OncoScan_CNV_hg19_processed.RDS")
+  # ascn = TRUE
+  # mingap = 5E+06
+  # segmentLength = 10
+  # homoCut = .05
+  # mc.G = 2:4
+  # bafbin.size = 1E+07
+  # prior = "G"
+  # BAF.filter = .9
+  # BAF.cutter = 0
+  # smooth.k = 5
+  # ASPCF.pen = 100
+  # gammaRange = c(0.35,.95)
+  # recenter = "l2r.centeredpeak"
+  # calling.method = "mad"
+  # nrf = 0.5
+  # SER.pen = .9999
+  # out.dir = getwd()
+  # return.data = FALSE
+  # require(foreach)
+  # require(mclust)
+  # source("~/git_gustaveroussy/EaCoN/R/germline_functions.R")
+  # source("~/git_gustaveroussy/EaCoN/R/fit_functions.R")
+  # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # source("~/git_gustaveroussy/EaCoN/R/plot_functions.R")
+  
+  
   calling.method <- tolower(calling.method)
 
   if(!dir.exists(out.dir)) stop(tmsg(paste0("Output directory [", out.dir, "] does not exist !")))
@@ -13,7 +41,20 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
 
   ## Extract genome version and load corresponding data
   genome <- data$meta$basic$genome
-  data(list = genome, package = "chromosomes", envir = environment())
+  genome.pkg <- data$meta$basic$genome.pkg
+  if (!genome.pkg %in% BSgenome::installed.genomes()) {
+    if (genome.pkg %in% BSgenome::available.genomes()) {
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+    } else {
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+    }
+  }
+  # data(list = genome, package = "chromosomes", envir = environment())
+  message(tmsg(paste0("Loading ", genome.pkg, " ...")))
+  suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
+  BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
+  # genome <- BSgenome::providerVersion(BSg.obj)
+  cs <- chromobjector(BSg.obj)
 
   ## Init graphical parameters
   # oripar <- par(no.readonly = TRUE)
@@ -27,25 +68,25 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
   setwd(odir)
 
   data$meta$eacon <- list(
-    # "proportionOpen" = proportionOpen,
+    "mingap" = mingap,
     "segmentLength" = segmentLength,
     "prior" = if(is.null(prior)) "NA" else prior,
     "BAF.binning.size" = bafbin.size,
     "BAF.filter" = BAF.filter,
     "BAF.cutter" = BAF.cutter,
-    "mclust.Krange" = mc.range,
+    "mclust.G" = mc.G,
     "BAF.segments.homo.limit" = homoCut,
     "winsorize.k" = if(is.null(smooth.k)) "NA" else smooth.k,
     "ASCAT.ASPCF.penalty" = ASPCF.pen,
     "calling.method" = calling.method,
-    "calling.nrf" = nrf,
+    "calling.nrf" = if(is.null(nrf)) "NA" else nrf,
     "small.events.rescue.PELT.penalty" = if(is.null(SER.pen)) "NA" else SER.pen
   )
 
   ## Germline prediction
   message(tmsg("Generating germline ..."))
-  # my.gg <- EaCoN.Predict.Germline(ASCATobj = data$data, prior = prior, bafbin.size = bafbin.size, modelName = "E", toclustname = "BAF", mcMin = 2, mcMax = mcMax, nfactor = 4, segmentLength = segmentLength)
-  data$germline <- EaCoN.Predict.Germline(ASCATobj = data$data, prior = prior, bafbin.size = bafbin.size, modelName = "E", toclustname = "BAF", mcMin = mc.range[1], mcMax = mc.range[2], nfactor = 4, BAF.filter = BAF.filter, BAF.cutter = BAF.cutter, segmentLength = segmentLength, genome = genome)
+  # data$germline <- EaCoN.Predict.Germline(ASCATobj = data$data, prior = prior, bafbin.size = bafbin.size, modelName = "E", toclustname = "BAF", mcMin = mc.range[1], mcMax = mc.range[2], nfactor = 4, BAF.filter = BAF.filter, BAF.cutter = BAF.cutter, segmentLength = segmentLength, genome.pkg = genome.pkg)
+  data$germline <- EaCoN.Predict.Germline(ASCATobj = data$data, prior = prior, bafbin.size = bafbin.size, modelName = "E", toclustname = "BAF", mc.G = mc.G, nfactor = 4, BAF.filter = BAF.filter, BAF.cutter = BAF.cutter, segmentLength = segmentLength, genome.pkg = genome.pkg)
   # saveRDS(my.gg, paste0(samplename, ".ascat.HomoProbes.RDS"), compress = "bzip2")
 
   png(paste0(samplename, ".Rorschach.png"), width = 980, height = 980)
@@ -62,11 +103,20 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
   ## Winsorization
   if(!is.null(smooth.k)) {
     message(tmsg("Smoothing L2R outliers ..."))
-    cndf <- data.frame(Chr = rep(data$data$chrs, vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+    cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
     cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = smooth.k, tau = 1, verbose = FALSE)
     data$data$Tumor_LogR[,1] <- cndf.wins[, 3, drop = FALSE]
+    rm(list = c("cndf", "cndf.wins"))
   }
 
+  ## Computing gaps
+  if (!is.null(mingap)) {
+    data$data$chr <- foreach(k = data$data$ch, .combine = "c") %do% {
+      gapz <- which(diff(data$data$SNPpos$pos[k]) >= mingap)
+      return(unname(split(k, findInterval(k, k[gapz+1]))))
+    }
+  }
+  
   ## ASPCF segmentation
   message(tmsg("ASPCF segmentation ..."))
   aspcf.res <- ASCAT::ascat.aspcf(ASCATobj = data$data, ascat.gg = data$germline, penalty = ASPCF.pen)
@@ -121,20 +171,18 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
     }
     data$data$Tumor_LogR[, 1] <- data$data$Tumor_LogR[,1] - shifter
     data$data$Tumor_LogR_segmented <- data$data$Tumor_LogR_segmented - shifter
-    data$meta$eacon[["eacon-recenter-value"]] <- shifter
+    data$meta$eacon[["recenter-value"]] <- shifter
   } else if (is.null(recenter)) {
     message(tmsg("No recentering."))
   } else stop(tmsg("Invalid recentering method called !"))
 
   ## Winsorization
   message(tmsg("Smoothing L2R (for plots)..."))
-  cndf <- data.frame(Chr = rep(data$data$chrs, vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+  cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
   cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = 5, tau = 1, verbose = FALSE)
   data$data$Tumor_LogR_wins <- cndf.wins[, 3, drop = FALSE]
   colnames(data$data$Tumor_LogR_wins) <- samplename
-
-  # par(oripar)
-  # saveRDS(data$data, paste0(samplename, ".ascat.ASPCF.RDS"), compress = "bzip2")
+  rm(list = c("cndf", "cndf.wins"))
 
   ## PELT rescue
   if (!is.null(SER.pen)) {
@@ -146,9 +194,9 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
     mydf <- mydf[!is.na(mydf$l2r), ]
     chrends <- cumsum(rle(as.character(data$data$SNPpos$chrs[!is.na(data$data$Tumor_LogR[,1])]))$lengths)
     if (is.character(SER.pen)) {
-      seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = segmentLength)@cpts))
+      seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = 5)@cpts))
     } else if (is.numeric(SER.pen)) {
-      seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = 'Asymptotic', pen.value = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = segmentLength)@cpts))
+      seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = 'Asymptotic', pen.value = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = 5)@cpts))
     } else stop(tmsg("SER.pen should be a character or a numeric !"))
     if (is.character(seg.end)) {
       message(tmsg(" PELT segmentation failed with this combination of SER.pen and segmentLength options !"))
@@ -161,7 +209,7 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
       rescued <- which(seg.width < seg.maxwidth)
       message(tmsg(paste0(" Found ", length(rescued), ".")))
       if (length(rescued) > seg.maxn) message(tmsg("WARNING : Many small events found, profile may be noisy ! Consider using 'smooth.k', or for WES data, strengthen low depth filtering !"))
-      data$meta$eacon[["eacon-PELT-nseg"]] <- length(rescued)
+      data$meta$eacon[["PELT-nseg"]] <- length(rescued)
       `%do%` <- foreach::"%do%"
       foreach::foreach(re = rescued, .combine = "c") %do% {
         interv <- mydf$idx.ori[seg.start[re]]:mydf$idx.ori[seg.end[re]]
@@ -185,9 +233,10 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
   baf.seg$start.probeset <- bafpos$ProbeSet[baf.seg$start.idx]
   baf.seg$end.probeset <- bafpos$ProbeSet[baf.seg$end.idx]
   baf.seg$chrA <- bafpos$chrs[baf.seg$start.idx]
-  if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) {
-    baf.seg$Chr <- unlist(cs$chrom2chr[paste0("chr", baf.seg$chrA)])
-  } else baf.seg$Chr <- unlist(cs$chrom2chr[baf.seg$chrA])
+  # if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) {
+    # baf.seg$Chr <- unlist(cs$chrom2chr[paste0("chr", baf.seg$chrA)])
+  # } else baf.seg$Chr <- unlist(cs$chrom2chr[baf.seg$chrA])
+  baf.seg$Chr <- unlist(cs$chrom2chr[baf.seg$chrA])
   baf.seg$Start <- bafpos$pos[baf.seg$start.idx]
   baf.seg$End <- bafpos$pos[baf.seg$end.idx]
   baf.seg$Width <- baf.seg$End - baf.seg$Start + 1
@@ -202,8 +251,8 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
   baf.hetero <- sort(which(baf.seg$Value == .5))
   if (length(baf.hetero) > 0) baf.seg$Status[baf.hetero] <- "Hetero"
 
-  baf.seg.out <- baf.seg[,c(7:12,4:5,1:3)]
-  colnames(baf.seg.out) <- c("Chr", "Start", "End", "Width", "BAF.Value", "BAF.Status", "Start.FeatureName", "End.FeatureName", "Start.FeatureIdx", "End.FeatureIdx", "Features")
+  baf.seg.out <- baf.seg[,c(6,7:12,4:5,1:3)]
+  colnames(baf.seg.out) <- c("Chrom", "Chr", "Start", "End", "Width", "BAF.Value", "BAF.Status", "Start.FeatureName", "End.FeatureName", "Start.FeatureIdx", "End.FeatureIdx", "Features")
 
   write.table(baf.seg.out, paste0(samplename, ".SegmentedBAF.txt"), sep = "\t", row.names = FALSE, quote = FALSE)
 
@@ -257,8 +306,8 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
   # print(paste0("GCUT2 ", g.cut))
   # print(paste0("LCUT2 ", l.cut))
 
-  data$meta$eacon[["eacon-L2R-segments-gain-cutoff"]] <- g.cut
-  data$meta$eacon[["eacon-L2R-segments-loss-cutoff"]] <- l.cut
+  data$meta$eacon[["L2R-segments-gain-cutoff"]] <- g.cut
+  data$meta$eacon[["L2R-segments-loss-cutoff"]] <- l.cut
 
   ## Generating CBS
   gain.idx <- which(l2r.segments$Value > g.cut)
@@ -274,23 +323,20 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
   write.table(data$cbs$nocut, paste0(samplename, ".NoCut.cbs"), sep = "\t", row.names = FALSE, quote = FALSE)
   write.table(data$cbs$cut, paste0(samplename, ".Cut.cbs"), sep = "\t", row.names = FALSE, quote = FALSE)
 
-  ## Saving segmentation object
-  saveRDS(data, paste0(samplename, ".EaCoN.ASPCF.RDS"), compress = "xz")
-
   ## REPLOTS
   message(tmsg("Plotting ..."))
   # l2r.seg.obj <- list(pos = l2r.segments, idx = list(gain = gain.idx, loss = loss.idx, normal = normal.idx), cutval = pcut)
   l2r.seg.obj <- list(pos = l2r.segments, idx = list(gain = gain.idx, loss = loss.idx, normal = normal.idx), cutval = c(l.cut, g.cut))
   seg.col <- list(gain = "blue", outscale.gain = "midnightblue", loss = "red", outscale.loss = "darkred", normal = "black")
-  l2r.chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(data$data$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)])
+  # l2r.chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(data$data$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)])
+  l2r.chr <- unname(unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)]))
   l2r.value <- data.frame(Chr = l2r.chr,
                           Start = data$data$SNPpos$pos,
                           End = data$data$SNPpos$pos,
                           Value = data$data$Tumor_LogR_wins[,1],
-                          # Value = data$data$Tumor_LogR[,1],
                           stringsAsFactors = FALSE)
-  baf.chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(data$data$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)])
-  baf.value <- data.frame(Chr = baf.chr,
+  # baf.chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(data$data$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)])
+  baf.value <- data.frame(Chr = l2r.chr,
                           Start = data$data$SNPpos$pos,
                           End = data$data$SNPpos$pos,
                           Value = data$data$Tumor_BAF[,1],
@@ -303,17 +349,20 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, segmentLength = 5, homoCut =
                      seg.col = seg.col,
                      seg.type = "block",
                      seg.normal = TRUE,
-                     genome = genome,
+                     genome.pkg = genome.pkg,
                      title = paste0(samplename, " L2R"),
                      ylim = c(-1.5,1.5))
 
   EaCoN.bafplot.geno(baf = baf.value,
                      seg = baf.seg,
                      seg.type = "both",
-                     genome = genome,
+                     genome.pkg = genome.pkg,
                      title = paste0(samplename, " BAF"))
   dev.off()
-
+  
+  ## Saving segmentation object
+  saveRDS(data, paste0(samplename, ".EaCoN.ASPCF.RDS"), compress = "xz")
+  
   ## ALLELE-SPECIFIC COPY NUMBER
   if (ascn) EaCoN.ASCN(data = data, gammaRange = gammaRange)
   setwd(oridir)
@@ -352,18 +401,33 @@ EaCoN.Segment.ff.Batch <- function (RDS.files = list.files(path = getwd(), patte
 EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) {
   
   # # data <- readRDS("/home/job/WORKSPACE/tempo/MR050/20180111134713/MR050.EaCoN.ASPCF.RDS")
-  # setwd("/home/job/WORKSPACE/MP/ONCO")
-  # data <- readRDS("/home/job/WORKSPACE/MP/ONCO/17R02793.EaCoN.ASPCF.RDS")
-  # # gammaRange <- c(0.40,.60)
+  # setwd("/home/job/WORKSPACE/MP/ONCO/18H00752/20180214114019")
+  # data <- readRDS("/home/job/WORKSPACE/MP/ONCO/18H00752/20180214114019/18H00752.EaCoN.ASPCF.RDS")
   # gammaRange <- c(0.35,.45)
   # out.dir <- getwd()
   # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # require(foreach)
 
 
+  if (any(is.null(c(data$data$Tumor_LogR_segmented, data$data$Tumor_BAF_segmented)))) stop(tmsg("No segmentation data found in the provided RDS file !"))
   samplename <- data$meta$basic$samplename
+  ## Extract genome version and load corresponding data
   genome <- data$meta$basic$genome
-  data(list = genome, package = "chromosomes", envir = environment())
+  genome.pkg <- data$meta$basic$genome.pkg
+  if (!genome.pkg %in% BSgenome::installed.genomes()) {
+    if (genome.pkg %in% BSgenome::available.genomes()) {
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+    } else {
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+    }
+  }
+  # data(list = genome, package = "chromosomes", envir = environment())
+  message(tmsg(paste0("Loading ", genome.pkg, " ...")))
+  suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
+  BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
+  cs <- chromobjector(BSg.obj)
+  
+  # data(list = genome, package = "chromosomes", envir = environment())
   message(tmsg("ASCN modeling ..."))
   gammavec <- if(length(gammaRange) >1 ) seq(gammaRange[1], gammaRange[2], 0.05) else gammaRange
   oridirx <- getwd()
@@ -377,7 +441,7 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
       message(tmsg("  ASCAT could not find an optimal ploidy / cellularity from the data."))
       setwd(oridirx)
       file.remove(odirg)
-      return(rep(NA, 6))
+      return(rep(NA, 8))
     }
     else {
       
@@ -401,32 +465,38 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
       saveRDS(my.ascat.seg.ascn, paste0(samplename, ".ascat.ASCN.RDS"), compress = "xz")
 
       ## Generating TCN-CBS
-      outfile <- paste0(samplename, ".gamma", gamma, ".TCN.cbs")
+      outfile <- paste0(samplename, ".gamma", gamma, ".cn")
       outdf <- my.ascat.seg.ascn$segments
-      outdf$chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", outdf$chr)]) else unlist(cs$chrom2chr[outdf$chr])
+      outdf$chrom <- outdf$chr
+      outdf$chr <- unlist(cs$chrom2chr[outdf$chrom])
+      # outdf$chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", outdf$chr)]) else unlist(cs$chrom2chr[outdf$chr])
       outdf$Width <- outdf$endpos - outdf$startpos + 1
       outdf$TCN <- outdf$nMajor + outdf$nMinor
-      outdf$Ploidy.ASCAT <- my.ascat.seg.ascn$ploidy$ascat
-      outdf$Ploidy.Median <- my.ascat.seg.ascn$ploidy$median
-      outdf$Ploidy.MostWidth <- my.ascat.seg.ascn$ploidy$most.width
-      outdf$Ploidy.WidthWeighted <- my.ascat.seg.ascn$ploidy$width.weighted
-      outdf$GoF <- my.ascat.seg.ascn$goodnessOfFit
-      outdf <- outdf[,c(1:4,7,8,5,6,9:12)]
-      colnames(outdf)[1:4] <- c(samplename, "Chr", "Start", "End")
+      # outdf$Ploidy.ASCAT <- my.ascat.seg.ascn$ploidy$ascat
+      # outdf$Ploidy.Median <- my.ascat.seg.ascn$ploidy$median
+      # outdf$Ploidy.MostWidth <- my.ascat.seg.ascn$ploidy$most.width
+      # outdf$Ploidy.WidthWeighted <- my.ascat.seg.ascn$ploidy$width.weighted
+      # outdf$GoF <- my.ascat.seg.ascn$goodnessOfFit
+      # outdf <- outdf[,c(1:4,7,8,5,6,9:12)]
+      outdf <- outdf[,c(1,2,7,3,4,8,9,5,6)]
+      colnames(outdf)[1:5] <- c(samplename, "Chr", "Chrom", "Start", "End")
       write.table.fast(x = outdf, file = outfile)
-
+      
+      ## Generating cellularity + ploidy + metrics file
+      outfile <- paste0(samplename, ".gamma", gamma, "_model.txt")
+      modeldf <- data.frame(key = c("Sample", "Gamma", "Goodness.of.Fit", "Psi", "Ploidy.ASCAT", "Ploidy.Median", "Ploidy.Most.Width", "Ploidy.Width.weighted", "Cellularity"), value = c(samplename, gamma, unname(my.ascat.seg.ascn$goodnessOfFit), unname(my.ascat.seg.ascn$psi), my.ascat.seg.ascn$ploidy$ascat, my.ascat.seg.ascn$ploidy$median, my.ascat.seg.ascn$ploidy$most.width, my.ascat.seg.ascn$ploidy$width.weighted, unname(my.ascat.seg.ascn$aberrantcellfraction)), stringsAsFactors = FALSE)
+      write.table.fast(x = modeldf, file = outfile, header = FALSE)
+      
       ## Reploting
       ylim <- 6
       ### TCN
-      segments.posN <- my.ascat.seg.ascn$segments$chr
-      segments.posN[segments.posN == "X"] <- 23
-      segments.posN[segments.posN == "Y"] <- 24
-      segments.posN <- as.numeric(segments.posN)
-      segments.genostart <- cs$chromosomes$chr.length.toadd[segments.posN] + my.ascat.seg.ascn$segments$startpos
-      segments.genoend <- cs$chromosomes$chr.length.toadd[segments.posN] + my.ascat.seg.ascn$segments$endpos
+      segments.genostart <- cs$chromosomes$chr.length.toadd[outdf$Chr] + my.ascat.seg.ascn$segments$startpos
+      segments.genoend <- cs$chromosomes$chr.length.toadd[outdf$Chr] + my.ascat.seg.ascn$segments$endpos
+      ink <- cs$chromosomes$chrN %in% outdf$Chr
       png(paste0(samplename, ".ASCATprofile.png"), width = 1850, height = 980)
       par(mar = c(1, 4, 5, 1), mfrow = c(2, 1))
-      plot(0, 0, type = "n", xlim = c(0,max(segments.genoend)), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " Allele-Specific Copy Number (Gamma = ", gamma, ")\n Cellularity = ", my.ascat.seg.ascn$aberrantcellfraction, " // Ploidy = (A:", round(my.ascat.seg.ascn$ploidy$ascat, digits = 2), ", M:", round(my.ascat.seg.ascn$ploidy$median, digits = 2), ", MW:", round(my.ascat.seg.ascn$ploidy$most.width, digits = 2), ", WW:", round(my.ascat.seg.ascn$ploidy$width.weighted, digits = 2), ") // Goodness of fit = ", round(my.ascat.seg.ascn$goodnessOfFit, digits = 2), "% // Psi = ", my.ascat.seg.ascn$psi, " // nSeg = ", nrow(my.ascat.seg.ascn$segments), " // Predicted gender = ", data$data$gender), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
+      # plot(0, 0, type = "n", xlim = c(0,max(segments.genoend)), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " Allele-Specific Copy Number (Gamma = ", gamma, ")\n Cellularity = ", my.ascat.seg.ascn$aberrantcellfraction, " // Ploidy = (A:", round(my.ascat.seg.ascn$ploidy$ascat, digits = 2), ", M:", round(my.ascat.seg.ascn$ploidy$median, digits = 2), ", MW:", round(my.ascat.seg.ascn$ploidy$most.width, digits = 2), ", WW:", round(my.ascat.seg.ascn$ploidy$width.weighted, digits = 2), ") // Goodness of fit = ", round(my.ascat.seg.ascn$goodnessOfFit, digits = 2), "% // Psi = ", my.ascat.seg.ascn$psi, " // nSeg = ", nrow(my.ascat.seg.ascn$segments), " // Predicted gender = ", data$data$gender), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
+      plot(0, 0, type = "n", xlim = c(0,cs$genome.length), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " Allele-Specific Copy Number (Gamma = ", gamma, ")\n Cellularity = ", my.ascat.seg.ascn$aberrantcellfraction, " // Ploidy = (A:", round(my.ascat.seg.ascn$ploidy$ascat, digits = 2), ", M:", round(my.ascat.seg.ascn$ploidy$median, digits = 2), ", MW:", round(my.ascat.seg.ascn$ploidy$most.width, digits = 2), ", WW:", round(my.ascat.seg.ascn$ploidy$width.weighted, digits = 2), ") // Goodness of fit = ", round(my.ascat.seg.ascn$goodnessOfFit, digits = 2), "% // Psi = ", my.ascat.seg.ascn$psi, " // nSeg = ", nrow(my.ascat.seg.ascn$segments), " // Predicted gender = ", data$data$gender), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
       abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
       segments(segments.genostart, my.ascat.seg.ascn$segments$nMajor + 0.05, segments.genoend, my.ascat.seg.ascn$segments$nMajor + 0.05, pch = ".", col = 2, lwd = 6)
       segments(segments.genostart, my.ascat.seg.ascn$segments$nMinor - 0.05, segments.genoend, my.ascat.seg.ascn$segments$nMinor - 0.05, pch = ".", col = 3, lwd = 6)
@@ -452,10 +522,14 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
         segments(segments.genostart[dn.nMinor],
                  -0.05, segments.genoend[dn.nMinor], -0.05,
                  pch = ".", col = "darkgreen", lwd = 6)
-      abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
+      abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
       abline(h = 0:ylim, col = "grey75", lty = 3)
-      try(text(x = cs$chromosomes$mid.chr.geno, y = ylim, labels = cs$chromosomes$chrA, pos = 1, cex = 1.5))
-      graphics::plot(0, 0, type = "n", xlim = c(0, max(segments.genoend)), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
+      # try(text(x = cs$chromosomes$mid.chr.geno, y = ylim, labels = cs$chromosomes$chrA, pos = 1, cex = 1.5))
+      
+      try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
+      
+      # graphics::plot(0, 0, type = "n", xlim = c(0, max(segments.genoend)), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
+      graphics::plot(0, 0, type = "n", xlim = c(0, cs$genome.length), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
       abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
       abline(h = my.ascat.seg.ascn$ploidy$median, col = "red", lty = 2)
       abline(h = my.ascat.seg.ascn$ploidy$most.width, col = "cyan", lty = 2)
@@ -465,21 +539,22 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
       segments(segments.genostart, nTotal, segments.genoend, nTotal, pch = ".", col = 4, lwd = 6)
       if (length(up.nTotal) > 0) segments(segments.genostart[up.nTotal], (ylim + 0.2) + 0.05, segments.genoend[up.nTotal], (ylim + 0.2) + 0.05, pch = ".", col = "cyan", lwd = 6)
       if (length(dn.nTotal) > 0) segments(segments.genostart[dn.nTotal], 0, segments.genoend[dn.nTotal], 0, pch = ".", col = "midnightblue", lwd = 6)
-      abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
+      abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
       abline(h = 0:ylim, col = "grey75", lty = 3)
-      try(text(x = cs$chromosomes$mid.chr.geno, y = ylim, labels = cs$chromosomes$chrA, pos = 1, cex = 1.5))
+      try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
       dev.off()
       
       ### RAW CN
-      segments.posN <- my.ascat.seg.ascn$segments_raw$chr
-      segments.posN[segments.posN == "X"] <- 23
-      segments.posN[segments.posN == "Y"] <- 24
-      segments.posN <- as.numeric(segments.posN)
+      segments.posN <- unlist(cs$chrom2chr[my.ascat.seg.ascn$segments_raw$chr])
+      # segments.posN[segments.posN == "X"] <- 23
+      # segments.posN[segments.posN == "Y"] <- 24
+      # segments.posN <- as.numeric(segments.posN)
       segments.genostart <- cs$chromosomes$chr.length.toadd[segments.posN] + my.ascat.seg.ascn$segments_raw$startpos
       segments.genoend <- cs$chromosomes$chr.length.toadd[segments.posN] + my.ascat.seg.ascn$segments_raw$endpos
       png(paste0(samplename, ".rawprofile.png"), width = 1850, height = 980)
       par(mar = c(1, 4, 5, 1), mfrow = c(2, 1))
-      plot(0, 0, type = "n", xlim = c(0,max(segments.genoend)), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " RAW Allele-Specific Copy Number (Gamma = ", gamma, ")"), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
+      # plot(0, 0, type = "n", xlim = c(0,max(segments.genoend)), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " RAW Allele-Specific Copy Number (Gamma = ", gamma, ")"), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
+      plot(0, 0, type = "n", xlim = c(0,cs$genome.length), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " RAW Allele-Specific Copy Number (Gamma = ", gamma, ")"), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
       abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
       segments(segments.genostart, my.ascat.seg.ascn$segments_raw$nAraw + 0.05, segments.genoend, my.ascat.seg.ascn$segments_raw$nAraw + 0.05, pch = ".", col = 2, lwd = 6)
       segments(segments.genostart, my.ascat.seg.ascn$segments_raw$nBraw - 0.05, segments.genoend, my.ascat.seg.ascn$segments_raw$nBraw - 0.05, pch = ".", col = 3, lwd = 6)
@@ -505,22 +580,24 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
         segments(segments.genostart[dn.nMinor],
                  -0.05, segments.genoend[dn.nMinor], -0.05,
                  pch = ".", col = "darkgreen", lwd = 6)
-      abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
+      abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
       abline(h = 0:ylim, col = "grey75", lty = 3)
-      try(text(x = cs$chromosomes$mid.chr.geno, y = ylim, labels = cs$chromosomes$chrA, pos = 1, cex = 1.5))
-      graphics::plot(0, 0, type = "n", xlim = c(0, max(segments.genoend)), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " RAW Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
+      try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
+      # graphics::plot(0, 0, type = "n", xlim = c(0, max(segments.genoend)), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " RAW Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
+      graphics::plot(0, 0, type = "n", xlim = c(0, cs$genome.length), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " RAW Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
       abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
       abline(h = my.ascat.seg.ascn$ploidy$median, col = 2, lty = 2)
       abline(h = my.ascat.seg.ascn$ploidy$most.width, col = "purple", lty = 2)
-      nTotal <- my.ascat.seg.ascn$segments_raw$nMajor + my.ascat.seg.ascn$segments_raw$nMinor
+      # nTotal <- my.ascat.seg.ascn$segments_raw$nMajor + my.ascat.seg.ascn$segments_raw$nMinor
+      nTotal <- my.ascat.seg.ascn$segments_raw$nAraw + my.ascat.seg.ascn$segments_raw$nBraw
       up.nTotal <- which(nTotal > ylim)
       dn.nTotal <- which(nTotal == 0)
       segments(segments.genostart, nTotal, segments.genoend, nTotal, pch = ".", col = 4, lwd = 6)
       if (length(up.nTotal) > 0) segments(segments.genostart[up.nTotal], (ylim + 0.2) + 0.05, segments.genoend[up.nTotal], (ylim + 0.2) + 0.05, pch = ".", col = "cyan", lwd = 6)
       if (length(dn.nTotal) > 0) segments(segments.genostart[dn.nTotal], 0, segments.genoend[dn.nTotal], 0, pch = ".", col = "midnightblue", lwd = 6)
-      abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
+      abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
       abline(h = 0:ylim, col = "grey75", lty = 3)
-      try(text(x = cs$chromosomes$mid.chr.geno, y = ylim, labels = cs$chromosomes$chrA, pos = 1, cex = 1.5))
+      try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
       dev.off()
       
       ### TCNvsL2R
@@ -557,13 +634,14 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
 
       message(tmsg(paste0("    ", round(my.ascat.seg.ascn$goodnessOfFit, digits = 3), " / ", my.ascat.seg.ascn$psi)))
       setwd(oridirx)
-      return(c(gamma, unlist(my.ascat.seg.ascn$ploidy, use.names = FALSE), my.ascat.seg.ascn$aberrantcellfraction, my.ascat.seg.ascn$goodnessOfFit, my.ascat.seg.ascn$psi))
+      return(unname(c(gamma, unlist(my.ascat.seg.ascn$ploidy, use.names = FALSE), my.ascat.seg.ascn$aberrantcellfraction, my.ascat.seg.ascn$goodnessOfFit, my.ascat.seg.ascn$psi)))
     }
   }, stringsAsFactors = FALSE)
   rownames(fit.val) <- gammavec
   # colnames(fit.val) <- c("gamma", "ploidy", "rounded.ploidy", "aberrant.cell.fraction", "GoF", "psi")
   colnames(fit.val) <- c("gamma", "ploidy.ASCAT", "ploidy.Median", "ploidy.Most.width", "ploidy.Width.weighted", "aberrant.cell.fraction", "GoF", "psi")
   if (any(!is.na(fit.val$gamma))) {
+    fit.val[,1] <- gammavec
     gammaOpt.idx <- which.max(fit.val$GoF)
     gammaOpt <- fit.val$gamma[gammaOpt.idx]
     write.table(fit.val, file = paste0(out.dir, "/", samplename, ".gammaEval.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
@@ -591,7 +669,6 @@ EaCoN.ASCN <- function(data = NULL, gammaRange = c(.35,.95), out.dir = getwd()) 
   } else {
     message(tmsg("WARNING : ASCN failed for all evaluated gamma values !"))
   }
-  return()
 }
 
 ## Run ASCN segmentation, from a file
@@ -629,8 +706,8 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
   # data <- readRDS("TCGA-E9-A1NH-01A_vs_11A.EaCoN.ASPCF.RDS")
   # setwd("/home/job/WORKSPACE/MP/SNP6/BITES_p_TCGAb61_SNP_S_GenomeWideSNP_6_B12_697124/20180123165450")
   # data <- readRDS("BITES_p_TCGAb61_SNP_S_GenomeWideSNP_6_B12_697124.EaCoN.ASPCF.RDS")
-  # setwd("/home/job/WORKSPACE/MP/ONCO/M2530_FFPE/20180124150505")
-  # data <- readRDS("M2530_FFPE.EaCoN.ASPCF.RDS")
+  # setwd("/home/job/WORKSPACE/MP/ONCO/18H00752/20180214114019")
+  # data <- readRDS("/home/job/WORKSPACE/MP/ONCO/18H00752/20180214114019/18H00752.EaCoN.ASPCF.RDS")
   # targets.table <- NULL
   # out.dir <- getwd()
   # refGene.table = NULL
@@ -638,6 +715,7 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
   # report = TRUE
   # ldb = "/mnt/data_cigogne/bioinfo/"
   # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # source("/home/job/git_gustaveroussy/EaCoN/R/plot_functions.R")
   # require(foreach)
 
   oridir <- getwd()
@@ -678,6 +756,7 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
   # if (length(cbs.cut.file) > 1) stop(paste0("Found multiple Cut CBS files for ", out.dir))
   # cbs.df <- read.table.fast(cbs.cut.file)
 
+  if (!("cbs" %in% names(data))) stop(tmsg("CBS slot not found in RDS object ! Are you sure it is a valid one ?"))
   cbs.df <- foreach::foreach(seg = 1:nrow(data$cbs$cut), .combine = "rbind") %do% {
     ingenz <- gen.df$symbol[gen.df$chrN == data$cbs$cut$Chr[seg] & gen.df$start <= data$cbs$cut$End[seg] & gen.df$end >= data$cbs$cut$Start[seg]]
     return(data.frame(data$cbs$cut[seg, ], Genes = length(ingenz), Symbol = paste0(ingenz, collapse = ","), stringsAsFactors = FALSE))
@@ -710,7 +789,8 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
   baf.seg$start.probeset <- bafpos$ProbeSet[baf.seg$start.idx]
   baf.seg$end.probeset <- bafpos$ProbeSet[baf.seg$end.idx]
   baf.seg$chrA <- bafpos$chrs[baf.seg$start.idx]
-  baf.seg$Chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", baf.seg$chrA)]) else unlist(cs$chrom2chr[baf.seg$chrA])
+  # baf.seg$Chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", baf.seg$chrA)]) else unlist(cs$chrom2chr[baf.seg$chrA])
+  baf.seg$Chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[baf.seg$chrA]) else unlist(cs$chrom2chr[baf.seg$chrA])
   # baf.seg$Chr <- unlist(cs$chrom2chr[paste0("chr", baf.seg$chrA)])
   baf.seg$Start <- bafpos$pos[baf.seg$start.idx]
   baf.seg$End <- bafpos$pos[baf.seg$end.idx]
@@ -718,7 +798,7 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
   baf.seg$Value <- bafpos$BAF[baf.seg$start.idx]
 
   ## BAF calling
-  baf.homocut <- as.numeric(data$meta$eacon[["eacon-BAF-segments-homo-limit"]])
+  baf.homocut <- as.numeric(data$meta$eacon[["BAF-segments-homo-limit"]])
 
   ### Calling
   baf.seg$Status <- "Unbalanced"
@@ -756,8 +836,8 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     return(ginreg)
   }
   targ.regz <- foreach::foreach(g = 1:nrow(targ.regz), .combine = "rbind") %do% {
-    ginreg.idx <- which(paste0("chr", baf.seg$chrA) == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
-    # ginreg.idx <- which(baf.seg$chrA == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
+    # ginreg.idx <- which(paste0("chr", baf.seg$chrA) == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
+    ginreg.idx <- which(baf.seg$chrA == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
     ginreg <- foreach::foreach(gg = ginreg.idx, .combine = "rbind") %do% {
       match.start <- max(baf.seg$Start[gg], targ.regz$match.start[g])
       match.end <- min(baf.seg$End[gg], targ.regz$match.end[g])
@@ -797,7 +877,8 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     trunc.regz <- foreach::foreach(g = 1:nrow(trunc.regz), .combine = "rbind") %do% {
       # ginreg.idx <- which(paste0("chr", baf.seg$chrA) == trunc.regz$chrom[g] & baf.seg$Start <= trunc.regz$match.end[g] & baf.seg$End >= trunc.regz$match.start[g])
       # ginreg.idx <- which(paste0("chr", baf.seg$chrA) == trunc.regz$chrom[g] & ((baf.seg$Start <= trunc.regz$match.start[g] & baf.seg$End >= trunc.regz$match.start[g]) | (baf.seg$Start <= trunc.regz$match.end[g] & baf.seg$End >= trunc.regz$match.end[g])))
-      ginreg.idx <- which(paste0("chr", baf.seg$chrA) == trunc.regz$chrom[g] & baf.seg$Start <= trunc.regz$match.end[g] & baf.seg$End >= trunc.regz$match.start[g])
+      # ginreg.idx <- which(paste0("chr", baf.seg$chrA) == trunc.regz$chrom[g] & baf.seg$Start <= trunc.regz$match.end[g] & baf.seg$End >= trunc.regz$match.start[g])
+      ginreg.idx <- which(baf.seg$chrA == trunc.regz$chrom[g] & baf.seg$Start <= trunc.regz$match.end[g] & baf.seg$End >= trunc.regz$match.start[g])
       if (length(ginreg.idx > 0)) {
         ginreg <- foreach::foreach(gg = ginreg.idx, .combine = "rbind") %do% {
           match.start <- max(baf.seg$Start[gg], trunc.regz$match.start[g])
@@ -923,20 +1004,22 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     mad.diff <- abs(diff(my.ascat.seg$Tumor_LogR[,1]))
     my.mad <- stats::median(mad.diff[mad.diff>0], na.rm = TRUE)
 
-    g.cut <- getmeta(key = "eacon-L2R-segments-gain-cutoff", meta = data$meta$eacon)
-    l.cut <- getmeta(key = "eacon-L2R-segments-loss-cutoff", meta = data$meta$eacon)
+    g.cut <- getmeta(key = "L2R-segments-gain-cutoff", meta = data$meta$eacon)
+    l.cut <- getmeta(key = "L2R-segments-loss-cutoff", meta = data$meta$eacon)
 
     gain.idx <- which(l2r.segments$Value > g.cut)
     loss.idx <- which(l2r.segments$Value < l.cut)
     normal.idx <- which(l2r.segments$Value >= l.cut & l2r.segments$Value <= g.cut)
     l2r.seg.obj <- list(pos = l2r.segments, idx = list(gain = gain.idx, loss = loss.idx, normal = normal.idx), cutval = c(l.cut, g.cut))
     seg.col <- list(gain = "blue", outscale.gain = "midnightblue", loss = "red", outscale.loss = "darkred", normal = "black")
-    l2r.chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(my.ascat.seg$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(my.ascat.seg$SNPpos$chrs)])
+    # l2r.chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(my.ascat.seg$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(my.ascat.seg$SNPpos$chrs)])
+    l2r.chr <- unlist(cs$chrom2chr[as.character(my.ascat.seg$SNPpos$chrs)])
     l2r.value <- data.frame(Chr = l2r.chr,
                             Start = my.ascat.seg$SNPpos$pos,
                             End = my.ascat.seg$SNPpos$pos,
                             Value = my.ascat.seg$Tumor_LogR_wins[,1],
                             stringsAsFactors = FALSE)
+    genome.pkg <- data$meta$basic$genome.pkg
 
     # png(paste0(out.dir, "/", samplename, ".L2R.G.png"), width = 1850, height = 980)
     png(paste0(samplename, ".L2R.G.png"), width = 1850, height = 980)
@@ -946,14 +1029,15 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
                        seg.col = seg.col,
                        seg.type = "block",
                        seg.normal = TRUE,
-                       genome = genome,
+                       genome.pkg = genome.pkg,
                        title = paste0(samplename, " L2R"),
                        ylim = c(-1.5,1.5))
     dev.off()
 
     ### Genomic BAF plot
     message(tmsg("Plotting BAF ..."))
-    baf.chr <-if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(my.ascat.seg$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(my.ascat.seg$SNPpos$chrs)])
+    # baf.chr <-if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(my.ascat.seg$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(my.ascat.seg$SNPpos$chrs)])
+    baf.chr <- unlist(cs$chrom2chr[as.character(my.ascat.seg$SNPpos$chrs)])
     baf.value <- data.frame(Chr = baf.chr,
                             Start = my.ascat.seg$SNPpos$pos,
                             End = my.ascat.seg$SNPpos$pos,
@@ -966,7 +1050,7 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     EaCoN.bafplot.geno(baf = baf.value,
                        seg = baf.seg,
                        seg.type = "both",
-                       genome = genome,
+                       genome.pkg = genome.pkg,
                        title = paste0(samplename, " BAF")
     )
     dev.off()
@@ -976,7 +1060,7 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     # karyoplotf <- paste0(out.dir, "/", samplename, ".L2R.K.png")
     karyoplotf <- paste0(samplename, ".L2R.K.png")
     png(karyoplotf, width = 1850, height = 980)
-    EaCoN.l2rplot.karyo(l2r = l2r.value, seg = l2r.seg.obj, seg.col = seg.col, seg.type = "block", seg.normal = TRUE, ylim = c(-1.5,1.5), genome = genome)
+    EaCoN.l2rplot.karyo(l2r = l2r.value, seg = l2r.seg.obj, seg.col = seg.col, seg.type = "block", seg.normal = TRUE, ylim = c(-1.5,1.5), genome.pkg = genome.pkg)
     dev.off()
     karyoplotf <- tools::file_path_as_absolute(karyoplotf)
 
@@ -998,7 +1082,7 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
                            l2r.seg.type = "block",
                            baf.seg.type = "both",
                            seg.normal = TRUE,
-                           genome = genome
+                           genome.pkg = genome.pkg
       )
       dev.off()
     }
@@ -1032,7 +1116,8 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     minbold <- 1
     segtab.df <- l2r.segments
     segtab.df$Ratio <- 2^segtab.df$Value
-    segtab.df$ChromFull <- paste0("chr", segtab.df$Chrom)
+    # segtab.df$ChromFull <- paste0("chr", segtab.df$Chrom)
+    # segtab.df$ChromFull <- segtab.df$Chrom
     segtab.df$Width <- segtab.df$End - segtab.df$Start +1
     segtab.df$Start.band <- vapply(1:nrow(segtab.df), function(x) {
       scb <- cs$cytobands$chrN == segtab.df$Chr[x] & cs$cytobands$start <= segtab.df$Start[x] & cs$cytobands$end >= segtab.df$Start[x]
@@ -1049,7 +1134,9 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     segtab.df$NrSymbol <- vapply(1:nrow(segtab.df), function(x) { length(unlist(strsplit(x = segtab.df$Symbol[x], split = ","))) }, 1)
     segtab.df$l2rbold <- 0
     segtab.df$l2rbold[abs(segtab.df$Value) > minbold] <- 1
-    segtab.df <- segtab.df[,c(10,3,4,11:14,5,9,6,16,15,17)]
+    # segtab.df <- segtab.df[,c(10,3,4,11:14,5,9,6,16,15,17)]
+    
+    segtab.df <- segtab.df[,c(1,3,4,10:13,5,9,6,15,14,16)]
 
     colnames(segtab.df) <- c("Chr", "Start", "End", "Width", "Start Cytoband", "End Cytoband", "Status", "L2R", "Ratio", "# Markers", "# Genes", "symbols", "l2rbold")
     segtab.df$Start <- format(segtab.df$Start, big.mark = ",")
@@ -1196,7 +1283,7 @@ EaCoN.Annotate.ff.Batch <- function(RDS.files = list.files(path = getwd(), patte
   cl <- parallel::makeCluster(spec = nthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cl)
   s <- ""
-  targ.all <- foreach::foreach(s = 1:length(RDS.files), .inorder = FALSE, .errorhandling = "pass") %dopar% {
+  targ.all <- foreach::foreach(s = 1:length(RDS.files), .inorder = FALSE, .errorhandling = "stop") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
     EaCoN.Annotate.ff(RDS.file = RDS.files[s], ...)
   }

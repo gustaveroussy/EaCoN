@@ -1,5 +1,5 @@
 ## Performs CS CEL processing
-EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", renormalize = TRUE, renorm.rda = NULL, out.dir = getwd(), oschp.keep = TRUE, force.OS = NULL, apt.version = "1.20.0", apt.build = "na35.r1", return.data = FALSE) {
+EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", renormalize = TRUE, renorm.rda = NULL, out.dir = getwd(), oschp.keep = TRUE, force.OS = NULL, apt.version = "1.20.0", apt.build = "na35.r1", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE) {
 
   # setwd("/home/job/svn/genomics/CGH/R/00_PIPELINE/TEST_ZONE/SNP6")
   # CEL <- "BEAUX_p_TCGA_b109_SNP_2N_GenomeWideSNP_6_C03_772214.CEL"
@@ -20,6 +20,14 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   if (is.null(samplename)) stop(tmsg("A samplename is required !"))
   if (!file.exists(CEL)) stop(tmsg(paste0("Could not find CEL file ", CEL, " !")))
   if (renormalize) { if (!is.null(renorm.rda)) { if (!file.exists(renorm.rda)) stop(tmsg(paste0("Could not find renorm.rda file ", renorm.rda))) } }
+  if (is.null(genome.pkg)) stop(tmsg("A BSgenome package name is required !"))
+  if (!genome.pkg %in% BSgenome::installed.genomes()) {
+    if (genome.pkg %in% BSgenome::available.genomes()) {
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+    } else {
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+    }
+  }
 
   sup.array <- c("GenomeWideSNP_6")
   arraytype.cel = affxparser::readCelHeader(filename = CEL)$chiptype
@@ -36,7 +44,7 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   ## Checking apt-copynumber-cyto-ssa package loc
   apt.snp6.pkg.name <- paste0("apt.snp6.", apt.version)
   if (!(apt.snp6.pkg.name %in% installed.packages())) stop(tmsg(paste0("Package ", apt.snp6.pkg.name, " not found !")))
-  require(package = apt.snp6.pkg.name, character.only = TRUE)
+  suppressPackageStartupMessages(require(package = apt.snp6.pkg.name, character.only = TRUE))
 
   ## Processing CEL to an OSCHP file
   oscf <- apt.snp6.process(CEL = CEL, samplename = samplename, out.dir = out.dir, temp.files.keep = FALSE, force.OS = force.OS, apt.build = apt.build)
@@ -45,27 +53,23 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   print(tmsg("Loading OSCHP file ..."))
   my.oschp <- oschp.load(file = oscf)
 
+  ### Loading genome info
+  message(paste0("Loading ", genome.pkg, " ..."))
+  suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
+  BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
+  genome2 <- BSgenome::providerVersion(BSg.obj)
+  cs <- chromobjector(BSg.obj)
+  
   ## Processing : meta (and checks)
-  # meta.a1.df <- my.oschp[["Dset_IO_HDF5_Gdh"]][["_&keyvals"]][,1:2]
-  # meta.a1.df <- meta.a1.df[!duplicated(meta.a1.df$key),]
-  # meta.a1 <- meta.df2list(meta.a1.df)
-  # meta.a1[["L2R.level"]] <- l2r.level
-  # if (!("affymetrix-chipsummary-snp-qc" %in% names(meta.a1))) meta.a1[["affymetrix-chipsummary-snp-qc"]] <- NA
   if (!("affymetrix-chipsummary-snp-qc" %in% names(my.oschp$Meta$analysis))) my.oschp$Meta$analysis[["affymetrix-chipsummary-snp-qc"]] <- NA
-  # rm(meta.a1.df)
 
   ### Getting basic meta
-  # genome <- getmeta("affymetrix-algorithm-param-genome-version", meta.a1)
   genome <- getmeta("affymetrix-algorithm-param-genome-version", my.oschp$Meta$analysis)
-  data(list = genome, package = "chromosomes", envir = environment())
-  # arraytype <- getmeta("affymetrix-array-type", meta.a1)
+  if (genome != genome2) stop(tmsg(paste0("Genome build name given with BSgenome package '", genome.pkg, "', (", genome2, ") is different from the genome build specified by provided APT build version '", apt.build, "' (", genome, ") !")))
   arraytype <- getmeta("affymetrix-array-type", my.oschp$Meta$analysis)
-  # manufacturer <- getmeta("program-company", meta.a1)
   manufacturer <- getmeta("program-company", my.oschp$Meta$analysis)
-  # species <- getmeta("affymetrix-algorithm-param-genome-species", meta.a1)
   species <- getmeta("affymetrix-algorithm-param-genome-species", my.oschp$Meta$analysis)
-  # pgender <- as.character(as.numeric(getmeta("affymetrix-chipsummary-Gender", meta.a1)))
-
+  
   snp6.conv <- list("1" = "male", "2" = "female", "NA" = NA, "0" = NA)
   gender.conv <- list("female" = "XX", "male" = "XY", "NA" = NA)
   pgender <- gender.conv[[snp6.conv[[as.character(as.numeric(getmeta("affymetrix-chipsummary-Gender", my.oschp$Meta$analysis)))]]]]
@@ -91,6 +95,7 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
     manufacturer = manufacturer,
     species = species,
     genome = genome,
+    genome.pkg = genome.pkg,
     predicted.gender = pgender
   )
 
@@ -176,10 +181,12 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
       Tumor_BAF_segmented = NULL,
       Germline_LogR = NULL,
       Germline_BAF = NULL,
-      SNPpos = data.frame(chrs = ao.df$chrA, pos = ao.df$pos, row.names = rownames(ao.df)),
+      # SNPpos = data.frame(chrs = ao.df$chrA, pos = ao.df$pos, row.names = rownames(ao.df)),
+      SNPpos = data.frame(chrs = ao.df$chr, pos = ao.df$pos, row.names = rownames(ao.df)),
       ch = my.ch,
       chr = my.ch,
-      chrs = unique(ao.df$chrA),
+      # chrs = unique(ao.df$chrA),
+      chrs = unique(ao.df$chr),
       samples = samplename,
       gender = as.vector(meta.b$predicted.gender),
       sexchromosomes = c("X", "Y"),

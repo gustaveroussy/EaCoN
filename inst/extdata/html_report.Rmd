@@ -188,7 +188,7 @@ for (kr in 1:length(krA)) {
 ```{r solo, echo = FALSE, results = 'asis', eval=as.logical(solo)}
 cat('# Annotated Regions\n')
 #cat(paste0("<a href='", samplename, "_solo.", genome, "/chr", l2r.seg.obj$pos$Chrom[1], ".html' target=_new> Open SOLO </a>\n"))
-cat(paste0("<a href='", samplename, "_solo.", genome, "/", segtab.df$Chr[segtab.df$Status != "Normal"][1], ".html' target=_new> Open SOLO </a>\n"))
+cat(paste0("<a href='", samplename, "_solo.", genome, "/", unlist(cs$chr2chrom[segtab.df$Chr[segtab.df$Status != "Normal"][1]]), ".html' target=_new> Open SOLO </a>\n"))
 cat("<HR><HR><BR><BR>\n")
 ```
 
