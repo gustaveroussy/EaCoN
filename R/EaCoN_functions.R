@@ -1,4 +1,4 @@
-EaCoN.Segment <- function(data = NULL, ascn = TRUE, mingap = 5E+06, segmentLength = 10, homoCut = .05, mc.G = 2:4, bafbin.size = 1E+07, prior = "G", BAF.filter = .9, BAF.cutter = 0, smooth.k = 5, ASPCF.pen = 100, gammaRange = c(0.35,.95), recenter = "l2r.centeredpeak", calling.method = "mad", nrf = 0.5, SER.pen = .9999, out.dir = getwd(), return.data = FALSE) {
+EaCoN.Segment <- function(data = NULL, ascn = TRUE, mingap = 5E+06, segmentLength = 10, homoCut = .05, mc.G = 3:4, nfactor = 2, bafbin.size = 1E+07, BAF.rescale = FALSE, BAF.filter = .9, BAF.cutter = 0, smooth.k = NULL, ASPCF.pen = 100, gammaRange = c(0.35,.95), recenter = "l2r.centeredpeak", calling.method = "mad", nrf = 0.5, SER.pen = 1-(1E-04), out.dir = getwd(), return.data = FALSE) {
 
   # setwd("/home/job/WORKSPACE/MP/ONCO/B12015_F1H1")
   # data = readRDS("/home/job/WORKSPACE/MP/ONCO/B12015_F1H1/B12015_F1H1_OncoScan_CNV_hg19_processed.RDS")
@@ -8,7 +8,6 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, mingap = 5E+06, segmentLengt
   # homoCut = .05
   # mc.G = 2:4
   # bafbin.size = 1E+07
-  # prior = "G"
   # BAF.filter = .9
   # BAF.cutter = 0
   # smooth.k = 5
@@ -70,7 +69,8 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, mingap = 5E+06, segmentLengt
   data$meta$eacon <- list(
     "mingap" = mingap,
     "segmentLength" = segmentLength,
-    "prior" = if(is.null(prior)) "NA" else prior,
+    # "prior" = if(is.null(prior)) "NA" else prior,
+    "BAF.rescale" = as.character(BAF.rescale),
     "BAF.binning.size" = bafbin.size,
     "BAF.filter" = BAF.filter,
     "BAF.cutter" = BAF.cutter,
@@ -83,11 +83,16 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, mingap = 5E+06, segmentLengt
     "small.events.rescue.PELT.penalty" = if(is.null(SER.pen)) "NA" else SER.pen
   )
 
+  ## BAF scaling
+  if (BAF.rescale) {
+    message(tmsg("BAF scaling ..."))
+    data$data <- EaCoN.BAF.Scaler(ASCATobj = data$data, bafbin.size = bafbin.size, toclustname = "BAF")
+  }
+  
   ## Germline prediction
   message(tmsg("Generating germline ..."))
   # data$germline <- EaCoN.Predict.Germline(ASCATobj = data$data, prior = prior, bafbin.size = bafbin.size, modelName = "E", toclustname = "BAF", mcMin = mc.range[1], mcMax = mc.range[2], nfactor = 4, BAF.filter = BAF.filter, BAF.cutter = BAF.cutter, segmentLength = segmentLength, genome.pkg = genome.pkg)
-  data$germline <- EaCoN.Predict.Germline(ASCATobj = data$data, prior = prior, bafbin.size = bafbin.size, modelName = "E", toclustname = "BAF", mc.G = mc.G, nfactor = 4, BAF.filter = BAF.filter, BAF.cutter = BAF.cutter, segmentLength = segmentLength, genome.pkg = genome.pkg)
-  # saveRDS(my.gg, paste0(samplename, ".ascat.HomoProbes.RDS"), compress = "bzip2")
+  data$germline <- EaCoN.Predict.Germline(ASCATobj = data$data, bafbin.size = bafbin.size, modelName = "E", toclustname = "BAF", mc.G = mc.G, nfactor = nfactor, BAF.filter = BAF.filter, BAF.cutter = BAF.cutter, segmentLength = segmentLength, genome.pkg = genome.pkg)
 
   png(paste0(samplename, ".Rorschach.png"), width = 980, height = 980)
   par(mar = c(1, 1, 1, 1), mfrow = c(5, 5))
@@ -116,6 +121,10 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, mingap = 5E+06, segmentLengt
       return(unname(split(k, findInterval(k, k[gapz+1]))))
     }
   }
+  
+  ## Limiting BAF range
+  # data$data$Tumor_BAF[[1]][data$data$Tumor_BAF[[1]] > 1] <- 1
+  # data$data$Tumor_BAF[[1]][data$data$Tumor_BAF[[1]] < 0] <- 0
   
   ## ASPCF segmentation
   message(tmsg("ASPCF segmentation ..."))
@@ -296,12 +305,12 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, mingap = 5E+06, segmentLengt
 
 
   # Post-calling re-centralization
-  message(tmsg("Recentering (step 2) ..."))
-  shifter2 <- median(l2r.segments$Value[(l2r.segments$Value > l.cut) & (l2r.segments$Value < g.cut)], na.rm = TRUE)
-  l2r.segments$Value <- l2r.segments$Value - shifter2
-  data$data$Tumor_LogR_segmented <- data$data$Tumor_LogR_segmented - shifter2
-  g.cut <- g.cut - shifter2
-  l.cut <- l.cut - shifter2
+  # message(tmsg("Recentering (step 2) ..."))
+  # shifter2 <- median(l2r.segments$Value[(l2r.segments$Value > l.cut) & (l2r.segments$Value < g.cut)], na.rm = TRUE)
+  # l2r.segments$Value <- l2r.segments$Value - shifter2
+  # data$data$Tumor_LogR_segmented <- data$data$Tumor_LogR_segmented - shifter2
+  # g.cut <- g.cut - shifter2
+  # l.cut <- l.cut - shifter2
 
   # print(paste0("GCUT2 ", g.cut))
   # print(paste0("LCUT2 ", l.cut))
@@ -361,6 +370,7 @@ EaCoN.Segment <- function(data = NULL, ascn = TRUE, mingap = 5E+06, segmentLengt
   dev.off()
   
   ## Saving segmentation object
+  message(tmsg("Saving data ..."))
   saveRDS(data, paste0(samplename, ".EaCoN.ASPCF.RDS"), compress = "xz")
   
   ## ALLELE-SPECIFIC COPY NUMBER
@@ -390,7 +400,7 @@ EaCoN.Segment.ff.Batch <- function (RDS.files = list.files(path = getwd(), patte
   `%dopar%` <- foreach::"%dopar%"
   cl <- parallel::makeCluster(spec = nthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cl)
-  eacon.batchres <- foreach::foreach(r = seq_along(RDS.files), .inorder = TRUE, .errorhandling = "pass") %dopar% {
+  eacon.batchres <- foreach::foreach(r = seq_along(RDS.files), .inorder = TRUE, .errorhandling = "stop") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
     EaCoN.Segment.ff(RDS.file = RDS.files[r], ...)
   }
@@ -692,7 +702,7 @@ EaCoN.ASCN.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern =
   cl <- parallel::makeCluster(spec = nthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cl)
   r <- ""
-  eacon.batchres <- foreach::foreach(r = seq_along(RDS.files), .inorder = TRUE, .errorhandling = "pass") %dopar% {
+  eacon.batchres <- foreach::foreach(r = seq_along(RDS.files), .inorder = TRUE, .errorhandling = "stop") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
     EaCoN.ASCN.ff(RDS.file = RDS.files[r], ...)
   }
@@ -700,7 +710,7 @@ EaCoN.ASCN.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern =
 }
 
 ## Generate the HTML report
-EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, report = TRUE, solo = FALSE, ldb = "/mnt/data_cigogne/bioinfo/", out.dir = getwd()) {
+EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, report = TRUE, author.name = "", solo = FALSE, ldb = "/mnt/data_cigogne/bioinfo/", out.dir = getwd()) {
 
   # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-E9-A1NH-01A_vs_11A/20180119203804")
   # data <- readRDS("TCGA-E9-A1NH-01A_vs_11A.EaCoN.ASPCF.RDS")
@@ -790,7 +800,7 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
   baf.seg$end.probeset <- bafpos$ProbeSet[baf.seg$end.idx]
   baf.seg$chrA <- bafpos$chrs[baf.seg$start.idx]
   # baf.seg$Chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", baf.seg$chrA)]) else unlist(cs$chrom2chr[baf.seg$chrA])
-  baf.seg$Chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[baf.seg$chrA]) else unlist(cs$chrom2chr[baf.seg$chrA])
+  baf.seg$Chr <- unlist(cs$chrom2chr[baf.seg$chrA])
   # baf.seg$Chr <- unlist(cs$chrom2chr[paste0("chr", baf.seg$chrA)])
   baf.seg$Start <- bafpos$pos[baf.seg$start.idx]
   baf.seg$End <- bafpos$pos[baf.seg$end.idx]
@@ -798,7 +808,8 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
   baf.seg$Value <- bafpos$BAF[baf.seg$start.idx]
 
   ## BAF calling
-  baf.homocut <- as.numeric(data$meta$eacon[["BAF-segments-homo-limit"]])
+  # baf.homocut <- as.numeric(data$meta$eacon[["BAF-segments-homo-limit"]])
+  baf.homocut <- as.numeric(data$meta$eacon[["BAF.segments.homo.limit"]])
 
   ### Calling
   baf.seg$Status <- "Unbalanced"
@@ -1004,9 +1015,11 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     mad.diff <- abs(diff(my.ascat.seg$Tumor_LogR[,1]))
     my.mad <- stats::median(mad.diff[mad.diff>0], na.rm = TRUE)
 
-    g.cut <- getmeta(key = "L2R-segments-gain-cutoff", meta = data$meta$eacon)
-    l.cut <- getmeta(key = "L2R-segments-loss-cutoff", meta = data$meta$eacon)
-
+    # g.cut <- getmeta(key = "L2R-segments-gain-cutoff", meta = data$meta$eacon)
+    g.cut <- data$meta$eacon[["L2R-segments-gain-cutoff"]]
+    # l.cut <- getmeta(key = "L2R-segments-loss-cutoff", meta = data$meta$eacon)
+    l.cut <- data$meta$eacon[["L2R-segments-loss-cutoff"]]
+    
     gain.idx <- which(l2r.segments$Value > g.cut)
     loss.idx <- which(l2r.segments$Value < l.cut)
     normal.idx <- which(l2r.segments$Value >= l.cut & l2r.segments$Value <= g.cut)
@@ -1136,12 +1149,13 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     segtab.df$l2rbold[abs(segtab.df$Value) > minbold] <- 1
     # segtab.df <- segtab.df[,c(10,3,4,11:14,5,9,6,16,15,17)]
     
-    segtab.df <- segtab.df[,c(1,3,4,10:13,5,9,6,15,14,16)]
+    # segtab.df <- segtab.df[,c(1,3,4,10:13,5,9,6,15,14,16)]
+    segtab.df <- segtab.df[,c(2,3,4,10:13,5,9,6,15,14,16)]
 
     colnames(segtab.df) <- c("Chr", "Start", "End", "Width", "Start Cytoband", "End Cytoband", "Status", "L2R", "Ratio", "# Markers", "# Genes", "symbols", "l2rbold")
-    segtab.df$Start <- format(segtab.df$Start, big.mark = ",")
-    segtab.df$End <- format(segtab.df$End, big.mark = ",")
-    segtab.df$Width <- width.unit.conv(segtab.df$Width)
+    # segtab.df$Start <- format(segtab.df$Start, big.mark = ",")
+    # segtab.df$End <- format(segtab.df$End, big.mark = ",")
+    # segtab.df$Width <- width.unit.conv(segtab.df$Width)
     segtab.df$L2R <- round(segtab.df$L2R, digits = 3)
     segtab.df$Ratio <- round(segtab.df$Ratio, digits = 3)
 
@@ -1151,7 +1165,8 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     ### BAF
     message(tmsg("Polishing BAF segmentation table ..."))
     segbaf.df <- baf.seg
-    segbaf.df$Chrom <- paste0("chr", segbaf.df$chrA)
+    # segbaf.df$Chrom <- paste0("chr", segbaf.df$chrA)
+    segbaf.df$Chrom <- segbaf.df$chrA
     segbaf.df$Start.band <- vapply(1:nrow(segbaf.df), function(x) {
       scb <- cs$cytobands$chrN == segbaf.df$Chr[x] & cs$cytobands$start <= segbaf.df$Start[x] & cs$cytobands$end >= segbaf.df$Start[x]
       return(paste0(cs$cytobands$chrA[scb], cs$cytobands$cytoband[scb]))
@@ -1166,10 +1181,10 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     }
     segbaf.df <- segbaf.df[,c(13,8:10,14,15,12,11,3,16,17)]
     colnames(segbaf.df) <- c("Chr", "Start", "End", "Width", "Start Cytoband", "End Cytoband", "Status", "BAF", "# Markers", "# Genes", "symbols")
-    segbaf.df$Start <- format(segbaf.df$Start, big.mark = ",")
-    segbaf.df$End <- format(segbaf.df$End, big.mark = ",")
+    # segbaf.df$Start <- format(segbaf.df$Start, big.mark = ",")
+    # segbaf.df$End <- format(segbaf.df$End, big.mark = ",")
     # segbaf.df$Width <- format(segbaf.df$Width, big.mark = ",")
-    segbaf.df$Width <- width.unit.conv(segbaf.df$Width)
+    # segbaf.df$Width <- width.unit.conv(segbaf.df$Width)
     segbaf.df$BAF <- round(segbaf.df$BAF, digits = 3)
 
     baf.segstat <- c("Hetero", "Homo", "Unbalanced")
@@ -1178,18 +1193,14 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
 
     ## Targets table
     message(tmsg("Polishing targets table ..."))
-    targ.regz[["Gene Start"]] <- format(targ.regz[["Gene Start"]], big.mark = ",")
-    targ.regz[["Gene End"]] <- format(targ.regz[["Gene End"]], big.mark = ",")
-    # targ.regz[["Gene Width"]] <- format(targ.regz[["Gene Width"]], big.mark = ",")
-    targ.regz[["Gene Width"]] <- width.unit.conv(targ.regz[["Gene Width"]])
-    targ.regz[["Match Start"]] <- format(targ.regz[["Match Start"]], big.mark = ",")
-    targ.regz[["Match End"]] <- format(targ.regz[["Match End"]], big.mark = ",")
-    # targ.regz[["Match Width"]] <- format(targ.regz[["Match Width"]], big.mark = ",")
-    targ.regz[["Match Width"]] <- width.unit.conv(targ.regz[["Match Width"]])
-    # targ.regz[["L2R Segment Width"]] <- format(targ.regz[["L2R Segment Width"]], big.mark = ",")
-    targ.regz[["L2R Segment Width"]] <- width.unit.conv(targ.regz[["L2R Segment Width"]])
-    # targ.regz[["BAF Segment Width"]] <- format(targ.regz[["BAF Segment Width"]], big.mark = ",")
-    targ.regz[["BAF Segment Width"]] <- width.unit.conv(targ.regz[["BAF Segment Width"]])
+    # targ.regz[["Gene Start"]] <- format(targ.regz[["Gene Start"]], big.mark = ",")
+    # targ.regz[["Gene End"]] <- format(targ.regz[["Gene End"]], big.mark = ",")
+    # targ.regz[["Gene Width"]] <- width.unit.conv(targ.regz[["Gene Width"]])
+    # targ.regz[["Match Start"]] <- format(targ.regz[["Match Start"]], big.mark = ",")
+    # targ.regz[["Match End"]] <- format(targ.regz[["Match End"]], big.mark = ",")
+    # targ.regz[["Match Width"]] <- width.unit.conv(targ.regz[["Match Width"]])
+    # targ.regz[["L2R Segment Width"]] <- width.unit.conv(targ.regz[["L2R Segment Width"]])
+    # targ.regz[["BAF Segment Width"]] <- width.unit.conv(targ.regz[["BAF Segment Width"]])
     targ.regz[["L2R Value"]] <- round(targ.regz[["L2R Value"]], digits = 3)
     targ.regz[["BAF Value"]] <- round(targ.regz[["BAF Value"]], digits = 3)
 
@@ -1199,18 +1210,14 @@ EaCoN.Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NU
     ## Truncated table
     if (length(gen.trunk.idx) > 0) {
 
-      trunc.regz[["Gene Start"]] <- format(trunc.regz[["Gene Start"]], big.mark = ",")
-      trunc.regz[["Gene End"]] <- format(trunc.regz[["Gene End"]], big.mark = ",")
-      # trunc.regz[["Gene Width"]] <- format(trunc.regz[["Gene Width"]], big.mark = ",")
-      trunc.regz[["Gene Width"]] <- width.unit.conv(trunc.regz[["Gene Width"]])
-      trunc.regz[["Match Start"]] <- format(trunc.regz[["Match Start"]], big.mark = ",")
-      trunc.regz[["Match End"]] <- format(trunc.regz[["Match End"]], big.mark = ",")
-      # trunc.regz[["Match Width"]] <- format(trunc.regz[["Match Width"]], big.mark = ",")
-      trunc.regz[["Match Width"]] <- width.unit.conv(trunc.regz[["Match Width"]])
-      # trunc.regz[["L2R Segment Width"]] <- format(trunc.regz[["L2R Segment Width"]], big.mark = ",")
-      trunc.regz[["L2R Segment Width"]] <- width.unit.conv(trunc.regz[["L2R Segment Width"]])
-      # trunc.regz[["BAF Segment Width"]] <- format(trunc.regz[["BAF Segment Width"]], big.mark = ",")
-      trunc.regz[["BAF Segment Width"]] <- width.unit.conv(trunc.regz[["BAF Segment Width"]])
+      # trunc.regz[["Gene Start"]] <- format(trunc.regz[["Gene Start"]], big.mark = ",")
+      # trunc.regz[["Gene End"]] <- format(trunc.regz[["Gene End"]], big.mark = ",")
+      # trunc.regz[["Gene Width"]] <- width.unit.conv(trunc.regz[["Gene Width"]])
+      # trunc.regz[["Match Start"]] <- format(trunc.regz[["Match Start"]], big.mark = ",")
+      # trunc.regz[["Match End"]] <- format(trunc.regz[["Match End"]], big.mark = ",")
+      # trunc.regz[["Match Width"]] <- width.unit.conv(trunc.regz[["Match Width"]])
+      # trunc.regz[["L2R Segment Width"]] <- width.unit.conv(trunc.regz[["L2R Segment Width"]])
+      # trunc.regz[["BAF Segment Width"]] <- width.unit.conv(trunc.regz[["BAF Segment Width"]])
       trunc.regz[["L2R Value"]] <- round(trunc.regz[["L2R Value"]], digits = 3)
       trunc.regz[["BAF Value"]] <- round(trunc.regz[["BAF Value"]], digits = 3)
 

@@ -8,7 +8,7 @@ This function performs the normalization of a CEL file pair of Affymetrix OncoSc
 EaCoN.OS.Process(ATChannelCel = NULL, GCChannelCel = NULL,
 samplename = NULL, dual.norm = TRUE, l2r.level = "weighted",
 renormalize = TRUE, renorm.rda = NULL, out.dir = getwd(),
-oschp.keep = FALSE, force.OS = NULL, apt.version = "2.4.0",
+oschp.keep = TRUE, force.OS = NULL, apt.version = "2.4.0",
 apt.build = "na33.r2", genome.pkg = 
 "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE)
 }

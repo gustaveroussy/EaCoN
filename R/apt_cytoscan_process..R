@@ -139,6 +139,7 @@ EaCoN.CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, n
 
   # ao.df <- ao.df[!duplicated(ao.df$pos),]
   ao.df <- ao.df[!(is.na(ao.df$L2R) & is.na(ao.df$BAF)),]
+  ao.df$L2R.ori <- ao.df$L2R
 
   ## L2R renormalizations
   smo <- round(nrow(ao.df) / 550)
@@ -211,11 +212,18 @@ EaCoN.CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, n
   message(tmsg("Plotting ..."))
   ao.df$genopos <- ao.df$pos + cs$chromosomes$chr.length.toadd[ao.df$chrN]
   ao.df$L2R <- ao.df$L2R - median(ao.df$L2R, na.rm = TRUE)
+  ao.df$L2R.ori <- ao.df$L2R.ori - median(ao.df$L2R.ori, na.rm = TRUE)
   kend <- ao.df$genopos[vapply(unique(ao.df$chrN), function(k) { max(which(ao.df$chrN == k))}, 1)]
   l2r.notna <- which(!is.na(ao.df$L2R))
   l2r.rm <- runmed(ao.df$L2R[l2r.notna], smo)
+  l2r.ori.rm <- runmed(ao.df$L2R.ori[l2r.notna], smo)
   png(paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_rawplot.png"), 1600, 1050)
-  par(mfrow = c(2,1))
+  # par(mfrow = c(2,1))
+  par(mfrow = c(3,1))
+  plot(ao.df$genopos, ao.df$L2R.ori, pch = ".", cex = 3, col = "grey70", xaxs = "i", yaxs = "i", ylim = c(-2,2), main = paste0(samplename, " ", arraytype, " raw L2R profile (median-centered) / ", round(sum(abs(diff(l2r.ori.rm))), digits = 3)), xlab = "Genomic position", ylab = "L2R")
+  lines(ao.df$genopos[l2r.notna], l2r.ori.rm, col = 1)
+  abline(v = kend, col = 4, lty = 3, lwd = 2)
+  abline(h = 0, col = 2, lty = 2, lwd = 2)
   plot(ao.df$genopos, ao.df$L2R, pch = ".", cex = 3, col = "grey70", xaxs = "i", yaxs = "i", ylim = c(-2,2), main = paste0(samplename, " ", arraytype, " L2R profile (", l2r.level, ", median-centered)"), xlab = "Genomic position", ylab = "L2R")
   lines(ao.df$genopos[l2r.notna], l2r.rm, col = 1)
   abline(v = kend, col = 4, lty = 3, lwd = 2)

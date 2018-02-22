@@ -1,6 +1,17 @@
 EaCoN
 -----
 
+v0.2.10 (20180220) *PapaPapi*
+-----------------
+* Added a BAF scaling routine (based on density of homozygous probes) to germline prediction function, in order to rescue unscaled BAF from some male rawcopy-normalized CSHD profiles.
+* Removed the "prior" parameter from Eacon.Segment (for germline prediction) : now forced to "G" (genomic).
+* Added missing "raw" plot (1st panel) for CytoScan and SNP6 arrays.
+* Hid the "solo" and "ldb" options from EaCoN::Annotate() help page (but still present for GR MP work).
+* Added an "autor.name" option to EaCoN::Annotate().
+* Fixed chr display in some tables in the HTML report.
+* Fixed meta name typo that made homozygous BAF segments not detected as such in HTML report plots.
+* Moved genomic length formatting in HTML report tables from pure R to DT::formatCurrency (should allow to restore sorting possibility lost with R formatting ?)
+
 v0.2.9 (20180213) *TumorBoost*
 -----------------
 * Added nsubthread parameter to slow WES functions, to allow multithreading at the chromosome level.

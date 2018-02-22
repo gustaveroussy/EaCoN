@@ -286,7 +286,7 @@ EaCoN.OS.Process.Batch <- function(pairs.file = NULL, nthread = 1, cluster.type 
   doParallel::registerDoParallel(cl)
 
   p <- 0
-  osres <- foreach(p = seq_len(nrow(mypairs)), .inorder = FALSE, .errorhandling = "pass") %dopar% {
+  osres <- foreach(p = seq_len(nrow(mypairs)), .inorder = FALSE, .errorhandling = "stop") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
     EaCoN.OS.Process(ATChannelCel = mypairs$ATChannelCel[p], GCChannelCel = mypairs$GCChannelCel[p], samplename = mypairs$SampleName[p], ...)
   }
