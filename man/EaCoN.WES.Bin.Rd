@@ -3,8 +3,8 @@
 \title{Computes the read depth of a pair of BAM files and bins it.}
 \usage{
   EaCoN.WES.Bin(testBAM = NULL, refBAM = NULL, BINpack = NULL,
-  samplename = "SAMPLE", Q = 20, out.dir = getwd(),
-  return.data = FALSE)
+  samplename = "SAMPLE", Q = 20, nsubthread = 1, cluster.type = "PSOCK",
+  out.dir = getwd(), return.data = FALSE)
 }
 \arguments{
   \item{testBAM}{BAM file corresponding to the tested sample (typically a patient tumor sample).}
@@ -12,6 +12,8 @@
   \item{BINpack}{A data pack generated with \code{EaCoN.BINpack.Maker()} containing to a binned version of the capture BED used to generate the BAM files, and corresponding precomputed GC\% tracks.}
   \item{samplename}{The name of the sample.}
   \item{Q}{Minimum baseQ/BAQ quality score as defined by \code{samtools mpileup}.}
+  \item{nsubthread}{Number of subthreads for multithreading.}
+  \item{cluster.type}{Type of subthreading cluster (see \code{?parallel::makeCluster()}).}
   \item{out.dir}{Output directory.}
   \item{return.data}{Return the results.}
 }

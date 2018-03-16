@@ -2,11 +2,13 @@
 \alias{EaCoN.ASCN}
 \title{Allele-Specific Copy Number estimation using ASCAT.}
 \usage{
-  EaCoN.ASCN(data = NULL, gammaRange = c(.35,.95), out.dir = getwd())
+  EaCoN.ASCN(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, cluster.type = "PSOCK", out.dir = getwd())
 }
 \arguments{
   \item{data}{Data object contained in a RDS file generated with \code{EaCoN.Segment()} (or corresponding wrappers \code{EaCoN.Segment.ff()} and \code{EaCoN.Segment.ff.Batch()}.}
   \item{gammaRange}{The range of gamma values to assess the modelling of ASCN (see \code{?ASCAT::ascat.runAscat}).}
+  \item{nsubthread}{Number of subthreads for multithreading.}
+  \item{cluster.type}{Type of subthreading cluster (see \code{?parallel::makeCluster()}).}
   \item{out.dir}{Output directory.}
 }
 \description{

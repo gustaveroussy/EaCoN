@@ -1,7 +1,46 @@
 EaCoN
 -----
 
-v0.2.8 (20180119) *Krank*
+v0.2.12 (20180313) *FirstWave*
+--------------------
+* Added support for wave-effect renormalization (should work with all Affy arrays, but pre-computed data only available for hg19 build as of now).
+* Exported re-normalization procedure to a generic function (easier to maintain code across different array designs).
+* Consequently renamed the fit_functions.R script to renorm_functions.R.
+
+v0.2.11 (20180228) *Encore!*
+--------------------
+* Corrected interpretation/conversion of gender prediction by Affymetrix on SNP6 data.
+* Changed default gender for WES data from "XX" to "NA".
+* Removed call of EaCoN.ASCN from EaCoN.Segment. Now the two operations are strictly considered as different steps.
+* Added nsubthread to EaCoN.ASCN (to test multiple gammas in parallel).
+* Corrected variable typo in EaCoN.WES.Bin that made it fail at the coverage statistics computation.
+* Now the coverage plot is written at its expected position.
+
+v0.2.10 (20180220) *PapaPapi*
+-----------------
+* Added a BAF scaling routine (based on density of homozygous probes) to germline prediction function, in order to rescue unscaled BAF from some male rawcopy-normalized CSHD profiles.
+* Removed the "prior" parameter from Eacon.Segment (for germline prediction) : now forced to "G" (genomic).
+* Added missing "raw" plot (1st panel) for CytoScan and SNP6 arrays.
+* Hid the "solo" and "ldb" options from EaCoN::Annotate() help page (but still present for GR MP work).
+* Added an "autor.name" option to EaCoN::Annotate().
+* Fixed chr display in some tables in the HTML report.
+* Fixed meta name typo that made homozygous BAF segments not detected as such in HTML report plots.
+* Moved genomic length formatting in HTML report tables from pure R to DT::formatCurrency (should allow to restore sorting possibility lost with R formatting ?)
+
+v0.2.9 (20180213) *TumorBoost*
+-----------------
+* Added nsubthread parameter to slow WES functions, to allow multithreading at the chromosome level.
+* Added optional (recommended, active by default) BAF normalization using TumorBoost for WES data(as implemented in aroma.light).
+* Added coverage of bins and SNP positions for test and ref as QC for WES data. A new plot is generated for several minimum depth values.
+* Implementing universal chromosome names support for WES data (to avoid problems with non-canonical chr names like used in the TCGA data, by example) using BSgenome, and for microarray data too. Now, "chromosomes" is only required by EaCoN::Annotate() for plotting karyotypic view and per-chr plots.
+* Accordingly changed bits of code in plots to display 'new' chromosome names and discard reference chr not covered in the source design. Now chr names appear in tom-bottom flip-flop on genomic plots.
+* Again, modified the reporting parts of EaCoN::Annotate() to handle new chr structure.
+* Introduced a functionality of the ASCAT package to detect gaps based on a minimum size, implemented as the 'mingap' parameter un EaCoN.Segment(). This allows to avoid coverage of gaps like some human chr centromeres by segmentation. Default is 5 Mb.
+* Removed startup messages when running EaCoN.*.Process() functions.
+* Fixed PELT segmentation minimum segment length to 5 (to make it independant from the minsegLen parameter dedicated to germline prediction, which may have to be truly variable depending on the data source).
+* Corrected error that generated an ugly (though harmless) warning in EaCoN::EaCoN.ASCN() (under-dimensioned the NA-filled returned vector when ASCN failed, since adding more ploidy measurement methods).
+
+v0.2.8 (20180124) *Krank*
 -----------------
 * Corrected a damn error in WES binning routine, which changed bin order (bad sort from numerical to alphanumerical ...) !
 * Converted some messages in EaCoN.WES.Bin.Batch() that still did not use tmsg().
@@ -16,6 +55,9 @@ v0.2.8 (20180119) *Krank*
 * Added BSgenome.Hsapiens.1000genomes.hs37d5 to the list of valid genomes.
 * Added corresponding refGene table rdata (which is a simple spoof of hg19 with different chrom names).
 * Recompressed all refGene table rdata to xz.
+* Set a fixed seed (123456) for mclust section.
+* Fixed case in germline prediction where execution halted if no variant (thus, no BAF) exist for a chromosome.
+* Changed compression of all RDS files to xz (from bzip2) as on our data types we gain 30 to 50% at a cost of few seconds.
 
 v0.2.7 (20180109) *HappyNewYear*
 -----------------
