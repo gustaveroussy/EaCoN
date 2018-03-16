@@ -6,17 +6,19 @@ This function performs the normalization of a CEL file of Affymetrix GenomeWideS
 }
 \usage{
 EaCoN.SNP6.Process(CEL = NULL, samplename = NULL, l2r.level = "normal",
-renormalize = TRUE, renorm.rda = NULL, out.dir = getwd(),
-oschp.keep = TRUE, force.OS = NULL, apt.version = "1.20.0",
-apt.build = "na35.r1", genome.pkg = 
-"BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE)
+wave.renorm = TRUE, wave.renorm.rda = NULL, gc.renorm = TRUE,
+gc.renorm.rda = NULL, out.dir = getwd(), oschp.keep = TRUE,
+force.OS = NULL, apt.version = "1.20.0", apt.build = "na35.r1",
+genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE)
 }
 \arguments{
 \item{CEL}{A CEL file.}
 \item{samplename}{Name of the analyzed sample.}
 \item{l2r.level}{Type of log2(ratio) to extract : \code{'weighted'} or \code{'normal'}.}
-\item{renormalize}{Perform a GC-content re-normalization after APT processing.}
-\item{renorm.rda}{If \code{renormaize} set to \code{TRUE}, specifies the data package containing GC-content tracks. If \code{NULL}, a default one (included in the package) will be used.}
+\item{wave.renorm}{Perform a 'Wave-effect' re-normalization after APT processing.}
+\item{wave.renorm.rda}{If \code{wave.renorm} set to \code{TRUE}, specifies the data package containing GC-content tracks. If \code{NULL}, a default one (included in the \code{affy.CN.norm.data} package) will be used.}
+\item{gc.renorm}{Perform a 'GC-content' re-normalization after APT processing.}
+\item{gc.renorm.rda}{If \code{gc.renorm} set to \code{TRUE}, specifies the data package containing GC-content tracks. If \code{NULL}, a default one (included in the \code{affy.CN.norm.data} package) will be used.}
 \item{out.dir}{The path to output results.}
 \item{oschp.keep}{Keep the intermediate OSCHP (HDF5) file.}
 \item{force.OS}{Specifiy the OS type of the execution machine (see Details).}

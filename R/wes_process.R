@@ -144,7 +144,7 @@ EaCoN.WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplen
     species = GenomeInfoDb::organism(BSg.obj),
     genome = genome,
     genome.pkg = genome.pkg,
-    predicted.gender = "XX"
+    predicted.gender = "NA"
   )
   
   meta.w <- list(
@@ -266,7 +266,7 @@ EaCoN.WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplen
     # aroma.cn
     
   }
-  message("Stopping cluster ...")
+  # message("Stopping cluster ...")
   parallel::stopCluster(cl)
   
   message("Done.")
@@ -285,18 +285,26 @@ EaCoN.WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplen
   }
   rm(WESdata)
   
+  message(tmsg("Saving counts data ..."))
+  meta.w$RD.test.mean.summary <- as.vector(summary(CN$RD.test.mean))
+  meta.w$RD.ref.mean.summary <- as.vector(summary(CN$RD.ref.mean))
+  meta.w$BAF.RD.test.summary <- as.vector(summary(BAF$RD.test))
+  names(meta.w$BAF.RD.test.summary) <- names(meta.w$RD.test.mean.summary) <- names(meta.w$RD.ref.mean.summary) <- c("min", "q25", "median", "mean", "q75", "max")
+  WESobj <- list(RD = CN, SNP = BAF, meta = list(basic = meta.b, WES = meta.w))
+  rm(list = c("CN", "BAF"))
+  
   ## QC : Computing coverages
   message(tmsg("Computing coverages ..."))
-  gw.rd <- sum(data$RD$end - data$RD$start +1)
-  gw.snp <- nrow(data$SNP)
+  gw.rd <- sum(WESobj$RD$end - WESobj$RD$start +1)
+  gw.snp <- nrow(WESobj$SNP)
   rd.cov <- data.frame(cuts = c(1, 5, 10, 20, 30, 40, 50, 75, 100, 150, 200), stringsAsFactors = FALSE)
   rd.cov <- cbind(rd.cov, t(foreach::foreach(x = rd.cov$cuts, .combine = "cbind") %do% {
-    test.rd.in <- data$RD$RD.test.mean >= x
-    ref.rd.in <- data$RD$RD.ref.mean >= x
-    test.snprd.in <- data$SNP$RD.test >= x
-    ref.snprd.in <- data$SNP$RD.ref >= x
-    test.cut.cov <- if(!any(test.rd.in)) NA else (sum(data$RD$end[test.rd.in] - data$RD$start[test.rd.in] +1)/gw.rd)
-    ref.cut.cov <- if(!any(ref.rd.in)) NA else (sum(WESdata$RD$end[ref.rd.in] - data$RD$start[ref.rd.in] +1)/gw.rd)
+    test.rd.in <- WESobj$RD$RD.test.mean >= x
+    ref.rd.in <- WESobj$RD$RD.ref.mean >= x
+    test.snprd.in <- WESobj$SNP$RD.test >= x
+    ref.snprd.in <- WESobj$SNP$RD.ref >= x
+    test.cut.cov <- if(!any(test.rd.in)) NA else (sum(WESobj$RD$end[test.rd.in] - WESobj$RD$start[test.rd.in] +1)/gw.rd)
+    ref.cut.cov <- if(!any(ref.rd.in)) NA else (sum(WESobj$RD$end[ref.rd.in] - WESobj$RD$start[ref.rd.in] +1)/gw.rd)
     test.snpcut.cov <- if(!any(test.snprd.in)) NA else (length(which(test.snprd.in))/gw.snp)
     ref.snpcut.cov <- if(!any(ref.snprd.in)) NA else (length(which(ref.snprd.in))/gw.snp)
     return(c(test.cut.cov, ref.cut.cov, test.snpcut.cov, ref.snpcut.cov))
@@ -304,8 +312,9 @@ EaCoN.WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplen
   colnames(rd.cov) <- c("MinDepth", "TestBINCoverage", "RefBINCoverage", "TestBAFCoverage", "RefBAFCoverage")
   
   ## QC : Plotting coverages
-  png(paste0(out.dir, "/", samplename, "_WES_", data$meta$basic$genome, "_coverage.png"), 800, 640)
-  plot(rd.cov$MinDepth, rd.cov$TestBAFCoverage, type = "b", col = 2, lty = 3, pch = 20, main = paste0(data$meta$basic$samplename, "\nCoverage Plot"), xlab = "Minimum depth", ylab = "Coverage", ylim = c(0,1), xaxp = c(0,200,10))
+  dir.create(paste0(out.dir, "/", samplename))
+  png(paste0(out.dir, "/", samplename, "/", samplename, "_WES_", WESobj$meta$basic$genome, "_coverage.png"), 800, 640)
+  plot(rd.cov$MinDepth, rd.cov$TestBAFCoverage, type = "b", col = 2, lty = 3, pch = 20, main = paste0(WESobj$meta$basic$samplename, "\nCoverage Plot"), xlab = "Minimum depth", ylab = "Coverage", ylim = c(0,1), xaxp = c(0,200,10))
   abline(v = rd.cov$MinDepth, lty = 2, col = "grey75")
   abline(h = seq(0,1,.1), lty = 2, col = "grey75")
   lines(rd.cov$MinDepth, rd.cov$RefBAFCoverage, type = "b", col = 1, lty = 3, pch = 20)
@@ -316,13 +325,6 @@ EaCoN.WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplen
   dev.off()
   
   ## Saving
-  message(tmsg("Saving counts data ..."))
-  meta.w$RD.test.mean.summary <- as.vector(summary(CN$RD.test.mean))
-  meta.w$RD.ref.mean.summary <- as.vector(summary(CN$RD.ref.mean))
-  meta.w$BAF.RD.test.summary <- as.vector(summary(BAF$RD.test))
-  names(meta.w$BAF.RD.test.summary) <- names(meta.w$RD.test.mean.summary) <- names(meta.w$RD.ref.mean.summary) <- c("min", "q25", "median", "mean", "q75", "max")
-  WESobj <- list(RD = CN, SNP = BAF, meta = list(basic = meta.b, WES = meta.w))
-  dir.create(paste0(out.dir, "/", samplename))
   saveRDS(WESobj, file = paste0(out.dir, "/", samplename, "/", samplename, "_", genome, "_b", meta.w$bin.size, "_binned.RDS"), compress = "xz")
   if (return.data) return(WESobj)
 }
@@ -578,7 +580,7 @@ EaCoN.WES.Bin.Batch <- function(BAM.list.file = NULL, BINpack = NULL, nthread = 
   `%dopar%` <- foreach::"%dopar%"
   cl <- parallel::makeCluster(spec = nthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cl)
-  eacon.batchres <- foreach::foreach(r = seq_len(nrow(myBAMs)), .inorder = TRUE, .errorhandling = "remove") %dopar% {
+  eacon.batchres <- foreach::foreach(r = seq_len(nrow(myBAMs)), .inorder = TRUE, .errorhandling = "stop") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
     EaCoN.WES.Bin(testBAM = myBAMs$testBAM[r], refBAM = myBAMs$refBAM[r], BINpack = BINpack, samplename = myBAMs$SampleName[r], cluster.type = cluster.type, ...)
   }
@@ -1024,7 +1026,7 @@ EaCoN.WES.Normalize.ff.Batch <- function(BIN.RDS.files = list.files(path = getwd
   `%dopar%` <- foreach::"%dopar%"
   cl <- parallel::makeCluster(spec = nthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cl)
-  eacon.batchres <- foreach::foreach(r = seq_along(BIN.RDS.files), .inorder = TRUE, .errorhandling = "pass") %dopar% {
+  eacon.batchres <- foreach::foreach(r = seq_along(BIN.RDS.files), .inorder = TRUE, .errorhandling = "stop") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
     EaCoN.WES.Normalize.ff(BIN.RDS.file = BIN.RDS.files[r], ...)
   }

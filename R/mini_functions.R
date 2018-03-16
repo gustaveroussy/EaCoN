@@ -127,11 +127,11 @@ read.table.fast <- function(file = NULL, header = TRUE, sep= "\t", row.names = F
 }
 
 ## Function to load data from a HDF5 file, using rhdf5. Returns a list of tables.
-hdf5.load <- function (file = NULL) {
-  if (is.null(file)) stop("Please provide a HDF5 file !")
-  if (!file.exists(file)) stop("Provided HDF5 file does not exist !")
-  return(rhdf5::h5read(file = file, name = "/"))
-}
+# hdf5.load <- function (file = NULL) {
+#   if (is.null(file)) stop("Please provide a HDF5 file !")
+#   if (!file.exists(file)) stop("Provided HDF5 file does not exist !")
+#   return(rhdf5::h5read(file = file, name = "/"))
+# }
 
 ## Function to change global option "bitmapType" for PNG plotting on stations without X installed or launched
 EaCoN.set.bitmapType <- function(type = "cairo") {
@@ -155,3 +155,4 @@ chromobjector <- function(BSg = NULL) {
   chromobj$genome.length <- sum(as.numeric(chromobj$chromosomes$chr.length), na.rm = TRUE)
   return(chromobj)
 }
+

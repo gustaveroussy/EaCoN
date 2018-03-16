@@ -1,5 +1,5 @@
 ## Performs OS CEL pairs processing
-EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NULL, dual.norm = TRUE, l2r.level = "weighted", renormalize = TRUE, renorm.rda = NULL, out.dir = getwd(), oschp.keep = TRUE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r2", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE) {
+EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NULL, dual.norm = TRUE, l2r.level = "weighted", wave.renorm = TRUE, wave.renorm.rda = NULL, gc.renorm = TRUE, gc.renorm.rda = NULL, out.dir = getwd(), oschp.keep = TRUE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r2", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE) {
 
   # ## TEMP
   # setwd("/home/job/svn/genomics/CGH/R/00_PIPELINE/TEST_ZONE/OS")
@@ -10,18 +10,24 @@ EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplenam
   # out.dir = getwd()
   # temp.files.keep = FALSE
   # force.OS = NULL
-  # renormalize = TRUE
-  # renorm.rda <- NULL
+  # wave.renorm = TRUE
+  # wave.renorm.rda <- NULL
+  # gc.renorm = TRUE
+  # gc.renorm.rda <- NULL
   # l2r.level <- "normal"
   # temp.files.keep = FALSE
   # apt.build = "na33.r2"
   # apt.version = "2.4.0"
+  # require(foreach)
+  # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
 
   ## Early checks
   if (is.null(ATChannelCel)) stop(tmsg("An ATChannel CEL file is required !"))
   if (is.null(GCChannelCel)) stop(tmsg("A GCChannel CEL file is required !"))
   if (is.null(samplename)) stop(tmsg("A samplename is required !"))
-  if (renormalize) { if (!is.null(renorm.rda)) { if (!file.exists(renorm.rda)) stop(tmsg(paste0("Could not find renorm.rda file ", renorm.rda))) } }
+  if (gc.renorm) { if (!is.null(gc.renorm.rda)) { if (!file.exists(gc.renorm.rda)) stop(tmsg(paste0("Could not find gc.renorm.rda file ", gc.renorm.rda))) } }
+  if (wave.renorm) { if (!is.null(wave.renorm.rda)) { if (!file.exists(wave.renorm.rda)) stop(tmsg(paste0("Could not find wave.renorm.rda file ", wave.renorm.rda))) } }
   if(!file.exists(ATChannelCel)) stop(tmsg(paste0("Could not find ATChannelCel file ", ATChannelCel, " !")))
   if(!file.exists(GCChannelCel)) stop(paste0("Could not find GCChannelCel file ", GCChannelCel, " !"))
   if (ATChannelCel == GCChannelCel) stop(tmsg("ATChannelCel and GCChannelCel files are identical !"))
@@ -52,14 +58,10 @@ EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplenam
   ## Reading OSCHP
   my.oschp <- oschp.load(file = oscf)
   if (length(names(my.oschp$Meta)) == 3) names(my.oschp$Meta) <- c("ATChannelCel", "GCChannelCel", "analysis")
+  sex.chr <- c("chrX", "chrY")
 
 
   ## Processing : meta (and checks)
-  # meta.a1.df <- my.oschp[["Dset_IO_HDF5_Gdh"]][["_&keyvals"]][,1:2]
-  # meta.a1.df <- meta.a1.df[!duplicated(meta.a1.df$key),]
-  # meta.a1 <- meta.df2list(meta.a1.df)
-  # meta.a1[["L2R.level"]] <- l2r.level
-  # rm(meta.a1.df)
   if (!("affymetrix-chipsummary-snp-qc" %in% names(my.oschp$Meta$analysis))) my.oschp$Meta$analysis[["affymetrix-chipsummary-snp-qc"]] <- NA
   
   ### Loading genome info
@@ -78,29 +80,10 @@ EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplenam
   manufacturer <- getmeta("program-company", my.oschp$Meta$analysis)
   species <- getmeta("affymetrix-algorithm-param-genome-species", my.oschp$Meta$analysis)
   
-  gender.conv <- list("female" = "XX", "male" = "XY", "NA" = NA)
+  gender.conv <- list("female" = "XX", "male" = "XY", "NA" = "NA")
   pgender <- gender.conv[[(getmeta("affymetrix-chipsummary-Y-gender-call", my.oschp$Meta$analysis))]]
 
   if (!(arraytype %in% sup.array)) stop(tmsg(paste0("Unsupported array : '", arraytype, "' !")))
-  # meta.a2.A.df <- my.oschp[["Dset_IO_HDF5_Gdh"]][["Dset_IO_HDF5_Gdh:0"]][["Dset_IO_HDF5_Gdh:0:0"]][["_&keyvals"]][,1:2]
-  # meta.a2.C.df <- my.oschp[["Dset_IO_HDF5_Gdh"]][["Dset_IO_HDF5_Gdh:1"]][["Dset_IO_HDF5_Gdh:1:0"]][["_&keyvals"]][,1:2]
-  # meta.a3.A.df <- my.oschp[["Dset_IO_HDF5_Gdh"]][["Dset_IO_HDF5_Gdh:0"]][["Dset_IO_HDF5_Gdh:0:0"]][["Dset_IO_HDF5_Gdh:0:0:0"]][["_&keyvals"]][,1:2]
-  # meta.a3.C.df <- my.oschp[["Dset_IO_HDF5_Gdh"]][["Dset_IO_HDF5_Gdh:1"]][["Dset_IO_HDF5_Gdh:1:0"]][["Dset_IO_HDF5_Gdh:1:0:0"]][["_&keyvals"]][,1:2]
-  # meta.a2.A <- meta.df2list(meta.a2.A.df)
-  # rm(meta.a2.A.df)
-  # meta.a2.C <- meta.df2list(meta.a2.C.df)
-  # rm(meta.a2.C.df)
-  # meta.a3.A <- meta.df2list(meta.a3.A.df)
-  # rm(meta.a3.A.df)
-  # meta.a3.C <- meta.df2list(meta.a3.C.df)
-  # rm(meta.a3.C.df)
-
-  ## Reconstructing missing meta
-  # if (!"CEL1" %in% names(my.oschp$Meta)) {
-  #   datheader.split <- unlist(strsplit(x =  affxparser::readCelHeader(filename = CEL)$datheader, split = "\\s+"))
-  #   my.oschp$Meta$CEL1$acquisition <- list("affymetrix-scanner-id" = datheader.split[8], "affymetrix-scan-date" = paste0(datheader.split[6:7], collapse = " "))
-  #   my.oschp$Meta$CEL1$array <- list("affymetrix-array-id" = NA, "affymetrix-array-barcode" = NA)
-  # }
 
   meta.b <- list(
     samplename = samplename,
@@ -132,37 +115,115 @@ EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplenam
   ao.df$L2R.ori <- ao.df$L2R
 
   ## L2R renormalizations
+  # smo <- round(nrow(ao.df) / 550)
+  # if(smo%%2 == 0) smo <- smo+1
+  # if (renormalize) {
+  #   message(tmsg("Re-normalization ..."))
+  #   if (!is.null(renorm.rda)) {
+  #     load(renorm.rda, envir = environment())
+  #     gcd.arraytype <- GC.data$info$value[GC.data$info$key == "array_type"]
+  #     gcd.genome <- GC.data$info$value[GC.data$info$key == "genome-version"]
+  #     if ((gcd.arraytype != arraytype) | (gcd.genome != genome)) stop(tmsg(paste0("Provided renorm.rda is not compatible with currently analyzed sample : expected [", arraytype, ", ", genome, "], got [", gcd.arraytype, ", ", gcd.genome, "] !")))
+  #   } else {
+  #     GC.pkg.name <- "affy.CN.norm.data"
+  #     if (!(GC.pkg.name %in% installed.packages())) stop(paste0("Package ", GC.pkg.name, " not found !"))
+  #     GC.file <- system.file(paste0("data/", arraytype, ".", genome, ".GC.rda"), package = GC.pkg.name)
+  #     if (GC.file == "") stop(tmsg(paste0("Could not find a GC data package for [", arraytype, ", ", genome, "] in package '", GC.pkg.name, "' ! Please build your own GC data pack with ", GC.pkg.name, "::affy.gc.compute() and submit it using the 'GC.rda' option.")))
+  #     data(list = paste0(arraytype, ".", genome, ".GC"), package = GC.pkg.name, envir = environment())
+  #   }
+  #   gcdata <- GC.data$GC[GC.data$GC$ProbeSetName %in% rownames(ao.df),]
+  #   ao.df <- ao.df[rownames(ao.df) %in% gcdata$ProbeSetName,]
+  #   if (!all(unique(gcdata$ProbeSetName == rownames(ao.df)))) stop(tmsg("GC data and L2R data are not synched, or ordered differently !"))
+  #   ndata <- data.frame(chr = paste0("chr", ao.df$chrs), start = ao.df$pos, end = ao.df$pos, name = rownames(ao.df), gcdata[,-c(1:4)], stringsAsFactors = FALSE)
+  #   # ndata <- cbind(ndata, gcdata[,-c(1:4)])
+  #   rm(gcdata, GC.data)
+  #   my.rm.mad <- sum(abs(diff(as.numeric(runmed(ao.df$L2R[!is.na(ao.df$L2R)], smo)))))
+  #   normloop.res <- l2r.fitloop(l2rObj = list(l2r=ao.df$L2R, rm.mad = my.rm.mad), tfd = ndata, smo = smo)
+  #   ao.df$L2R <- normloop.res$l2r$l2r + median(ao.df$L2R, na.rm = TRUE)
+  #   # if(is.null(normloop.res$pos)) meta.df <- rbind(meta.df, c("a2p-renorm", "None")) else meta.df <- rbind(meta.df, c("a2p-renorm", paste0(normloop.res$pos, collapse = ",")))
+  #   if(is.null(normloop.res$pos)) meta.b <- setmeta("renorm", "None", meta.b) else meta.b <- setmeta("renorm", paste0(normloop.res$pos, collapse = ","), meta.b)
+  # } else {
+  #   meta.b <- setmeta("renorm", "FALSE", meta.b)
+  # }
+
+  ## L2R renormalizations
   smo <- round(nrow(ao.df) / 550)
   if(smo%%2 == 0) smo <- smo+1
-  if (renormalize) {
-    message(tmsg("Re-normalization ..."))
-    if (!is.null(renorm.rda)) {
-      load(renorm.rda, envir = environment())
-      gcd.arraytype <- GC.data$info$value[GC.data$info$key == "array_type"]
-      gcd.genome <- GC.data$info$value[GC.data$info$key == "genome-version"]
-      if ((gcd.arraytype != arraytype) | (gcd.genome != genome)) stop(tmsg(paste0("Provided renorm.rda is not compatible with currently analyzed sample : expected [", arraytype, ", ", genome, "], got [", gcd.arraytype, ", ", gcd.genome, "] !")))
+  
+  ### Wave  
+  if (wave.renorm) {
+    message(tmsg("Wave re-normalization ..."))
+    
+    ren.res <- renorm.go(input.data = ao.df, renorm.rda = wave.renorm.rda, track.type = "Wave", smo = smo, arraytype = arraytype, genome = genome)
+    
+    ao.df <- ren.res$data
+    fitted.l2r <- ren.res$renorm$l2r$l2r
+    
+    if(is.null(ren.res$renorm$pos)) {
+      meta.b <- setmeta("wave.renorm", "None", meta.b)
+      message(tmsg(" No positive fit."))
     } else {
-      GC.pkg.name <- "affy.CN.norm.data"
-      if (!(GC.pkg.name %in% installed.packages())) stop(paste0("Package ", GC.pkg.name, " not found !"))
-      GC.file <- system.file(paste0("data/", arraytype, ".", genome, ".GC.rda"), package = GC.pkg.name)
-      if (GC.file == "") stop(tmsg(paste0("Could not find a GC data package for [", arraytype, ", ", genome, "] in package '", GC.pkg.name, "' ! Please build your own GC data pack with ", GC.pkg.name, "::affy.gc.compute() and submit it using the 'GC.rda' option.")))
-      data(list = paste0(arraytype, ".", genome, ".GC"), package = GC.pkg.name, envir = environment())
+      ## Tweaking sex chromosomes
+      sex.idx <- ao.df$chr %in% sex.chr
+      auto.ori.med <- median(ao.df$L2R[!sex.idx], na.rm = TRUE)
+      auto.rn.med <- median(fitted.l2r[!sex.idx], na.rm = TRUE)
+      if (any(sex.idx)) {
+        for (k in sex.chr) {
+          k.idx <- ao.df$chr == k
+          if (any(k.idx)) {
+            k.ori.diffmed <- median(ao.df$L2R.ori[k.idx], na.rm = TRUE) - auto.ori.med
+            k.rn.diffmed <- median(fitted.l2r[k.idx], na.rm = TRUE) - auto.rn.med
+            fitted.l2r[k.idx] <- fitted.l2r[k.idx] - k.rn.diffmed + k.ori.diffmed
+          }
+        }
+      }
+      meta.b <- setmeta("wave.renorm", paste0(ren.res$mrenorm$pos, collapse = ","), meta.b)
     }
-    gcdata <- GC.data$GC[GC.data$GC$ProbeSetName %in% rownames(ao.df),]
-    ao.df <- ao.df[rownames(ao.df) %in% gcdata$ProbeSetName,]
-    if (!all(unique(gcdata$ProbeSetName == rownames(ao.df)))) stop(tmsg("GC data and L2R data are not synched, or ordered differently !"))
-    ndata <- data.frame(chr = paste0("chr", ao.df$chrs), start = ao.df$pos, end = ao.df$pos, name = rownames(ao.df), gcdata[,-c(1:4)], stringsAsFactors = FALSE)
-    # ndata <- cbind(ndata, gcdata[,-c(1:4)])
-    rm(gcdata, GC.data)
-    my.rm.mad <- sum(abs(diff(as.numeric(runmed(ao.df$L2R[!is.na(ao.df$L2R)], smo)))))
-    normloop.res <- l2r.fitloop(l2rObj = list(l2r=ao.df$L2R, rm.mad = my.rm.mad), tfd = ndata, smo = smo)
-    ao.df$L2R <- normloop.res$l2r$l2r + median(ao.df$L2R, na.rm = TRUE)
-    # if(is.null(normloop.res$pos)) meta.df <- rbind(meta.df, c("a2p-renorm", "None")) else meta.df <- rbind(meta.df, c("a2p-renorm", paste0(normloop.res$pos, collapse = ",")))
-    if(is.null(normloop.res$pos)) meta.b <- setmeta("renorm", "None", meta.b) else meta.b <- setmeta("renorm", paste0(normloop.res$pos, collapse = ","), meta.b)
+    rm(ren.res)
+    ao.df[["L2R.Wave"]] <- fitted.l2r - median(fitted.l2r, na.rm = TRUE)
+    ao.df$L2R <- ao.df[["L2R.Wave"]]
   } else {
-    meta.b <- setmeta("renorm", "FALSE", meta.b)
+    meta.b <- setmeta("wave.renorm", "FALSE", meta.b)
   }
-
+  
+  ### GC
+  if (gc.renorm) {
+    message(tmsg("GC renormalization ..."))
+    
+    ren.res <- renorm.go(input.data = ao.df, renorm.rda = gc.renorm.rda, track.type = "GC", smo = smo, arraytype = arraytype, genome = genome)
+    ao.df <- ren.res$data
+    fitted.l2r <- ren.res$renorm$l2r$l2r
+    
+    if(is.null(ren.res$renorm$pos)) {
+      meta.b <- setmeta("gc.renorm", "None", meta.b)
+      message(tmsg(" No positive fit."))
+    } else {
+      ## Tweaking sex chromosomes
+      sex.idx <- ao.df$chr %in% sex.chr
+      auto.ori.med <- median(ao.df$L2R[!sex.idx], na.rm = TRUE)
+      auto.rn.med <- median(fitted.l2r[!sex.idx], na.rm = TRUE)
+      if (any(sex.idx)) {
+        for (k in sex.chr) {
+          k.idx <- ao.df$chr == k
+          if (any(k.idx)) {
+            k.ori.diffmed <- median(ao.df$L2R.ori[k.idx], na.rm = TRUE) - auto.ori.med
+            k.rn.diffmed <- median(fitted.l2r[k.idx], na.rm = TRUE) - auto.rn.med
+            fitted.l2r[k.idx] <- fitted.l2r[k.idx] - k.rn.diffmed + k.ori.diffmed
+          }
+        }
+      }
+      meta.b <- setmeta("gc.renorm", paste0(ren.res$renorm$pos, collapse = ","), meta.b)
+    }
+    rm(ren.res)
+    ao.df[["L2R.GC"]] <- fitted.l2r - median(fitted.l2r, na.rm = TRUE)
+    ao.df$L2R <- ao.df[["L2R.GC"]]
+  } else {
+    meta.b <- setmeta("gc.renorm", "FALSE", meta.b)
+  }
+  
+  ## Rough median-centering of L2R
+  ao.df$L2R <- ao.df$L2R - median(ao.df$L2R, na.rm = TRUE)
+  
   ## Building ASCAT-like object
   message(tmsg("Building normalized object ..."))
   my.ch <- sapply(unique(ao.df$chrs), function(x) { which(ao.df$chrs == x) })
