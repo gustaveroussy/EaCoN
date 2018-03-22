@@ -32,6 +32,15 @@ EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplenam
   if(!file.exists(GCChannelCel)) stop(paste0("Could not find GCChannelCel file ", GCChannelCel, " !"))
   if (ATChannelCel == GCChannelCel) stop(tmsg("ATChannelCel and GCChannelCel files are identical !"))
 
+  l2r.lev.conv <- list("normal" = "Log2Ratio", "weighted" = "WeightedLog2Ratio")
+  if (!(l2r.level %in% names(l2r.lev.conv))) stop(tmsg("Option 'l2r.level' should be 'normal' or 'weighted' !"))
+  
+  ## Handling compressed files
+  CEL.OS <- compressed_handler(c(ATChannelCel, GCChannelCel))
+  ATChannelCel <- CEL.OS[1]
+  GCChannelCel <- CEL.OS[2]
+  
+  ## Secondary checks
   sup.array <- c("OncoScan", "OncoScan_CNV")
   arraytype.celA = affxparser::readCelHeader(filename = ATChannelCel)$chiptype
   arraytype.celC = affxparser::readCelHeader(filename = GCChannelCel)$chiptype
@@ -98,11 +107,13 @@ EaCoN.OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplenam
   )
 
   ## Extracting data : L2R
-  ao.df <- if (l2r.level == "normal") {
-    data.frame(chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R = as.vector(my.oschp$ProbeSets$CopyNumber$Log2Ratio), BAF = as.vector(my.oschp$ProbeSets$AllelicData$BAF), stringsAsFactors = FALSE)
-  } else if (l2r.level == "weighted") {
-    data.frame(chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R = as.vector(my.oschp$ProbeSets$CopyNumber$WeightedLog2Ratio), BAF = as.vector(my.oschp$ProbeSets$AllelicData$BAF), stringsAsFactors = FALSE)
-  } else stop(tmsg("Unrecognized value for [l2r.level] !"))
+  ao.df <- data.frame(chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R.ori = as.vector(my.oschp$ProbeSets$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), L2R = as.vector(my.oschp$ProbeSets$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), BAF = as.vector(my.oschp$ProbeSets$AllelicData$BAF), stringsAsFactors = FALSE)
+  data.frame(chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R = as.vector(my.oschp$ProbeSets$CopyNumber$Log2Ratio), BAF = as.vector(my.oschp$ProbeSets$AllelicData$BAF), stringsAsFactors = FALSE)
+  # ao.df <- if (l2r.level == "normal") {
+  #   data.frame(chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R = as.vector(my.oschp$ProbeSets$CopyNumber$Log2Ratio), BAF = as.vector(my.oschp$ProbeSets$AllelicData$BAF), stringsAsFactors = FALSE)
+  # } else if (l2r.level == "weighted") {
+  #   data.frame(chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R = as.vector(my.oschp$ProbeSets$CopyNumber$WeightedLog2Ratio), BAF = as.vector(my.oschp$ProbeSets$AllelicData$BAF), stringsAsFactors = FALSE)
+  # } else stop(tmsg("Unrecognized value for [l2r.level] !"))
   rownames(ao.df) <- my.oschp$ProbeSets$CopyNumber$ProbeSetName
   affy.chrom <- my.oschp$Chromosomes$Summary
   ak <- affy.chrom$Display

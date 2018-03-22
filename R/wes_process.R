@@ -1011,8 +1011,13 @@ EaCoN.WES.Normalize.OLD <- function(data = NULL, BINpack = NULL, L2R.RD.min.Ref 
 
 ## Runs EaCoN.WES.Normalize using a RDS filename
 EaCoN.WES.Normalize.ff <- function(BIN.RDS.file = NULL, ...) {
+  
+  ## CHECKS
   if (is.null(BIN.RDS.file)) stop(tmsg("An RDS file from EaCoN::EaCoN.WES.Bin is required !"))
   if (!file.exists(BIN.RDS.file)) stop(tmsg(paste0("Could not find ", BIN.RDS.file, " .")))
+  if (is.null(BINpack)) stop(tmsg("A BINpack file is required !"))
+  if (!file.exists(BINpack)) stop(tmsg("Could not find the BINpack file !"))
+  
   message(tmsg("Loading binned WES data ..."))
   my.data <- readRDS(BIN.RDS.file)
   EaCoN.WES.Normalize(data = my.data, out.dir = dirname(BIN.RDS.file), ...)

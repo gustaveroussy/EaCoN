@@ -156,3 +156,28 @@ chromobjector <- function(BSg = NULL) {
   return(chromobj)
 }
 
+
+## Handles GZ, BZ2 or ZIP -compressed CEL files
+compressed_handler <- function(CELz = NULL) {
+  `%do%` <- foreach::"%do%"
+  CELz2 <- foreach(CEL = CELz, .combine = "c") %do% {
+    tmsg(paste0("Decompressing ", CEL, " ..."))
+    if (tolower(tools::file_ext(CEL)) == "bz2") {
+      uncomp_file <- tempfile(fileext = ".CEL")
+      R.utils::bunzip2(filename = CEL, destname = uncomp_file, FUN = bzfile, remove = FALSE)
+      CEL <- uncomp_file
+    } else if (tolower(tools::file_ext(CEL)) == "gz") {
+      uncomp_file <- tempfile(fileext = ".CEL")
+      R.utils::gunzip(filename = CEL, destname = uncomp_file, FUN = gzfile, remove = FALSE)
+      CEL <- uncomp_file
+    } else if (tolower(tools::file_ext(CEL)) == "zip") {
+      zlist <- utils::unzip(CEL, list = TRUE)
+      if (length(grep(zlist$Name, pattern = "\\.CEL", ignore.case = TRUE)) != 1) stop(tmsg(paste0(CEL, "archive file does not contain a single and unique CEL file !")))
+      zname <- zlist$Name[1]
+      utils::unzip(zipfile = CEL, files = zname, exdir = tempdir(), overwrite = TRUE)
+      CEL <- file.path(tempdir(), zname)
+    } else if (tolower(tools::file_ext(CEL)) != "cel") stop(tmsg(paste0("File ", CEL, " is not recognized as raw nor compressed (gz, bz2, zip) CEL file !")))
+    return(CEL)
+  }
+  return(CELz2)
+}

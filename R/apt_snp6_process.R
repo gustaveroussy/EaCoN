@@ -35,7 +35,14 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
       stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
     }
   }
-
+  
+  l2r.lev.conv <- list("normal" = "Log2Ratio", "weighted" = "SmoothSignal")
+  if (!(l2r.level %in% names(l2r.lev.conv))) stop(tmsg("Option 'l2r.level' should be 'normal' or 'weighted' !"))
+  
+  ## Handling compressed files
+  CEL <- compressed_handler(CEL)
+  
+  ## Secondary checks
   sup.array <- c("GenomeWideSNP_6")
   arraytype.cel = affxparser::readCelHeader(filename = CEL)$chiptype
   if (!arraytype.cel %in% sup.array) stop(tmsg(paste0("Identified array type '", arraytype.cel, "' is not supported by this function !")))
@@ -57,7 +64,7 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   oscf <- apt.snp6.process(CEL = CEL, samplename = samplename, out.dir = out.dir, temp.files.keep = FALSE, force.OS = force.OS, apt.build = apt.build)
 
   ## Reading OSCHP
-  print(tmsg("Loading OSCHP file ..."))
+  message(tmsg("Loading OSCHP file ..."))
   my.oschp <- oschp.load(file = oscf)
   sex.chr <- c("chrX", "chrY")
   
@@ -108,11 +115,13 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   )
 
   ## Extracting data : L2R
-  if (l2r.level == "normal") {
-    ao.df <- data.frame(chrs = as.vector(my.oschp$MultiData$CopyNumber$Chromosome), pos = as.vector(my.oschp$MultiData$CopyNumber$Position), L2R.ori = as.vector(my.oschp$MultiData$CopyNumber$Log2Ratio), L2R = as.vector(my.oschp$MultiData$CopyNumber$Log2Ratio), BAF = NA, stringsAsFactors = FALSE)
-  } else if (l2r.level == "weighted") {
-    ao.df <- data.frame(chrs = as.vector(my.oschp$MultiData$CopyNumber$Chromosome), pos = as.vector(my.oschp$MultiData$CopyNumber$Position), L2R.ori = as.vector(my.oschp$MultiData$CopyNumber$SmoothSignal), L2R = as.vector(my.oschp$MultiData$CopyNumber$SmoothSignal), BAF = NA, stringsAsFactors = FALSE)
-  } else stop(tmsg("Unrecognized value for [l2r.level] !"))
+  
+  ao.df <- data.frame(chrs = as.vector(my.oschp$MultiData$CopyNumber$Chromosome), pos = as.vector(my.oschp$MultiData$CopyNumber$Position), L2R.ori = as.vector(my.oschp$MultiData$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), L2R = as.vector(my.oschp$MultiData$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), BAF = NA, stringsAsFactors = FALSE)
+  # if (l2r.level == "normal") {
+  #   ao.df <- data.frame(chrs = as.vector(my.oschp$MultiData$CopyNumber$Chromosome), pos = as.vector(my.oschp$MultiData$CopyNumber$Position), L2R.ori = as.vector(my.oschp$MultiData$CopyNumber$Log2Ratio), L2R = as.vector(my.oschp$MultiData$CopyNumber$Log2Ratio), BAF = NA, stringsAsFactors = FALSE)
+  # } else if (l2r.level == "weighted") {
+  #   ao.df <- data.frame(chrs = as.vector(my.oschp$MultiData$CopyNumber$Chromosome), pos = as.vector(my.oschp$MultiData$CopyNumber$Position), L2R.ori = as.vector(my.oschp$MultiData$CopyNumber$SmoothSignal), L2R = as.vector(my.oschp$MultiData$CopyNumber$SmoothSignal), BAF = NA, stringsAsFactors = FALSE)
+  # } else stop(tmsg("Unrecognized value for [l2r.level] !"))
   rownames(ao.df) <- my.oschp$MultiData$CopyNumber$ProbeSetName
   affy.chrom <- my.oschp$MultiData[["CopyNumber_&keyvals"]][seq.int(3, nrow(my.oschp$MultiData[["CopyNumber_&keyvals"]]), 3),1:2]
   ak <- affy.chrom$val
@@ -123,7 +132,7 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   ao.df <- ao.df[order(ao.df$chrN, ao.df$pos),]
 
   ## Normalizing SNPs
-  print(tmsg("Normalizing SNP data (using rcnorm) ..."))
+  message(tmsg("Normalizing SNP data (using rcnorm) ..."))
   baf.df <- rcnorm::rcnorm.snp(myCEL = CEL, genome = genome, allSNPs = FALSE)
   baf.df$chr <- paste0("chr", baf.df$chrs)
   baf.df$chrN <- unlist(cs$chrom2chr[baf.df$chr])
@@ -222,10 +231,11 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   ao.df$L2R <- ao.df$L2R - median(ao.df$L2R, na.rm = TRUE)
   
   ## Building ASCAT-like object
-  print(tmsg("Building normalized object ..."))
+  message(tmsg("Building normalized object ..."))
   my.ch <- sapply(unique(ao.df$chrs), function(x) { which(ao.df$chrs == x) })
   my.ascat.obj <- list(
     data = list(
+      # Tumor_LogR.ori = data.frame(sample = ao.df$L2R.ori, row.names = rownames(ao.df)),
       Tumor_LogR = data.frame(sample = ao.df$L2R, row.names = rownames(ao.df)),
       Tumor_BAF = data.frame(sample = ao.df$BAF, row.names = rownames(ao.df)),
       Tumor_LogR_segmented = NULL,
@@ -257,7 +267,7 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   saveRDS(my.ascat.obj, paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_processed.RDS"), compress = "xz")
 
   ## Rough plot
-  print(tmsg("Plotting ..."))
+  message(tmsg("Plotting ..."))
   ao.df$genopos <- ao.df$pos + cs$chromosomes$chr.length.toadd[ao.df$chrN]
   ao.df$L2R <- ao.df$L2R - median(ao.df$L2R, na.rm = TRUE)
   ao.df$L2R.ori <- ao.df$L2R.ori - median(ao.df$L2R.ori, na.rm = TRUE)
@@ -283,11 +293,11 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
 
   ## Cleaning
   if(!oschp.keep) {
-    print(tmsg("Removing temporary OSCHP file ..."))
+    message(tmsg("Removing temporary OSCHP file ..."))
     file.remove(oscf)
   }
 
-  print(tmsg("Done."))
+  message(tmsg("Done."))
   gc()
   if(return.data) return(my.ascat.obj)
 }
