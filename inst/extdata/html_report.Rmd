@@ -73,7 +73,8 @@ cat("<BR>\n<I>MAPD : Good < 0.20 ; Acceptable < 0.25<BR>SNPQC : Good >= 26<BR>Wa
 _Normalized, centered, segmented and called._
 
 ```{r genoplots, results='asis', fig.height = 10, fig.width = 15, fig.align="center", echo = FALSE}
-pdisp <- c("L2R + BAF", "L2R", "BAF", "Predicted Germline")
+# pdisp <- c("L2R + BAF", "L2R", "BAF", "Predicted Germline")
+pdisp <- c("L2R + BAF", "L2R", "BAF")
 for (p in c(1:length(pdisp))) {
   cat(paste0("\n## ", pdisp[p], "\n"))
   gpng <- gplotlist[p]

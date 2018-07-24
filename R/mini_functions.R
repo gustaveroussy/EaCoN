@@ -31,8 +31,7 @@ width.unit.conv <- function(coord = NULL, digits = 3) {
 
 get.mad <- function(val = NULL) {
   ad <- abs(diff(val))
-  ad <- ad[ad != 0]
-  return(stats::median(ad, na.rm = TRUE))
+  return(stats::median(ad[ad != 0], na.rm = TRUE))
 }
 
 get.valid.genomes <- function() {
@@ -95,7 +94,8 @@ oschp.load <- function(file = NULL) {
 
 fpaav <- Vectorize(tools::file_path_as_absolute)
 
-tmsg <- function(text = NULL) { return(paste0(text, " [", Sys.info()[['nodename']], ":", Sys.getpid(), "]")) }
+# tmsg <- function(text = NULL) { return(paste0(text, " [", Sys.info()[['nodename']], ":", Sys.getpid(), "]")) }
+tmsg <- function(text = NULL) { message(paste0(" [", Sys.info()[['nodename']], ":", Sys.getpid(), "] ", text)) }
 
 ## Vectorization of seq.default()
 seq.int2 <- Vectorize(seq.default, SIMPLIFY = FALSE)
@@ -156,3 +156,35 @@ chromobjector <- function(BSg = NULL) {
   return(chromobj)
 }
 
+
+## Handles GZ, BZ2 or ZIP -compressed CEL files
+compressed_handler <- function(CELz = NULL) {
+  `%do%` <- foreach::"%do%"
+  CELz2 <- foreach(CEL = CELz, .combine = "c") %do% {
+    tmsg(paste0("Decompressing ", CEL, " ..."))
+    if (tolower(tools::file_ext(CEL)) == "bz2") {
+      uncomp_file <- tempfile(fileext = ".CEL")
+      R.utils::bunzip2(filename = CEL, destname = uncomp_file, FUN = bzfile, remove = FALSE)
+      CEL <- uncomp_file
+    } else if (tolower(tools::file_ext(CEL)) == "gz") {
+      uncomp_file <- tempfile(fileext = ".CEL")
+      R.utils::gunzip(filename = CEL, destname = uncomp_file, FUN = gzfile, remove = FALSE)
+      CEL <- uncomp_file
+    } else if (tolower(tools::file_ext(CEL)) == "zip") {
+      zlist <- utils::unzip(CEL, list = TRUE)
+      if (length(grep(zlist$Name, pattern = "\\.CEL", ignore.case = TRUE)) != 1) stop(tmsg(paste0(CEL, "archive file does not contain a single and unique CEL file !")))
+      zname <- zlist$Name[1]
+      utils::unzip(zipfile = CEL, files = zname, exdir = tempdir(), overwrite = TRUE)
+      CEL <- file.path(tempdir(), zname)
+    } else if (tolower(tools::file_ext(CEL)) != "cel") stop(tmsg(paste0("File ", CEL, " is not recognized as raw nor compressed (gz, bz2, zip) CEL file !")))
+    return(CEL)
+  }
+  return(CELz2)
+}
+
+## Convert BAF to mBAF
+BAF2mBAF <- function(Bvalues = NULL) {
+  nona <- !is.na(Bvalues)
+  Bvalues[nona][Bvalues[nona] > .5] <- 1 - Bvalues[nona][Bvalues[nona] > .5]
+  return(Bvalues)
+}

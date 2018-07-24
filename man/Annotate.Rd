@@ -1,12 +1,12 @@
-\name{EaCoN.Annotate}
-\alias{EaCoN.Annotate}
+\name{Annotate}
+\alias{Annotate}
 \title{Annotation of segmented regions and generation of an HTML QC report}
 \usage{
-  EaCoN.Annotate(data = NULL, refGene.table = NULL, targets.table = NULL,
-  report = TRUE, author.name, out.dir = getwd())
+  Annotate(data = NULL, refGene.table = NULL, targets.table = NULL,
+  report = TRUE, author.name = "", out.dir = getwd())
 }
 \arguments{
-  \item{data}{Data object contained in a RDS file generated with \code{EaCoN.Segment()}..}
+  \item{data}{Data object contained in a RDS file generated with \code{Segment.ASCAT()}..}
   \item{refGene.table}{A table containing gene symbols. If \code{NULL} and \code{genome} set to "hg18", "hg19" or "hg38", a default list will be used.}
   \item{targets.table}{A table containing a selected list of gene symbols (typically, a list of drug-actionable genes). If \code{NULL} and \code{genome} set to "hg19", a default list of 475 cancer genes will be used.}
   \item{report}{Generate the HTML report.}

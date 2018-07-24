@@ -1,11 +1,11 @@
-\name{EaCoN.CS.Process.Batch}
-\alias{EaCoN.CS.Process.Batch}
-\title{Run EaCoN.CS.Process() in batch mode with multithreading}
+\name{CS.Process.Batch}
+\alias{CS.Process.Batch}
+\title{Run CS.Process() in batch mode with multithreading}
 \description{
-  This is just a wrapper to EaCoN.CS.Process() with multithreading.
+  This is just a wrapper to CS.Process() with multithreading.
 }
 \usage{
-  EaCoN.CS.Process.Batch(CEL.list.file = NULL, nthread = 1, cluster.type = "PSOCK", ...)
+  CS.Process.Batch(CEL.list.file = NULL, nthread = 1, cluster.type = "PSOCK", ...)
 }
 \arguments{
   \item{CEL.list.file}{A tab-separated file giving the file names of the CEL files and corresponding sample name (see Details section).}

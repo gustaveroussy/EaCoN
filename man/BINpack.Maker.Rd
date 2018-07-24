@@ -1,11 +1,11 @@
-\name{EaCoN.BINpack.Maker}
-\alias{EaCoN.BINpack.Maker}
+\name{BINpack.Maker}
+\alias{BINpack.Maker}
 \title{Generates a "BINpack" containing binned data and GC tracks from a capture BED file for WES data.}
 \usage{
-EaCoN.BINpack.Maker(bed.file = NULL, bin.size = 50,
-genome.pkg = "BSgenome.Hsapiens.UCSC.hg19",
-extend.multi = c(0, 50, 100, 200, 400, 800, 1600, 3200, 6400), blocksize = 1E+04,
-nthread = 1, out.dir = getwd(), return.data = FALSE)
+BINpack.Maker(bed.file = NULL, bin.size = 50, genome.pkg =
+"BSgenome.Hsapiens.UCSC.hg19", extend.multi = c(0, 50, 100, 200, 400, 800,
+1600, 3200, 6400), blocksize = 1E+04, nthread = 1, out.dir = getwd(),
+return.data = FALSE)
 }
 \arguments{
 \item{bed.file}{BED File corresponding to the captured genomic regions in the WES experiment (usually given by the manufacturer.}
@@ -25,7 +25,7 @@ A data pack (.rda) corresponding to the binned BED of captured regions with its 
 If \code{return.data} is set to \code{TRUE}, its content is also returned.
 }
 \details{
-Only genomes available in the \code{chomosomes} data package are compatible with this function.
+Before BED slicing in bins of specified size and GC\% computations, a cleaning of the BED is automaticaly performed, to fix some possible BED errors (inversed coordinates, duplicated or overlapping intervals, etc).
 }
 \author{
 Bastien Job

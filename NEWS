@@ -1,14 +1,52 @@
 EaCoN
 -----
 
-v0.2.12 (20180313) *FirstWave*
+v0.3.0 (20180620) *PapoQueen*
+-----------------
+* WES : Revamped the WES.bin() function to limit RAM consumption and maximize BAM files access when using subthreads.
+* WES : Almost completely rewrote the WES.Normalize() function :
+ - Better L2R normalization using simpler and finer filters.
+ - Incorporated the segregation of homo / hetero SNPs, using matched normal BAF.
+ - Added logOR heterozygosity expression for futher compatibility with the FACETS CBS-based bivariate segmenter.
+* Discarded the germline prediction from Segment.ASCAT(), now included in each ofthe *.Process() functions (to be more source-specific, mainly for WES).
+* All : Removed timestamped dir that made things tricky on some systems (I'm looking at you, Snakemake!)
+* All : Removed "EaCoN." prefix from most functions (less self-centric...)
+* All : Took care of vectors and columns that could be converted to factor or integer (to free some RAM up).
+* All : Added missing support for manual PELT penalty (only asymptotic mode was considered when SER.value was numeric).
+* SNP6 : Revamped BAF homozygous calling and rescaling.
+* Defined the novel sets of default parameters for all supported technologies.
+* Redacted the README.md
+
+v0.2.13 (20180531) *SunIsBack*
+------------------
+* WES : Added more data to the BIN  RDS output (counts with the reference genome nucleotide for both test and ref BAMs). This is in order to 1) filter out on a minimum alternative allele count 2) allow the use of other segmenters that do not rely on BAF but rather on AD (like PSCBS) or logOR (like FACETS).
+* Modified the subthreading scheme for EaCoN.WES.Bin() : now each subthread has its own connection to the BAM files. This allows each thread to work fully (but increases simultaneous IO).
+* Now each SNP variant has its corresponding bin index, which will allow to perform density-based selection like in FACETS.
+
+v0.2.12-3 (20180409) *VaricellaEnding*
 --------------------
+* Corrected BAF values error introduced with wave-effect normalization for WES data.
+* Now the WES normalization plots indicate good MAD / SSAD values !
+* Removed the EaCoN.WES.Process() wrapper that is not interesting anymore and problematic to update.
+
+v0.2.12-2 (20180322) *Origins*
+--------------------
+* Added the "raw" (ie, pre-re-normalized) l2r values in the processed.RDS object, to ease the computation of the wave data for WES.
+* Cleaned a bit of code.
+* Added support for the wave-effect normalization for WES data.
+
+v0.2.12-1 (20180319) *Decompress!*
+--------------------
+* Added support for gz, bz2 or zip -compressed CEL files (decompressed to TMPDIR).
+
+v0.2.12 (20180313) *FirstWave*
+------------------
 * Added support for wave-effect renormalization (should work with all Affy arrays, but pre-computed data only available for hg19 build as of now).
 * Exported re-normalization procedure to a generic function (easier to maintain code across different array designs).
 * Consequently renamed the fit_functions.R script to renorm_functions.R.
 
 v0.2.11 (20180228) *Encore!*
---------------------
+------------------
 * Corrected interpretation/conversion of gender prediction by Affymetrix on SNP6 data.
 * Changed default gender for WES data from "XX" to "NA".
 * Removed call of EaCoN.ASCN from EaCoN.Segment. Now the two operations are strictly considered as different steps.
@@ -17,7 +55,7 @@ v0.2.11 (20180228) *Encore!*
 * Now the coverage plot is written at its expected position.
 
 v0.2.10 (20180220) *PapaPapi*
------------------
+------------------
 * Added a BAF scaling routine (based on density of homozygous probes) to germline prediction function, in order to rescue unscaled BAF from some male rawcopy-normalized CSHD profiles.
 * Removed the "prior" parameter from Eacon.Segment (for germline prediction) : now forced to "G" (genomic).
 * Added missing "raw" plot (1st panel) for CytoScan and SNP6 arrays.

@@ -1,14 +1,67 @@
-EaCoN.BAF.Scaler <- function(ASCATobj = NULL, bafbin.size = 1E+07, toclustname = "BAF") {
+# EaCoN.BAF.Scaler.old <- function(ASCATobj = NULL, bafbin.size = 1E+07, toclustname = "BAF") {
+#   
+#   Homozygous = matrix(nrow = dim(ASCATobj$Tumor_LogR)[1], ncol = dim(ASCATobj$Tumor_LogR)[2])
+#   colnames(Homozygous) = colnames(ASCATobj$Tumor_LogR)
+#   rownames(Homozygous) = rownames(ASCATobj$Tumor_LogR)
+#   
+#   Tumor_BAF_noNA = ASCATobj$Tumor_BAF[!is.na(ASCATobj$Tumor_BAF[, 1]), 1]
+#   names(Tumor_BAF_noNA) = rownames(ASCATobj$Tumor_BAF)[!is.na(ASCATobj$Tumor_BAF[, 1])]
+#   Tumor_LogR_noNA = ASCATobj$Tumor_LogR[names(Tumor_BAF_noNA), 1]
+#   names(Tumor_LogR_noNA) <- names(Tumor_BAF_noNA)
+#   bafcdf <- data.frame(idx = seq_len(nrow(ASCATobj$Tumor_BAF)), ASCATobj$SNPpos, value = ASCATobj$Tumor_BAF[,1], stringsAsFactors = FALSE)
+#   tbsm <- bsm <- bafcdf$value
+#   tbsm[which(tbsm < 0)] <- -tbsm[which(tbsm < 0)]
+#   tbsm[which(tbsm > 1)] <- 2 - tbsm[which(tbsm > 1)]
+#   bsm <- ifelse(bsm < .5, bsm, 1 - bsm)
+#   if (toclustname == "BAF") bafcdf$value <- tbsm else if (toclustname == "mBAF") bafcdf$value <- bsm else stop(tmsg("Unknown toclustname value !"))
+#   bafcdf.nna <- bafcdf[!is.na(bafcdf$value),]
+#   
+#   `%do%` <- foreach::"%do%"
+#   scaledBAF <- foreach::foreach(k = unique(ASCATobj$SNPpos$chrs), .combine = "c") %do% {
+#     WESk <- bafcdf.nna[bafcdf.nna$chrs == k,]
+#     if(nrow(WESk) == 0) return(NULL)
+#     krange <- range(WESk$pos, na.rm = TRUE)
+#     binmax <- ceiling(diff(krange) / bafbin.size)
+#     
+#     ## Scaling
+#     scaledBAF.k <- foreach::foreach(bk = seq_len(binmax), .combine = "c") %do% {
+#       bleft <- krange[1] + (bafbin.size * (bk - 1))
+#       bright <- krange[1] + (bafbin.size * bk)
+#       inbk.full <- WESk$pos >= bleft & WESk$pos < bright
+#       
+#       if(!any(inbk.full)) return()
+#       BAFk.full <- WESk$value[inbk.full]
+#       
+#       if (length(BAFk.full) >= 100) {
+#         bafden <- density(BAFk.full, adjust = .5)
+#         lowedge <- bafden$x[bafden$x < .25][which(bafden$y[bafden$x < .25] == max(bafden$y[bafden$x < .25]))]
+#         highedge <- bafden$x[bafden$x > .75][which(bafden$y[bafden$x > .75] == max(bafden$y[bafden$x > .75]))]
+#         BAFk.full <- (BAFk.full / (highedge-lowedge)) - (lowedge/highedge)
+#       }
+#       return(BAFk.full)
+#     }
+#     bafcdf.nna$value[bafcdf.nna$chrs == k] <- scaledBAF.k
+#     return(bafcdf.nna$value[bafcdf.nna$chrs == k])
+#   }
+#   ASCATobj$Tumor_BAF_Unscaled <- ASCATobj$Tumor_BAF
+#   ASCATobj$Tumor_BAF[,1][!is.na(ASCATobj$Tumor_BAF[,1])] <- scaledBAF
+#   return(ASCATobj)
+# }
+
+
+## Rescale BAF
+BAF.Rescale <- function(data = NULL, bafbin.size = 1E+07, toclustname = "BAF", out.dir = getwd(), return.data = FALSE, write.data = TRUE) {
   
-  Homozygous = matrix(nrow = dim(ASCATobj$Tumor_LogR)[1], ncol = dim(ASCATobj$Tumor_LogR)[2])
-  colnames(Homozygous) = colnames(ASCATobj$Tumor_LogR)
-  rownames(Homozygous) = rownames(ASCATobj$Tumor_LogR)
+  if (is.null(data)) stop(tmsg("data is NULL"))
+  if (!is.null(data$data$Tumor_BAF_segmented)) stop(tmsg("BAF is already segmented : BAF.Rescale should be used on unsegmented data."))
+  if (!dir.exists(out.dir)) stop(tmsg("out.dir does not exist !"))
   
-  Tumor_BAF_noNA = ASCATobj$Tumor_BAF[!is.na(ASCATobj$Tumor_BAF[, 1]), 1]
-  names(Tumor_BAF_noNA) = rownames(ASCATobj$Tumor_BAF)[!is.na(ASCATobj$Tumor_BAF[, 1])]
-  Tumor_LogR_noNA = ASCATobj$Tumor_LogR[names(Tumor_BAF_noNA), 1]
+  tmsg("Rescaling BAF ...")
+  Tumor_BAF_noNA = data$data$Tumor_BAF[!is.na(data$data$Tumor_BAF[, 1]), 1]
+  names(Tumor_BAF_noNA) = rownames(data$data$Tumor_BAF)[!is.na(data$data$Tumor_BAF[, 1])]
+  Tumor_LogR_noNA = data$data$Tumor_LogR[names(Tumor_BAF_noNA), 1]
   names(Tumor_LogR_noNA) <- names(Tumor_BAF_noNA)
-  bafcdf <- data.frame(idx = seq_len(nrow(ASCATobj$Tumor_BAF)), ASCATobj$SNPpos, value = ASCATobj$Tumor_BAF[,1], stringsAsFactors = FALSE)
+  bafcdf <- data.frame(idx = seq_len(nrow(data$data$Tumor_BAF)), data$data$SNPpos, value = data$data$Tumor_BAF[,1], stringsAsFactors = FALSE)
   tbsm <- bsm <- bafcdf$value
   tbsm[which(tbsm < 0)] <- -tbsm[which(tbsm < 0)]
   tbsm[which(tbsm > 1)] <- 2 - tbsm[which(tbsm > 1)]
@@ -17,7 +70,7 @@ EaCoN.BAF.Scaler <- function(ASCATobj = NULL, bafbin.size = 1E+07, toclustname =
   bafcdf.nna <- bafcdf[!is.na(bafcdf$value),]
   
   `%do%` <- foreach::"%do%"
-  scaledBAF <- foreach::foreach(k = unique(ASCATobj$SNPpos$chrs), .combine = "c") %do% {
+  scaledBAF <- foreach::foreach(k = unique(data$data$SNPpos$chrs), .combine = "c") %do% {
     WESk <- bafcdf.nna[bafcdf.nna$chrs == k,]
     if(nrow(WESk) == 0) return(NULL)
     krange <- range(WESk$pos, na.rm = TRUE)
@@ -43,11 +96,40 @@ EaCoN.BAF.Scaler <- function(ASCATobj = NULL, bafbin.size = 1E+07, toclustname =
     bafcdf.nna$value[bafcdf.nna$chrs == k] <- scaledBAF.k
     return(bafcdf.nna$value[bafcdf.nna$chrs == k])
   }
-  ASCATobj$Tumor_BAF_Unscaled <- ASCATobj$Tumor_BAF
-  ASCATobj$Tumor_BAF[,1][!is.na(ASCATobj$Tumor_BAF[,1])] <- scaledBAF
-  return(ASCATobj)
+  data$data$Tumor_BAF_Unscaled <- data$data$Tumor_BAF
+  data$data$Tumor_BAF[,1][!is.na(data$data$Tumor_BAF[,1])] <- scaledBAF
+  data$meta$eacon$BAF.rescale <- "TRUE"
+  
+  if (return.data) return(data$data)
+  
+  ## Saving segmentation object
+  if (write.data) {
+    tmsg("Saving data ...")
+    saveRDS(data, paste0(out.dir, "/", data$meta$basic$samplename, "_", data$meta$basic$type, "_", data$meta$basic$genome, "_processed.RDS"), compress = "xz")
+  }
+  
+  tmsg("Done.")
 }
 
+## Rescale BAF
+
+BAF.Rescale.ff <- function(RDSfile = NULL, ...) {
+  if (is.null(RDS.file)) stop(tmsg("A RDS file is needed !"))
+  if (!file.exists(RDS.file)) stop(tmsg(paste0("Could not find RDS file ", RDS.file, " !")))
+  ## Data loading
+  tmsg(paste0("Loading data from ", RDS.file, " ..."))
+  my.data <- readRDS(RDS.file)
+  Segment.ASCAT(data = my.data, out.dir = dirname(RDS.file), ...)
+}
+
+Segment.ASCAT.ff <- function(RDS.file = NULL, ...) {
+  if (is.null(RDS.file)) stop(tmsg("A RDS file is needed !"))
+  if (!file.exists(RDS.file)) stop(tmsg(paste0("Could not find RDS file ", RDS.file, " !")))
+  ## Data loading
+  tmsg(paste0("Loading data from ", RDS.file, " ..."))
+  my.data <- readRDS(RDS.file)
+  Segment.ASCAT(data = my.data, out.dir = dirname(RDS.file), ...)
+}
 
 EaCoN.Predict.Germline <- function(ASCATobj = NULL, bafbin.size = 1E+07, modelName = "E", toclustname = "BAF", mc.G = 2:4, nfactor = 4, BAF.filter = .9, BAF.cutter = 0, segmentLength = 5, genome.pkg = "BSgenome.Hsapiens.UCSC.hg19") {
 
