@@ -1,4 +1,4 @@
-EaCoN.BedGC.fasta <- function(binned.bed.file = NULL, genome = "hg19", fasta = NULL, na.to0 = TRUE, nt.add = c(0,50,100, 250, 500, 1000, 2500, 5000), out.dir = getwd(), return.data = FALSE, nthread = 1) {
+BedGC.fasta <- function(binned.bed.file = NULL, genome = "hg19", fasta = NULL, na.to0 = TRUE, nt.add = c(0,50,100, 250, 500, 1000, 2500, 5000), out.dir = getwd(), return.data = FALSE, nthread = 1) {
 
   print("WARNING ! On hg19, this function consumes 3 GB per thread (to add to your current R session) !")
   print("When possible, prefer the BedGC.chr() function that performs the same task using sequences as single-chromosome FASTA files. This consumes only 0.3 GB of RAM per thread.")
@@ -64,7 +64,7 @@ EaCoN.BedGC.fasta <- function(binned.bed.file = NULL, genome = "hg19", fasta = N
   if(return.data) return(out.df) else return(NULL)
 }
 
-EaCoN.BedGC.fasta.chr <- function(binned.bed.file = NULL, genome = "hg19", fasta.dir = NULL, na.to0 = TRUE, nt.add = c(0,50,100, 250, 500, 1000, 2500, 5000), out.dir = getwd(), return.data = FALSE, nthread = 2) {
+BedGC.fasta.chr <- function(binned.bed.file = NULL, genome = "hg19", fasta.dir = NULL, na.to0 = TRUE, nt.add = c(0,50,100, 250, 500, 1000, 2500, 5000), out.dir = getwd(), return.data = FALSE, nthread = 2) {
 
   if (is.null(binned.bed.file)) stop("A BED file is required !")
   if (!file.exists(binned.bed.file)) stop("Could not find the BED file !")
@@ -141,7 +141,7 @@ EaCoN.BedGC.fasta.chr <- function(binned.bed.file = NULL, genome = "hg19", fasta
   return(cbind(bed.data, Agcpc))
 }
 
-EaCoN.BedGC.R <- function(binned.bed.file = NULL, human.genome.build = "hg19", na.to0 = TRUE, nt.add = c(0,50,100, 250, 500, 1000, 2500, 5000), out.dir = getwd(), return.data = FALSE, nthread = 1) {
+BedGC.R <- function(binned.bed.file = NULL, human.genome.build = "hg19", na.to0 = TRUE, nt.add = c(0,50,100, 250, 500, 1000, 2500, 5000), out.dir = getwd(), return.data = FALSE, nthread = 1) {
 
   print("WARNING ! On hg19, this function consumes 3 GB per thread (to add to your current R session) !")
   print("When possible, prefer the BedGC.chr() function that performs the same task using sequences as single-chromosome FASTA files. This consumes only 0.3 GB of RAM per thread.")
@@ -218,7 +218,7 @@ EaCoN.BedGC.R <- function(binned.bed.file = NULL, human.genome.build = "hg19", n
   if(return.data) return(out.df) else return(NULL)
 }
 
-EaCoN.BedCheck <- function(bed.file = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", out.dir = getwd(), return.data = FALSE) {
+BedCheck <- function(bed.file = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", out.dir = getwd(), return.data = FALSE) {
 
   if (is.null(bed.file)) stop("A BED file is required !")
   if (!file.exists(bed.file)) stop("Could not find the BED file !")
@@ -226,14 +226,14 @@ EaCoN.BedCheck <- function(bed.file = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC
     if (!file.exists(out.dir)) stop("Could not find the output directory !")
     if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !")
   }
-  print("Checking BED ...")
+  message("Checking BED ...")
   # data(list = genome, package = "chromosomes", envir = environment())
-  print(paste0("Loading ", genome.pkg, " ..."))
+  message(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   genome <- BSgenome::providerVersion(BSg.obj)
 
-  bed.data <- read.table(file = bed.file, header = FALSE, sep = "\t", comment.char = "#", stringsAsFactors = FALSE)
+  bed.data <- read.table(file = bed.file, header = FALSE, sep = "\t", comment.char = "#", stringsAsFactors = TRUE)
   if (ncol(bed.data) < 3) stop("BED file must contain at least 3 columns !")
   bed.data <- bed.data[,1:3]
 
@@ -243,25 +243,25 @@ EaCoN.BedCheck <- function(bed.file = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC
 
   myGR <- GenomicRanges::GRanges(bed.data)
 
-  print(" Removing inproper coordinates (start >= end) ...")
+  message(" Removing inproper coordinates (start >= end) ...")
   myGR <- myGR[!GenomicRanges::width(myGR) < 1,]
 
-  print(" Removing replicates ...")
+  message(" Removing replicates ...")
   myGR <- myGR[!GenomicRanges::duplicated(myGR),]
 
-  print(" Looking for overlaps ...")
+  message(" Looking for overlaps ...")
   myGR <- GenomicRanges::reduce(myGR)
 
-  print(" Sorting ...")
+  message(" Sorting ...")
   myGR <- GenomicRanges::sort(myGR)
 
   ## Converting GR back to df
   bed.data <- as.data.frame(myGR)
-  bed.data$seqnames <- as.character(bed.data$seqnames)
+  # bed.data$seqnames <- as.character(bed.data$seqnames)
   bed.data <- bed.data[,1:3]
 
   if (!return.data) {
-    print("Writing clean bed ...")
+    message("Writing clean bed ...")
     colnames(bed.data)[1] <- "#chr"
     outname <- paste0(out.dir, "/", sub(pattern = "\\.bed$", replacement = paste0("_", genome, "_merged_sorted.bed"), x = basename(bed.file), ignore.case = TRUE))
     write.table.fast(x = bed.data, file = outname)
@@ -269,7 +269,7 @@ EaCoN.BedCheck <- function(bed.file = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC
 
   colnames(bed.data)[1] <- "chr"
 
-  print("Done.")
+  message("Done.")
   if(return.data) return(bed.data)
 }
 

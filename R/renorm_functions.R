@@ -7,7 +7,7 @@ l2r.fitloop <- function(l2rObj, tfd, smo = 399, method = "loess") {
   b <- ncol(minitf)+1
   posfit <- c()
   
-  message(tmsg(paste0("Init (", l2rObj$rm.mad, ")")))
+  tmsg(paste0("Init (", l2rObj$rm.mad, ")"))
   
   while ( (b != 1) & (ncol(minitf) != 0) ) {
     
@@ -23,7 +23,7 @@ l2r.fitloop <- function(l2rObj, tfd, smo = 399, method = "loess") {
     }
     b <- which.min(rmtest)
     if (b > 1) {
-      message(tmsg(paste0(" Positive fit with ", tfheads[b-1], " (", min(rmtest), ")")))
+      tmsg(paste0(" Positive fit with ", tfheads[b-1], " (", min(rmtest), ")"))
       posfit <- c(posfit, tfheads[b-1])
       l2rObj <- biggy[[b]]
       minitf <- as.data.frame(minitf[,-c(b-1)])
@@ -37,14 +37,16 @@ l2r.fitloop <- function(l2rObj, tfd, smo = 399, method = "loess") {
 l2r.fit <- function(l2r, tf, smo) {
   l2fN <- limma::loessFit(l2r, tf)
   l2N <- l2r-l2fN$fitted
-  Nrmspread <- sum(abs(diff(as.numeric(runmed(l2N[!is.na(l2N)], smo)))))
+  rm.diff <- diff(as.numeric(runmed(l2N[!is.na(l2N)], smo)))
+  Nrmspread <- sum(abs(rm.diff[rm.diff != 0]))
   return(list(l2r=l2N, rm.mad=Nrmspread))
 }
 
 ## FONCTION PERCENTILE SCALING
 l2r.pcs <- function(l2r, tf, smo) {
   l2N <- GCnorm.pcs(l2r, tf)
-  Nrmspread <- sum(abs(diff(as.numeric(runmed(l2N[!is.na(l2N)], smo)))))
+  rm.diff <- diff(as.numeric(runmed(l2N[!is.na(l2N)], smo)))
+  Nrmspread <- sum(abs(rm.diff[rm.diff != 0]))
   return(list(l2r=l2N, rm.mad=Nrmspread))
 }
 
@@ -77,15 +79,18 @@ renorm.go <- function(input.data = NULL, renorm.rda = NULL, track.type = "GC", s
   }
   # print(str(RNdata))
   # print(str(rownames(input.data)))
-  RNdata <- renorm.data$tracks[renorm.data$tracks$ProbeSetName %in% rownames(input.data),]
-  input.data <- input.data[rownames(input.data) %in% RNdata$ProbeSetName,]
+  RNdata <- renorm.data$tracks[renorm.data$tracks$ProbeSetName %in% input.data$ProbeSetName,]
+  input.data <- input.data[input.data$ProbeSetName %in% RNdata$ProbeSetName,]
   # print(str(input.data))
-  if (!all(unique(RNdata$ProbeSetName == rownames(input.data)))) stop(tmsg(paste0(track.type, " data and L2R data are not synched, or ordered differently !")))
+  if (!all(unique(RNdata$ProbeSetName == input.data$ProbeSetName))) stop(tmsg(paste0(track.type, " data and L2R data are not synched, or ordered differently !")))
   # ndata <- data.frame(chr = paste0("chr", input.data$chrs), start = input.data$pos, end = input.data$pos, name = rownames(input.data), RNdata[,-c(1:4), drop = FALSE], stringsAsFactors = FALSE)
-  ndata <- data.frame(chr = input.data$chr, start = input.data$pos, end = input.data$pos, name = rownames(input.data), RNdata[,-c(1:4), drop = FALSE], stringsAsFactors = FALSE)
+  ndata <- data.frame(chr = input.data$chr, start = input.data$pos, end = input.data$pos, name = input.data$ProbeSetName, RNdata[,-c(1:4), drop = FALSE], stringsAsFactors = FALSE)
   rm(RNdata, renorm.data)
   # print(str(ndata))
-  my.rm.mad <- sum(abs(diff(as.numeric(runmed(input.data$L2R[!is.na(input.data$L2R)], smo)))))
+  rm.diff <- diff(as.numeric(runmed(input.data$L2R[!is.na(input.data$L2R)], smo)))
+  my.rm.mad <- sum(abs(rm.diff[rm.diff != 0]))
+  # print(paste0("RMMAD ", my.rm.mad))
+  # print(paste0(summary(my.rm.mad)))
   normloop.res <- list(data = input.data, renorm = l2r.fitloop(l2rObj = list(l2r=input.data$L2R, rm.mad = my.rm.mad), tfd = ndata, smo = smo))
   
   return(normloop.res)

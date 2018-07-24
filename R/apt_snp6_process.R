@@ -1,14 +1,15 @@
 ## Performs CS CEL processing
-EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", wave.renorm = TRUE, wave.renorm.rda = NULL, gc.renorm = TRUE, gc.renorm.rda = NULL, out.dir = getwd(), oschp.keep = TRUE, force.OS = NULL, apt.version = "1.20.0", apt.build = "na35.r1", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE) {
+SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", gc.renorm = TRUE, gc.rda = NULL, wave.renorm = TRUE, wave.rda = NULL, mingap = 1E+06, out.dir = getwd(), oschp.keep = FALSE, force.OS = NULL, apt.version = "1.20.0", apt.build = "na35.r1", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
 
-  # setwd("/home/job/WORKSPACE/MP/SNP6")
-  # CEL <- "/home/job/WORKSPACE/MP/SNP6/AMAZE_p_TCGASNP_b86_87_88_N_GenomeWideSNP_6_H02_735486.CEL"
-  # samplename <- "AMAZE_p_TCGASNP_b86_87_88_N_GenomeWideSNP_6_H02_735486"
+  # setwd("/home/job/WORKSPACE/EaCoN_tests/SNP6")
+  # CEL <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/DATA/AFFY_SNP6/PRIMARY/BRCA/BITES_p_TCGAb61_SNP_S_GenomeWideSNP_6_E08_697096.CEL.bz2"
+  # samplename <- "BITES_TEST"
   # l2r.level <- "normal"
   # wave.renorm <- TRUE
-  # wave.renorm.rda <- NULL
+  # wave.rda <- NULL
   # gc.renorm <- TRUE
-  # gc.renorm.rda <- NULL
+  # gc.rda <- NULL
+  # mingap <- 1E+06
   # out.dir <- getwd()
   # oschp.keep <- TRUE
   # force.OS <- NULL
@@ -16,6 +17,9 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   # apt.build <- "na35.r1"
   # genome.pkg <- "BSgenome.Hsapiens.UCSC.hg19"
   # return.data <- FALSE
+  # write.data <- TRUE
+  # plot <- TRUE
+  # force <- FALSE
   # require(foreach)
   # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
@@ -25,8 +29,8 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   if (is.null(CEL)) stop(tmsg("A CEL file is required !"))
   if (is.null(samplename)) stop(tmsg("A samplename is required !"))
   if (!file.exists(CEL)) stop(tmsg(paste0("Could not find CEL file ", CEL, " !")))
-  if (gc.renorm) { if (!is.null(gc.renorm.rda)) { if (!file.exists(gc.renorm.rda)) stop(tmsg(paste0("Could not find gc.renorm.rda file ", gc.renorm.rda))) } }
-  if (wave.renorm) { if (!is.null(wave.renorm.rda)) { if (!file.exists(wave.renorm.rda)) stop(tmsg(paste0("Could not find wave.renorm.rda file ", wave.renorm.rda))) } }
+  if (gc.renorm) { if (!is.null(gc.rda)) { if (!file.exists(gc.rda)) stop(tmsg(paste0("Could not find gc.rda file ", gc.rda))) } }
+  if (wave.renorm) { if (!is.null(wave.rda)) { if (!file.exists(wave.rda)) stop(tmsg(paste0("Could not find wave.rda file ", wave.rda))) } }
   if (is.null(genome.pkg)) stop(tmsg("A BSgenome package name is required !"))
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
@@ -35,6 +39,7 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
       stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
     }
   }
+  if (dir.exists(samplename)) { if (!force) stop(tmsg(paste0("A [", samplename, '] dir already exists !'))) else unlink(samplename, recursive = TRUE, force = FALSE) }
   
   l2r.lev.conv <- list("normal" = "Log2Ratio", "weighted" = "SmoothSignal")
   if (!(l2r.level %in% names(l2r.lev.conv))) stop(tmsg("Option 'l2r.level' should be 'normal' or 'weighted' !"))
@@ -64,20 +69,21 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   oscf <- apt.snp6.process(CEL = CEL, samplename = samplename, out.dir = out.dir, temp.files.keep = FALSE, force.OS = force.OS, apt.build = apt.build)
 
   ## Reading OSCHP
-  message(tmsg("Loading OSCHP file ..."))
+  # tmsg("Loading OSCHP file ...")
   my.oschp <- oschp.load(file = oscf)
   sex.chr <- c("chrX", "chrY")
   
+  ## Processing : meta (and checks)
+  if (!("affymetrix-chipsummary-snp-qc" %in% names(my.oschp$Meta$analysis))) my.oschp$Meta$analysis[["affymetrix-chipsummary-snp-qc"]] <- NA
+  
   ### Loading genome info
-  message(paste0("Loading ", genome.pkg, " ..."))
+  tmsg(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   genome2 <- BSgenome::providerVersion(BSg.obj)
   cs <- chromobjector(BSg.obj)
   
-  ## Processing : meta (and checks)
-  if (!("affymetrix-chipsummary-snp-qc" %in% names(my.oschp$Meta$analysis))) my.oschp$Meta$analysis[["affymetrix-chipsummary-snp-qc"]] <- NA
-
+  
   ### Getting basic meta
   genome <- getmeta("affymetrix-algorithm-param-genome-version", my.oschp$Meta$analysis)
   if (genome != genome2) stop(tmsg(paste0("Genome build name given with BSgenome package '", genome.pkg, "', (", genome2, ") is different from the genome build specified by provided APT build version '", apt.build, "' (", genome, ") !")))
@@ -115,59 +121,168 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   )
 
   ## Extracting data : L2R
-  
-  ao.df <- data.frame(chrs = as.vector(my.oschp$MultiData$CopyNumber$Chromosome), pos = as.vector(my.oschp$MultiData$CopyNumber$Position), L2R.ori = as.vector(my.oschp$MultiData$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), L2R = as.vector(my.oschp$MultiData$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), BAF = NA, stringsAsFactors = FALSE)
-  # if (l2r.level == "normal") {
-  #   ao.df <- data.frame(chrs = as.vector(my.oschp$MultiData$CopyNumber$Chromosome), pos = as.vector(my.oschp$MultiData$CopyNumber$Position), L2R.ori = as.vector(my.oschp$MultiData$CopyNumber$Log2Ratio), L2R = as.vector(my.oschp$MultiData$CopyNumber$Log2Ratio), BAF = NA, stringsAsFactors = FALSE)
-  # } else if (l2r.level == "weighted") {
-  #   ao.df <- data.frame(chrs = as.vector(my.oschp$MultiData$CopyNumber$Chromosome), pos = as.vector(my.oschp$MultiData$CopyNumber$Position), L2R.ori = as.vector(my.oschp$MultiData$CopyNumber$SmoothSignal), L2R = as.vector(my.oschp$MultiData$CopyNumber$SmoothSignal), BAF = NA, stringsAsFactors = FALSE)
-  # } else stop(tmsg("Unrecognized value for [l2r.level] !"))
-  rownames(ao.df) <- my.oschp$MultiData$CopyNumber$ProbeSetName
+  ao.df <- dplyr::as.tbl(data.frame(my.oschp$MultiData$CopyNumber[,c(2:4)], L2R.ori = as.vector(my.oschp$MultiData$CopyNumber[[l2r.lev.conv[[l2r.level]]]])))
+  affy.meta <- my.oschp$Meta
   affy.chrom <- my.oschp$MultiData[["CopyNumber_&keyvals"]][seq.int(3, nrow(my.oschp$MultiData[["CopyNumber_&keyvals"]]), 3),1:2]
+  ao.df$L2R <- ao.df$L2R.ori
   ak <- affy.chrom$val
   names(ak) <- as.numeric(sub(":display", "", affy.chrom$key))
-  ao.df$chrA <- as.vector(ak[as.character(ao.df$chrs)])
+  ao.df$chrA <- as.vector(ak[as.character(ao.df$Chromosome)])
   ao.df$chr <- paste0("chr", ao.df$chrA)
   ao.df$chrN <- unlist(cs$chrom2chr[ao.df$chr])
-  ao.df <- ao.df[order(ao.df$chrN, ao.df$pos),]
+  
+  # ao.df <- data.frame(chrs = as.vector(my.oschp$MultiData$CopyNumber$Chromosome), pos = as.vector(my.oschp$MultiData$CopyNumber$Position), L2R.ori = as.vector(my.oschp$MultiData$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), L2R = as.vector(my.oschp$MultiData$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), BAF = NA, stringsAsFactors = FALSE)
+  # rownames(ao.df) <- my.oschp$MultiData$CopyNumber$ProbeSetName
+  # affy.chrom <- my.oschp$MultiData[["CopyNumber_&keyvals"]][seq.int(3, nrow(my.oschp$MultiData[["CopyNumber_&keyvals"]]), 3),1:2]
+  # ak <- affy.chrom$val
+  # names(ak) <- as.numeric(sub(":display", "", affy.chrom$key))
+  # ao.df$chrA <- as.vector(ak[as.character(ao.df$chrs)])
+  # ao.df$chr <- paste0("chr", ao.df$chrA)
+  # ao.df$chrN <- unlist(cs$chrom2chr[ao.df$chr])
+  # ao.df <- ao.df[order(ao.df$chrN, ao.df$pos),]
 
   ## Normalizing SNPs
-  message(tmsg("Normalizing SNP data (using rcnorm) ..."))
+  tmsg("Normalizing SNP data (using rcnorm) ...")
   baf.df <- rcnorm::rcnorm.snp(myCEL = CEL, genome = genome, allSNPs = FALSE)
   baf.df$chr <- paste0("chr", baf.df$chrs)
   baf.df$chrN <- unlist(cs$chrom2chr[baf.df$chr])
   baf.df <- baf.df[order(baf.df$chrN, baf.df$pos),]
   baf.df <- baf.df[!is.na(baf.df$BAF),]
   gc()
-
-  # ## Merging L2R and BAF data
-  ao.df <- ao.df[order(rownames(ao.df)),]
-  baf.df <- baf.df[order(rownames(baf.df)),]
-  bina <- which(rownames(baf.df) %in% rownames(ao.df))
-  ainb <- which(rownames(ao.df) %in% rownames(baf.df))
-  if(!all(rownames(ao.df)[ainb] == rownames(baf.df)[bina])) stop(tmsg("Could not synch L2R and (rcnorm-processed) BAF data !"))
-  ao.df$BAF[ainb] <- baf.df$BAF[bina]
-  ao.df <- ao.df[order(ao.df$chrN, ao.df$pos, rownames(ao.df)),]
+  
+  ao.df <- suppressWarnings(Reduce(function(t1, t2) dplyr::left_join(t1, t2, by = "ProbeSetName"), list(ao.df, dplyr::as.tbl(data.frame(ProbeSetName = rownames(baf.df), BAF.ori = baf.df$BAF, BAF = baf.df$BAF)), dplyr::as.tbl(my.oschp$MultiData$CopyNumber[,c(2,9)]))))
+  rm(my.oschp, baf.df)
+  gc()
+  
+  ao.df <- dplyr::arrange(ao.df, chrN, Position, ProbeSetName)
+  colnames(ao.df)[3] <- "pos"
+  
+  ## Merging L2R and BAF data
+  # ao.df <- ao.df[order(rownames(ao.df)),]
+  # baf.df <- baf.df[order(rownames(baf.df)),]
+  # bina <- which(rownames(baf.df) %in% rownames(ao.df))
+  # ainb <- which(rownames(ao.df) %in% rownames(baf.df))
+  # if(!all(rownames(ao.df)[ainb] == rownames(baf.df)[bina])) stop(tmsg("Could not synch L2R and (rcnorm-processed) BAF data !"))
+  # ao.df$BAF[ainb] <- baf.df$BAF[bina]
+  # ao.df <- ao.df[order(ao.df$chrN, ao.df$pos, rownames(ao.df)),]
 
   # ao.df <- ao.df[!duplicated(ao.df$pos),]
   ao.df <- ao.df[!(is.na(ao.df$L2R) & is.na(ao.df$BAF)),]
+  
+  
+  ######################
+  ######################
+  ##### WAR ZONE ! #####
+  ######################
+  ######################
+  
+  ########################
+  ## Segmentation-based ##
+  ########################
+  minseglen <- 50
+  # nna <- !is.na(ao.df$BAF)
+  nna <- !is.na(ao.df$BAF) & !is.na(ao.df[["Allele Difference"]])
+  ao.df$mBAF <- BAF2mBAF(ao.df$BAF)
+  # str(peltres <- changepoint::cpt.meanvar(ao.df$mBAF[nna], penalty = "MBIC", method = "PELT", minseglen = minseglen)@cpts)
+  peltres <- changepoint::cpt.var(ao.df[["Allele Difference"]][nna], penalty = "BIC", method = "PELT", minseglen = minseglen)@cpts
+  
+  ## Refining with chr ends
+  kends <- vapply(unique(ao.df$chrN[nna]), function(k) { max(which(ao.df$chrN[nna] == k))}, 1L)
+  peltres <- sort(unique(c(peltres, kends)))
+  prdiff <- diff(peltres)
+  toremove <- vector()
+  if (any(prdiff < 50)) {
+    for (b in which(prdiff < 50)) {
+      if (peltres[b+1] %in% kends) toremove <- c(toremove, b) else toremove <- c(toremove, b+1)
+    }
+    peltres <- peltres[-toremove]
+  }
+  
+  # plot(ao.df$BAF[nna], pch = ".", xaxs = "i", ylim = c(0,1))
+  # abline(v=peltres, col = 2)
+  
+  ## Clustering BAF segments
+  bs.end <- peltres
+  bs.start <- c(1, peltres[-length(peltres)]+1)
+  
+  ao.df$cluster <- NA
+  ao.df$uni <- FALSE
+  suppressPackageStartupMessages(require(mclust))
+  mc.G <- 4
+  mc.mN <- "E"
+  smeds <- hrates <- vector()
+  for(i in seq_along(bs.start)) {
+    mcresBIC <- mclust::mclustBIC(data = ao.df$BAF[nna][bs.start[i]:bs.end[i]], G = mc.G, modelNames = mc.mN, verbose = FALSE)
+    mcres <- mclust::Mclust(data = ao.df$BAF[nna][bs.start[i]:bs.end[i]], G = mc.G, modelNames = mc.mN, verbose = FALSE, x = mcresBIC)$classification
+    ao.df$cluster[nna][bs.start[i]:bs.end[i]] <- mcres
+    if (length(unique(mcres)) == 2) ao.df$uni[nna][bs.start[i]:bs.end[i]] <- TRUE
+    smeds <- c(smeds, median(ao.df$mBAF[nna][bs.start[i]:bs.end[i]][!mcres %in% c(1,4)], na.rm = TRUE))
+    hrates <- c(hrates, length(which(!mcres %in% c(1,4))) / length(mcres))
+  }
+  # plot(ao.df$BAF[nna], col = ao.df$cluster[nna], pch = ".", xaxs = "i", ylim = c(0,1))
+  # abline(v=peltres)
+  
+  ## Rescaling
+  tmsg("Rescaling BAF ...")
+  ao.df$BAF.unscaled <- ao.df$BAF
+  for(i in seq_along(bs.start)) {
+    lmed <- median(ao.df$BAF.unscaled[nna][bs.start[i]:bs.end[i]][ao.df$cluster[nna][bs.start[i]:bs.end[i]] == 1], na.rm = TRUE)
+    umed <- median(ao.df$BAF.unscaled[nna][bs.start[i]:bs.end[i]][ao.df$cluster[nna][bs.start[i]:bs.end[i]] == 4], na.rm = TRUE)
+    ao.df$BAF[nna][bs.start[i]:bs.end[i]] <- (lmed - ao.df$BAF[nna][bs.start[i]:bs.end[i]]) / (lmed - umed)
+  }
+  ao.df$mBAF <- BAF2mBAF(ao.df$BAF)
+  
+  png(paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_hrates.png"), 1600, 1050)
+  par(mfrow = c(2,1))
+  plot(ao.df$BAF[nna], col = ao.df$cluster[nna], pch = ".", xaxs = "i", ylim = c(0,1))
+  abline(v=peltres)
+  plot(density(hrates[smeds > .45]))
+  dev.off()
+  
+  # length(which(hrates < .2 & smeds < .45))
+  
+  ## Rescue
+  ao.df$cluster2 <- ao.df$cluster
+  ao.df$cluster2[ao.df$cluster2 == 4] <- 1
+  ao.df$cluster2[ao.df$cluster2 > 1] <- 2
+  target.hrate <- .3
+  for(i in seq_along(hrates)) {
+    if (hrates[i] < .2 & smeds[i] < .45) {
+      ao.df$cluster2[nna][bs.start[i]:bs.end[i]] <- 2
+      ao.df$uni[nna][bs.start[i]:bs.end[i]] <- TRUE
+    }
+  }
+  # png(paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_hrates2.png"), 1600, 1050)
+  # par(mfrow = c(2,1))
+  # plot(ao.df$BAF[nna], col = ao.df$cluster2[nna], pch = ".", xaxs = "i", ylim = c(0,1))
+  # abline(v=peltres)
+  # plot(density(hrates[smeds > .45]))
+  # dev.off()
 
+  # plot(ao.df$BAF[nna], col = ao.df$cluster2[nna], pch = ".", xaxs = "i", ylim = c(0,1))
+  # abline(v=peltres)
+  # plot(ao.df$BAF.unscaled[nna], col = ao.df$cluster[nna], pch = ".", xaxs = "i", ylim = c(0,1))
+  # abline(v=peltres)
+  
+  
   ## L2R renormalizations
+  tmsg("Normalizing L2R data ...")
+  
   smo <- round(nrow(ao.df) / 550)
   if(smo%%2 == 0) smo <- smo+1
   
   ### Wave  
   if (wave.renorm) {
-    message(tmsg("Wave re-normalization ..."))
+    tmsg("Wave re-normalization ...")
     
-    ren.res <- renorm.go(input.data = ao.df, renorm.rda = wave.renorm.rda, track.type = "Wave", smo = smo, arraytype = arraytype, genome = genome)
+    ren.res <- renorm.go(input.data = ao.df, renorm.rda = wave.rda, track.type = "Wave", smo = smo, arraytype = arraytype, genome = genome)
     
     ao.df <- ren.res$data
     fitted.l2r <- ren.res$renorm$l2r$l2r
     
     if(is.null(ren.res$renorm$pos)) {
       meta.b <- setmeta("wave.renorm", "None", meta.b)
-      message(tmsg(" No positive fit."))
+      tmsg(" No positive fit.")
     } else {
       ## Tweaking sex chromosomes
       sex.idx <- ao.df$chr %in% sex.chr
@@ -191,18 +306,18 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   } else {
     meta.b <- setmeta("wave.renorm", "FALSE", meta.b)
   }
-    
+  
   ### GC
   if (gc.renorm) {
-    message(tmsg("GC renormalization ..."))
+    tmsg("GC renormalization ...")
     
-    ren.res <- renorm.go(input.data = ao.df, renorm.rda = gc.renorm.rda, track.type = "GC", smo = smo, arraytype = arraytype, genome = genome)
+    ren.res <- renorm.go(input.data = ao.df, renorm.rda = gc.rda, track.type = "GC", smo = smo, arraytype = arraytype, genome = genome)
     ao.df <- ren.res$data
     fitted.l2r <- ren.res$renorm$l2r$l2r
     
     if(is.null(ren.res$renorm$pos)) {
       meta.b <- setmeta("gc.renorm", "None", meta.b)
-      message(tmsg(" No positive fit."))
+      tmsg(" No positive fit.")
     } else {
       ## Tweaking sex chromosomes
       sex.idx <- ao.df$chr %in% sex.chr
@@ -230,79 +345,161 @@ EaCoN.SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "norma
   ## Rough median-centering of L2R
   ao.df$L2R <- ao.df$L2R - median(ao.df$L2R, na.rm = TRUE)
   
+  ## Identifying gaps and clustering chromosomal portions
+  gaps <- which(diff(ao.df$pos) >= mingap)
+  kends <- vapply(unique(ao.df$Chromosome), function(k) { max(which(ao.df$Chromosome == k)) }, 1L)
+  kbreaks <- sort(unique(c(gaps, kends)))
+  ao.df$chrgap <- rep(seq_along(kbreaks), times = c(kbreaks[1], diff(kbreaks)))
+  
+  
+  
   ## Building ASCAT-like object
-  message(tmsg("Building normalized object ..."))
-  my.ch <- sapply(unique(ao.df$chrs), function(x) { which(ao.df$chrs == x) })
+  
+  tmsg("Building normalized object ...")
+  # my.ch <- sapply(unique(ao.df$chr), function(x) { which(ao.df$chr == x) })
   my.ascat.obj <- list(
     data = list(
-      # Tumor_LogR.ori = data.frame(sample = ao.df$L2R.ori, row.names = rownames(ao.df)),
-      Tumor_LogR = data.frame(sample = ao.df$L2R, row.names = rownames(ao.df)),
-      Tumor_BAF = data.frame(sample = ao.df$BAF, row.names = rownames(ao.df)),
+      Tumor_LogR.ori = data.frame(sample = ao.df$L2R.ori, row.names = ao.df$ProbeSetName),
+      Tumor_LogR = data.frame(sample = ao.df$L2R, row.names = ao.df$ProbeSetName),
+      Tumor_BAF = data.frame(sample = ao.df$BAF, row.names = ao.df$ProbeSetName),
+      Tumor_AD = data.frame(sample = ao.df[["Allele Difference"]], row.names = ao.df$ProbeSetName),
       Tumor_LogR_segmented = NULL,
       Tumor_BAF_segmented = NULL,
       Germline_LogR = NULL,
       Germline_BAF = NULL,
-      # SNPpos = data.frame(chrs = ao.df$chrA, pos = ao.df$pos, row.names = rownames(ao.df)),
-      SNPpos = data.frame(chrs = ao.df$chr, pos = ao.df$pos, row.names = rownames(ao.df)),
-      ch = my.ch,
-      chr = my.ch,
-      # chrs = unique(ao.df$chrA),
+      SNPpos = data.frame(chrs = ao.df$chr, pos = ao.df$pos, row.names = ao.df$ProbeSetName),
+      ch = sapply(unique(ao.df$chr), function(x) { which(ao.df$chr == x) }),
+      chr = sapply(unique(ao.df$chrgap), function(x) { which(ao.df$chrgap == x) }),
       chrs = unique(ao.df$chr),
       samples = samplename,
       gender = as.vector(meta.b$predicted.gender),
       sexchromosomes = sex.chr,
       failedarrays = NULL
-    ),
-    meta = list(
-      basic = meta.b,
-      affy = my.oschp$Meta
-    ),
-    CEL = list(
-      CEL1 = affxparser::readCel(filename = CEL)
+    ), 
+    germline = list(
+      germlinegenotypes = matrix(as.logical(abs(ao.df$cluster2 - 2L)), ncol = 1),
+      failedarrays = NULL
     )
   )
-  colnames(my.ascat.obj$data$Tumor_LogR) <- samplename
-  colnames(my.ascat.obj$data$Tumor_BAF) <- samplename
-
-  saveRDS(my.ascat.obj, paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_processed.RDS"), compress = "xz")
+  colnames(my.ascat.obj$germline$germlinegenotypes) <- colnames(my.ascat.obj$data$Tumor_LogR) <- colnames(my.ascat.obj$data$Tumor_LogR.ori) <- colnames(my.ascat.obj$data$Tumor_BAF) <- samplename
+  my.ascat.obj$data$Tumor_BAF.unscaled = data.frame(sample = ao.df$BAF.unscaled, row.names = ao.df$ProbeSetName)
+  colnames(my.ascat.obj$data$Tumor_BAF.unscaled) <- samplename
+  my.ascat.obj$data$Tumor_BAF.unisomy = data.frame(sample = ao.df$uni, row.names = ao.df$ProbeSetName)
+  colnames(my.ascat.obj$data$Tumor_BAF.unisomy) <- samplename
+  rownames(my.ascat.obj$germline$germlinegenotypes) <- ao.df$ProbeSetName
+  genopos <- ao.df$pos + cs$chromosomes$chr.length.toadd[ao.df$chrN]
+  rm(ao.df)
+  gc()
+  
+  ## Adding meta
+  my.ascat.obj$meta = list(
+    basic = meta.b,
+    affy = affy.meta
+  )
+  
+  ## Adding CEL intensities
+  my.ascat.obj$CEL = list(
+    CEL1 = affxparser::readCel(filename = CEL)
+  )
+  my.ascat.obj$CEL$CEL1$intensities <- as.integer(my.ascat.obj$CEL$CEL1$intensities)
+  
+  if(write.data) saveRDS(my.ascat.obj, paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_processed.RDS"), compress = "bzip2")
+  
+  ## PLOT
+  if (plot) {
+    tmsg("Plotting ...")
+    kend <- genopos[vapply(my.ascat.obj$data$ch, max, 1L)]
+    l2r.notna <- which(!is.na(my.ascat.obj$data$Tumor_LogR[,1]))
+    l2r.rm <- runmed(my.ascat.obj$data$Tumor_LogR[,1][l2r.notna], smo)
+    l2r.ori.rm <- runmed(my.ascat.obj$data$Tumor_LogR.ori[,1][l2r.notna], smo)
+    png(paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_rawplot.png"), 1600, 1050)
+    par(mfrow = c(3,1))
+    plot(genopos, my.ascat.obj$data$Tumor_LogR.ori[,1], pch = ".", cex = 3, col = "grey75", xaxs = "i", yaxs = "i", ylim = c(-2,2), main = paste0(samplename, " ", arraytype, " raw L2R profile (median-centered) / ", round(sum(abs(diff(l2r.ori.rm))), digits = 3)), xlab = "Genomic position", ylab = "L2R")
+    lines(genopos[l2r.notna], l2r.ori.rm, col = 1)
+    abline(v = kend, col = 4, lty = 3, lwd = 2)
+    abline(h = 0, col = 2, lty = 2, lwd = 2)
+    plot(genopos, my.ascat.obj$data$Tumor_LogR[,1], pch = ".", cex = 3, col = "grey75", xaxs = "i", yaxs = "i", ylim = c(-2,2), main = paste0(samplename, " ", arraytype, " L2R profile (", l2r.level, ", median-centered)) / ", round(sum(abs(diff(l2r.rm))), digits = 3)), xlab = "Genomic position", ylab = "L2R")
+    lines(genopos[l2r.notna], l2r.rm, col = 1)
+    abline(v = kend, col = 4, lty = 3, lwd = 2)
+    abline(h = 0, col = 2, lty = 2, lwd = 2)
+    plot(genopos, my.ascat.obj$data$Tumor_BAF[,1], pch = ".", cex = 3, col = "grey80", xaxs = "i", yaxs = "i", ylim = c(0,1), main = paste0(samplename, " ", arraytype, " BAF profile"), xlab = "Genomic position", ylab = "BAF")
+    points(genopos[my.ascat.obj$germline$germlinegenotypes[,1] == 0], my.ascat.obj$data$Tumor_BAF[my.ascat.obj$germline$germlinegenotypes[,1] == 0,1], pch = ".", cex = 3, col = "grey25")
+    # plot(ao.df$genopos, my.ascat.obj$data$Tumor_BAF[,1], pch = ".", cex = 3, col = ao.df$ForcedCall-5, xaxs = "i", yaxs = "i", ylim = c(0,1), main = paste0(samplename, " ", arraytype, " BAF profile"), xlab = "Genomic position", ylab = "BAF")
+    abline(v = kend, col = 4, lty = 3, lwd = 2)
+    abline(h = .5, col = 2, lty = 2, lwd = 2)
+    dev.off()
+  }
+  # tmsg("Building normalized object ...")
+  # my.ch <- sapply(unique(ao.df$chrs), function(x) { which(ao.df$chrs == x) })
+  # my.ascat.obj <- list(
+  #   data = list(
+  #     Tumor_LogR.ori = data.frame(sample = ao.df$L2R.ori, row.names = rownames(ao.df)),
+  #     Tumor_LogR = data.frame(sample = ao.df$L2R, row.names = rownames(ao.df)),
+  #     Tumor_BAF = data.frame(sample = ao.df$BAF, row.names = rownames(ao.df)),
+  #     Tumor_LogR_segmented = NULL,
+  #     Tumor_BAF_segmented = NULL,
+  #     Germline_LogR = NULL,
+  #     Germline_BAF = NULL,
+  #     # SNPpos = data.frame(chrs = ao.df$chrA, pos = ao.df$pos, row.names = rownames(ao.df)),
+  #     SNPpos = data.frame(chrs = ao.df$chr, pos = ao.df$pos, row.names = rownames(ao.df)),
+  #     ch = my.ch,
+  #     chr = my.ch,
+  #     # chrs = unique(ao.df$chrA),
+  #     chrs = unique(ao.df$chr),
+  #     samples = samplename,
+  #     gender = as.vector(meta.b$predicted.gender),
+  #     sexchromosomes = sex.chr,
+  #     failedarrays = NULL
+  #   ),
+  #   meta = list(
+  #     basic = meta.b,
+  #     affy = my.oschp$Meta
+  #   ),
+  #   CEL = list(
+  #     CEL1 = affxparser::readCel(filename = CEL)
+  #   )
+  # )
+  # colnames(my.ascat.obj$data$Tumor_LogR) <- colnames(my.ascat.obj$data$Tumor_LogR.ori) <- colnames(my.ascat.obj$data$Tumor_BAF) <- samplename
+  # 
+  # saveRDS(my.ascat.obj, paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_processed.RDS"), compress = "xz")
 
   ## Rough plot
-  message(tmsg("Plotting ..."))
-  ao.df$genopos <- ao.df$pos + cs$chromosomes$chr.length.toadd[ao.df$chrN]
-  ao.df$L2R <- ao.df$L2R - median(ao.df$L2R, na.rm = TRUE)
-  ao.df$L2R.ori <- ao.df$L2R.ori - median(ao.df$L2R.ori, na.rm = TRUE)
-  kend <- ao.df$genopos[vapply(unique(ao.df$chrN), function(k) { max(which(ao.df$chrN == k))}, 1)]
-  l2r.notna <- which(!is.na(ao.df$L2R))
-  l2r.rm <- runmed(ao.df$L2R[l2r.notna], smo)
-  l2r.ori.rm <- runmed(ao.df$L2R.ori[l2r.notna], smo)
-  png(paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_rawplot.png"), 1600, 1050)
-  # par(mfrow = c(2,1))
-  par(mfrow = c(3,1))
-  plot(ao.df$genopos, ao.df$L2R.ori, pch = ".", cex = 3, col = "grey70", xaxs = "i", yaxs = "i", ylim = c(-2,2), main = paste0(samplename, " ", arraytype, " raw L2R profile (median-centered) / ", round(sum(abs(diff(l2r.ori.rm))), digits = 3)), xlab = "Genomic position", ylab = "L2R")
-  lines(ao.df$genopos[l2r.notna], l2r.ori.rm, col = 1)
-  abline(v = kend, col = 4, lty = 3, lwd = 2)
-  abline(h = 0, col = 2, lty = 2, lwd = 2)
-  plot(ao.df$genopos, ao.df$L2R, pch = ".", cex = 3, col = "grey70", xaxs = "i", yaxs = "i", ylim = c(-2,2), main = paste0(samplename, " ", arraytype, " L2R profile (median-centered) / ", round(sum(abs(diff(l2r.rm))), digits = 3)), xlab = "Genomic position", ylab = "L2R")
-  lines(ao.df$genopos[l2r.notna], l2r.rm, col = 1)
-  abline(v = kend, col = 4, lty = 3, lwd = 2)
-  abline(h = 0, col = 2, lty = 2, lwd = 2)
-  plot(ao.df$genopos, ao.df$BAF, pch = ".", cex = 3, col = "grey75", xaxs = "i", yaxs = "i", ylim = c(0,1), main = paste0(samplename, " ", arraytype, " BAF profile"), xlab = "Genomic position", ylab = "BAF")
-  abline(v = kend, col = 4, lty = 3, lwd = 2)
-  abline(h = .5, col = 2, lty = 2, lwd = 2)
-  dev.off()
+  # tmsg("Plotting ...")
+  # ao.df$genopos <- ao.df$pos + cs$chromosomes$chr.length.toadd[ao.df$chrN]
+  # ao.df$L2R <- ao.df$L2R - median(ao.df$L2R, na.rm = TRUE)
+  # ao.df$L2R.ori <- ao.df$L2R.ori - median(ao.df$L2R.ori, na.rm = TRUE)
+  # kend <- ao.df$genopos[vapply(unique(ao.df$chrN), function(k) { max(which(ao.df$chrN == k))}, 1)]
+  # l2r.notna <- which(!is.na(ao.df$L2R))
+  # l2r.rm <- runmed(ao.df$L2R[l2r.notna], smo)
+  # l2r.ori.rm <- runmed(ao.df$L2R.ori[l2r.notna], smo)
+  # png(paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_rawplot.png"), 1600, 1050)
+  # # par(mfrow = c(2,1))
+  # par(mfrow = c(3,1))
+  # plot(ao.df$genopos, ao.df$L2R.ori, pch = ".", cex = 3, col = "grey70", xaxs = "i", yaxs = "i", ylim = c(-2,2), main = paste0(samplename, " ", arraytype, " raw L2R profile (median-centered) / ", round(sum(abs(diff(l2r.ori.rm))), digits = 3)), xlab = "Genomic position", ylab = "L2R")
+  # lines(ao.df$genopos[l2r.notna], l2r.ori.rm, col = 1)
+  # abline(v = kend, col = 4, lty = 3, lwd = 2)
+  # abline(h = 0, col = 2, lty = 2, lwd = 2)
+  # plot(ao.df$genopos, ao.df$L2R, pch = ".", cex = 3, col = "grey70", xaxs = "i", yaxs = "i", ylim = c(-2,2), main = paste0(samplename, " ", arraytype, " L2R profile (median-centered) / ", round(sum(abs(diff(l2r.rm))), digits = 3)), xlab = "Genomic position", ylab = "L2R")
+  # lines(ao.df$genopos[l2r.notna], l2r.rm, col = 1)
+  # abline(v = kend, col = 4, lty = 3, lwd = 2)
+  # abline(h = 0, col = 2, lty = 2, lwd = 2)
+  # plot(ao.df$genopos, ao.df$BAF, pch = ".", cex = 3, col = "grey75", xaxs = "i", yaxs = "i", ylim = c(0,1), main = paste0(samplename, " ", arraytype, " BAF profile"), xlab = "Genomic position", ylab = "BAF")
+  # abline(v = kend, col = 4, lty = 3, lwd = 2)
+  # abline(h = .5, col = 2, lty = 2, lwd = 2)
+  # dev.off()
 
   ## Cleaning
   if(!oschp.keep) {
-    message(tmsg("Removing temporary OSCHP file ..."))
+    tmsg("Removing temporary OSCHP file ...")
     file.remove(oscf)
   }
 
-  message(tmsg("Done."))
+  tmsg("Done.")
   gc()
   if(return.data) return(my.ascat.obj)
 }
 
-EaCoN.SNP6.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.type = "PSOCK", ...) {
+SNP6.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.type = "PSOCK", ...) {
   ## Checking the CEL.list.file
   if (is.null(CEL.list.file)) stop("A CEL.list.file is required !")
   if (!file.exists(CEL.list.file)) stop("Could not find CEL.list.file !")
@@ -345,7 +542,7 @@ EaCoN.SNP6.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.
   p <- 0
   s6res <- foreach::foreach(p = seq_len(nrow(myCELs)), .inorder = FALSE, .errorhandling = "stop") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
-    EaCoN.SNP6.Process(CEL = myCELs$cel_files[p], samplename = myCELs$SampleName[p], return.data = FALSE, ...)
+    SNP6.Process(CEL = myCELs$cel_files[p], samplename = myCELs$SampleName[p], return.data = FALSE, ...)
   }
 
   ## Stopping cluster

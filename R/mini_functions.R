@@ -31,8 +31,7 @@ width.unit.conv <- function(coord = NULL, digits = 3) {
 
 get.mad <- function(val = NULL) {
   ad <- abs(diff(val))
-  ad <- ad[ad != 0]
-  return(stats::median(ad, na.rm = TRUE))
+  return(stats::median(ad[ad != 0], na.rm = TRUE))
 }
 
 get.valid.genomes <- function() {
@@ -95,7 +94,8 @@ oschp.load <- function(file = NULL) {
 
 fpaav <- Vectorize(tools::file_path_as_absolute)
 
-tmsg <- function(text = NULL) { return(paste0(text, " [", Sys.info()[['nodename']], ":", Sys.getpid(), "]")) }
+# tmsg <- function(text = NULL) { return(paste0(text, " [", Sys.info()[['nodename']], ":", Sys.getpid(), "]")) }
+tmsg <- function(text = NULL) { message(paste0(" [", Sys.info()[['nodename']], ":", Sys.getpid(), "] ", text)) }
 
 ## Vectorization of seq.default()
 seq.int2 <- Vectorize(seq.default, SIMPLIFY = FALSE)
@@ -180,4 +180,11 @@ compressed_handler <- function(CELz = NULL) {
     return(CEL)
   }
   return(CELz2)
+}
+
+## Convert BAF to mBAF
+BAF2mBAF <- function(Bvalues = NULL) {
+  nona <- !is.na(Bvalues)
+  Bvalues[nona][Bvalues[nona] > .5] <- 1 - Bvalues[nona][Bvalues[nona] > .5]
+  return(Bvalues)
 }
