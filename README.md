@@ -370,7 +370,7 @@ SOURCE | SER.pen | smooth.k | nrf | BAF.filter
 OncoScan | `40` *(default)* | `NULL` *(default)* | `0.5` *(default)* | `0.9`
 CytoScan HD | `20` | `5` | `1.0` | `0.75` *(default)*
 SNP6 | `60` | `5` | `0.25` | `0.75` *(default)*
-WES | `NULL` | `5` | `0.5` *(default)* | `0.75` *(default)*
+WES | `2` | `5` | `0.5` *(default)* | `0.75` *(default)*
 
 - All the functions depicted above have other non-described parameters. As the above recommandations should do the trick in most case, they certainly won't fit all. To adjust parameters more finely, I suggest to refer to the R help pages for corresponding functions.
 
