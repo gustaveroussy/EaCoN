@@ -479,6 +479,7 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
   
   
   ## CHECKS
+  if (!is.list(data)) stop(tmsg("data should be a list !"))
   if (is.null(BINpack)) stop(tmsg("A BINpack file is required !"))
   if (!file.exists(BINpack)) stop(tmsg("Could not find the BINpack file !"))
   if (wave.renorm) { if (!is.null(wave.rda)) { if (!file.exists(wave.rda)) stop(tmsg(paste0("Could not find wave.rda file ", wave.rda))) } }
