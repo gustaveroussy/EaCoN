@@ -2,7 +2,7 @@ Encoding: UTF-8
 Package: EaCoN
 Type: Package
 Title: EaCoN : Easy Copy Number !
-Version: 0.3.0
+Version: 0.3.0-1
 Date: 2018-07-24
 Author: Bastien Job
 Maintainer: Bastien JOB <bastien.job@inserm.fr>

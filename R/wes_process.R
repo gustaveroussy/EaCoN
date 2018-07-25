@@ -240,11 +240,11 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
     #### Indexing BAM if needed
     if (!file.exists(paste0(testBAM, ".bai"))) {
       tmsg("Indexing Test BAM ...")
-      Rsamtools::indexBam(BamFile) 
+      Rsamtools::indexBam(testBAM) 
     } else tmsg("Test BAM is already indexed.")
     if (!file.exists(paste0(refBAM, ".bai"))) {
       tmsg("Indexing Ref BAM ...")
-      Rsamtools::indexBam(BamFile)
+      Rsamtools::indexBam(refBAM)
     } else tmsg("Ref BAM is already indexed.")
     
     #### Opening BAM connections
@@ -896,7 +896,7 @@ bedBinner <- function(bed = NULL, bin.size = 50, nthread = 1) {
   
   bin.size <- as.integer(bin.size)
   cl <- parallel::makeCluster(spec = nthread, type = "PSOCK", outfile = "")
-  suppressPackageStartupMessages(require(foreach, character.only = TRUE))
+  suppressPackageStartupMessages(require(foreach))
   # requireNamespace("foreach", quietly = TRUE)
   doParallel::registerDoParallel(cl)
   # `%dopar%` <- foreach::"%dopar%"
@@ -971,7 +971,8 @@ loc.nt.count.hs <- function(loc.df = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC.
 
   print(paste0("Loading ", genome.pkg, " sequence ..."))
   # requireNamespace(genome.pkg, quietly = TRUE)
-  require(genome.pkg, character.only = TRUE)
+  suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
+  # require(genome.pkg, character.only = TRUE)
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   genome <- BSgenome::providerVersion(BSg.obj)
   cs <- chromobjector(BSg.obj)

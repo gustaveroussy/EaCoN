@@ -1,7 +1,12 @@
 EaCoN
 -----
 
-v0.3.0 (20180620) *PapoQueen*
+v0.3.0-1 (20180724) *BzzzzSnap!*
+-----------------
+* Bug : BINpack.maker() :  subfunction failed to load the foreach package [corrected].
+* Bug : WES.Bin() : BAM indexation failed [corrected].
+
+v0.3.0 (20180724) *PapoQueen*
 -----------------
 * WES : Revamped the WES.bin() function to limit RAM consumption and maximize BAM files access when using subthreads.
 * WES : Almost completely rewrote the WES.Normalize() function :
