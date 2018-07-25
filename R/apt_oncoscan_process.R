@@ -3,9 +3,9 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   
   # ## TEMP
   # setwd("/home/job/WORKSPACE/EaCoN_tests/OS")
-  # ATChannelCel = "/home/job/WORKSPACE/EaCoN_tests/OS/B01158_F1H1_A.CEL.bz2"
-  # GCChannelCel = "/home/job/WORKSPACE/EaCoN_tests/OS/B01158_F1H1_C.CEL.bz2"
-  # samplename = "B01158_F1H1"
+  # ATChannelCel = "/home/job/WORKSPACE/EaCoN_tests/OS/18H03436_A.CEL.bz2"
+  # GCChannelCel = "/home/job/WORKSPACE/EaCoN_tests/OS/18H03436_C.CEL.bz2"
+  # samplename = "ERROR"
   # dual.norm = TRUE
   # out.dir = getwd()
   # temp.files.keep = TRUE
@@ -21,10 +21,13 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   # genome.pkg = "BSgenome.Hsapiens.UCSC.hg19"
   # BAF.filter = .75
   # force = FALSE
+  # write.data = TRUE
+  # plot = TRUE
+  # return.data = FALSE
   # require(foreach)
   # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
-
+  
   
   
   ## Early checks
@@ -220,7 +223,7 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   
   ## Identifying gaps and clustering chromosomal portions
   gaps <- which(diff(ao.df$pos) >= mingap)
-  kends <- vapply(unique(ao.df$Chromosome), function(k) { max(which(ao.df$Chromosome == k)) }, 1L)
+  kends <- vapply(unique(ao.df$chrs), function(k) { max(which(ao.df$chrs == k)) }, 1L)
   kbreaks <- sort(unique(c(gaps, kends)))
   ao.df$chrgap <- rep(seq_along(kbreaks), times = c(kbreaks[1], diff(kbreaks)))
   
@@ -363,10 +366,10 @@ OS.Process.Batch <- function(pairs.file = NULL, nthread = 1, cluster.type = "PSO
     message(paste0("FOUND : ", colnames(mypairs)))
     stop("Invalid header.")
   }
-
+  
   at.chk <- file.exists(mypairs$ATChannelCel)
   gc.chk <- file.exists(mypairs$GCChannelCel)
-
+  
   if (!all(at.chk) || !all(at.chk)) {
     message("Some CEL files from the pairs.file could not be found (wrong path ?) !")
     message("Missing AT CEL files :")
@@ -385,20 +388,20 @@ OS.Process.Batch <- function(pairs.file = NULL, nthread = 1, cluster.type = "PSO
     message("Some ATChannelCel and GCChannelCel are the same for at least one sample !")
     stop("Identical CEL files for AT and GC.")
   }
-
+  
   message(paste0("Found ", nrow(mypairs), " samples to process."))
-
+  
   ## Adjusting cores/threads
   message("Adjusting number of cores if needed ...")
   if (is.null(nthread)) nthread <- parallel::detectCores(logical = TRUE) -1
   if (nrow(mypairs) < nthread) nthread <- nrow(mypairs)
-
+  
   current.bitmapType <- getOption("bitmapType")
   message("Running APT ...")
   `%dopar%` <- foreach::"%dopar%"
   cl <- parallel::makeCluster(spec = nthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cl)
-
+  
   p <- 0
   osres <- foreach(p = seq_len(nrow(mypairs)), .inorder = FALSE, .errorhandling = "stop") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
@@ -406,7 +409,7 @@ OS.Process.Batch <- function(pairs.file = NULL, nthread = 1, cluster.type = "PSO
   }
   message("Stopping cluster ...")
   parallel::stopCluster(cl)
-
+  
   message("Done.")
 }
 
