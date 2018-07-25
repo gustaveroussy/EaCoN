@@ -2,31 +2,31 @@
 OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NULL, dual.norm = TRUE, l2r.level = "weighted", gc.renorm = TRUE, gc.rda = NULL, wave.renorm = TRUE, wave.rda = NULL, mingap = 1E+06, out.dir = getwd(), oschp.keep = FALSE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r2", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
   
   # ## TEMP
-  setwd("/home/job/WORKSPACE/EaCoN_tests/OS")
-  ATChannelCel = "/home/job/WORKSPACE/EaCoN_tests/OS/18H03436_A.CEL.bz2"
-  GCChannelCel = "/home/job/WORKSPACE/EaCoN_tests/OS/18H03436_C.CEL.bz2"
-  samplename = "ERROR"
-  dual.norm = TRUE
-  out.dir = getwd()
-  temp.files.keep = TRUE
-  force.OS = NULL
-  wave.renorm = TRUE
-  wave.rda <- NULL
-  gc.renorm = TRUE
-  gc.rda <- NULL
-  l2r.level <- "normal"
-  apt.build = "na33.r2"
-  apt.version = "2.4.0"
-  mingap = 1E+06
-  genome.pkg = "BSgenome.Hsapiens.UCSC.hg19"
-  BAF.filter = .75
-  force = FALSE
-  write.data = TRUE
-  plot = TRUE
-  return.data = FALSE
-  require(foreach)
-  source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
-  source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
+  # setwd("/home/job/WORKSPACE/EaCoN_tests/OS")
+  # ATChannelCel = "/home/job/WORKSPACE/EaCoN_tests/OS/18H03436_A.CEL.bz2"
+  # GCChannelCel = "/home/job/WORKSPACE/EaCoN_tests/OS/18H03436_C.CEL.bz2"
+  # samplename = "ERROR"
+  # dual.norm = TRUE
+  # out.dir = getwd()
+  # temp.files.keep = TRUE
+  # force.OS = NULL
+  # wave.renorm = TRUE
+  # wave.rda <- NULL
+  # gc.renorm = TRUE
+  # gc.rda <- NULL
+  # l2r.level <- "normal"
+  # apt.build = "na33.r2"
+  # apt.version = "2.4.0"
+  # mingap = 1E+06
+  # genome.pkg = "BSgenome.Hsapiens.UCSC.hg19"
+  # BAF.filter = .75
+  # force = FALSE
+  # write.data = TRUE
+  # plot = TRUE
+  # return.data = FALSE
+  # require(foreach)
+  # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
   
   
   
