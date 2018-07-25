@@ -6,6 +6,7 @@ v0.3.0-1 (20180725) *BzzzzSnap!*
 * Bug : BINpack.maker() :  subfunction failed to load the foreach package [corrected].
 * Bug : WES.Bin() : BAM indexation failed [corrected].
 * Bug : ASCN.ASCAT.ff() : Typo in dirname replacement made it non functional [corrected].
+* Bug : OS.Provess() : chromosomes cutting with mingap failed due to calling an inexisting column [corrected].
 * Added a control on list type for functions that require a 'data' object as first parameter.
 * Removed some commented code chunks.
 
