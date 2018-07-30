@@ -164,7 +164,7 @@ BINpack.Maker(bed.file = "/home/project/WES/SureSelect_v5.bed", bin.size = 50, g
 ```
 
   - This will generate a "BINpack" (with a ".rda" extension) that will be used in the next normalization steps : **/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda**
-  - **PLEASE NOTE THAT THIS STEP IS S-INDEPENDENT, THUS NEEDS TO BE PERFORMED AGAIN ONLY IF YOU CHANGE EITHER THE CAPTURE BED, THE BIN SIZE OR THE GENOME BUILD.** Thus, the generated BINpack can be used for any other sample in the same conditions.
+  - **PLEASE NOTE THAT THIS STEP IS SAMPLE-INDEPENDENT, THUS NEEDS TO BE PERFORMED AGAIN ONLY IF YOU CHANGE EITHER THE CAPTURE BED, THE BIN SIZE OR THE GENOME BUILD.** Thus, the generated BINpack can be used for any other sample in the same conditions.
 
   - **Second**, the WES data will be binned using the generated BINpack. We need three files as input : 
     - The aligned reads for the test sample (usualy in cancer, the patient tumor), in BAM format
