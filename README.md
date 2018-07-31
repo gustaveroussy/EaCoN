@@ -25,9 +25,9 @@ It consists in a series of R packages that perform such type of analysis, from r
     - Any design for which a capture BED and known genome are available
 - Full workflow analysis, from the raw data to an annotated HTML report :
   - L2R and BAF normalization from raw data
-    - Using **Affymetrix Power Tools** for Affymetrix arrays and **rawcopy**
+    - Using **[Affymetrix Power Tools](https://www.thermofisher.com/fr/fr/home/life-science/microarray-analysis/microarray-analysis-partners-programs/affymetrix-developers-network/affymetrix-power-tools.html)** for Affymetrix arrays and **[rawcopy](http://rawcopy.org/)**
     - Using internal methods for WES data
-  - L2R and BAF bivariate segmentation (using **ASCAT**)
+  - L2R and BAF bivariate segmentation (using **[ASCAT](https://www.crick.ac.uk/research/labs/peter-van-loo/software)**)
   - L2R profile centralization
   - L2R profile CNA calling
   - Generation of results as tables and plots
