@@ -6,8 +6,22 @@ _**Ea**sy **Co**py **N**umber !_
 
 ## **DESCRIPTION**
 
-EaCoN aims to be a user-friendly solution to perform relative or absolute copy-number analysis for multiple sources of data.
+EaCoN aims to be an all-packed in,  user-friendly solution to perform relative or absolute copy-number analysis for multiple sources of data.
 It consists in a series of R packages that perform such type of analysis, from raw CEL files of Affymetrix microarrays (GenomeWide snp6, OncoScan, CytoScan 750K, CytoScan HD) or from aligned reads as BAMs for WES (whole exome sequencing).
+
+---
+
+## **QUICK NEWS**
+
+### **2018-09-12 : v0.3.3 _(Trinity)_ is out !**
+
+- Now EaCoN supports [**SEQUENZA**](https://www.ncbi.nlm.nih.gov/pubmed/25319062) segmenter and copy number estimator ! This makes 3 different segmenters available for quick. Sequenza uses the same segmentation algorithm than ASCAT, _(PCF : piecewise constant curve fitting)_, but the two have different implementations of it (sequenza relies on the _copynumber_ package, ASCAT has its own implementation built-in), so expect similar but not identical results !
+- Few bugs solved.
+
+### **2018-08-08 : v0.3.2 _(PapeMamiePichine)_ is out !**
+
+- Now EaCoN supports [**FACETS**](https://www.ncbi.nlm.nih.gov/pubmed/27270079) segmenter and copy number estimator ! This segmenter extends the famous **CBS** _(Circular Binary Segmentation)_ algorithm by making it compatible with bi-variate segmentation using both the L2R and BAF signals.
+- Few bugs solved.
 
 ---
 
@@ -24,15 +38,15 @@ It consists in a series of R packages that perform such type of analysis, from r
   - WES (any species)
     - Any design for which a capture BED and known genome are available
 - Full workflow analysis, from the raw data to an annotated HTML report :
-  - L2R and BAF normalization from raw data
-    - Using **[Affymetrix Power Tools](https://www.thermofisher.com/fr/fr/home/life-science/microarray-analysis/microarray-analysis-partners-programs/affymetrix-developers-network/affymetrix-power-tools.html)** for Affymetrix arrays and **[rawcopy](http://rawcopy.org/)**
-    - Using internal methods for WES data
-  - L2R and BAF bivariate segmentation (using **[ASCAT](https://www.crick.ac.uk/research/labs/peter-van-loo/software)**)
+  - L2R and BAF normalization from raw data using
+    - **[Affymetrix Power Tools](https://www.thermofisher.com/fr/fr/home/life-science/microarray-analysis/microarray-analysis-partners-programs/affymetrix-developers-network/affymetrix-power-tools.html)** (binaries, embedded) for Affymetrix arrays and the **[rawcopy](http://rawcopy.org/)** BAF normalization methods for CytoScan and SNP6 arrays
+    - internal methods for WES data
+  - L2R and BAF bivariate segmentation using **ASCAT** _(recommended)_, **FACETS** or **SEQUENZA**
   - L2R profile centralization
   - L2R profile CNA calling
   - Generation of results as tables and plots
   - Generation of a portable and interactive HTML report
-  - Total (TCN) and allele-specific copy number (ASCN), ploidy and cellularity estimations (using **ASCAT**)
+  - Total (TCN) and allele-specific copy number (ASCN), ploidy and cellularity estimations using **ASCAT** _(recommended)_, **FACETS** or **SEQUENZA**
 - Required annotations for Affymetrix data provided (via additional packages)
 - Pre-computed normalization (GC%, wave) tracks provided (either)
 - Few functions to call
@@ -48,30 +62,33 @@ While the current EaCoN package is the core of the process, multiple others are 
 - R > 3.0
 - Public R dependencies :
   - [@ CRAN](https://cran.r-project.org/) :
-    - [bedr]() _to handle capture bed_
-    - [data.table]() _for tab-files / tables / blocks processing_
-    - [devtools]() _to install ASCAT_
-    - [dplyr]() _for tables / blocks processing_
-    - [doParallel]() _for multithreading_
-    - [DT]() _to generate nice tables in the HTML report_
-    - [foreach]() _for loops & multithreading_
-    - [iotools]() _for fast TSV writings_
-    - [matrixStats]() _for column-wise statistics computing_
-    - [mclust]() _for BAF regions clustering_
-    - [rmarkdown]() _to generate the HTML report_
+    - [bedr](https://cran.r-project.org/web/packages/bedr/index.html) _to handle capture bed_
+    - [data.table](https://cran.r-project.org/web/packages/data.table/index.html) _for tab-files / tables / blocks processing_
+    - [devtools](https://cran.r-project.org/web/packages/devtools/index.html) _to install ASCAT_
+    - [dplyr](https://cran.r-project.org/web/packages/dplyr/index.html) _for tables / blocks processing_
+    - [doParallel](https://cran.r-project.org/web/packages/doParallel/index.html) _for multithreading_
+    - [DT](https://cran.r-project.org/web/packages/DT/index.html) _to generate nice tables in the HTML report_
+    - [foreach](https://cran.r-project.org/web/packages/foreach/index.html) _for loops & multithreading_
+    - [iotools](https://cran.r-project.org/web/packages/iotools/index.html) _for fast TSV writings_
+    - [matrixStats](https://cran.r-project.org/web/packages/matrixStats/index.html) _for column-wise statistics computing_
+    - [mclust](https://cran.r-project.org/web/packages/mclust/index.html) _for BAF regions clustering_
+    - [rmarkdown](https://cran.r-project.org/web/packages/rmarkdown/index.html) _to generate the HTML report_
+    - [sequenza](https://cran.r-project.org/web/packages/sequenza/index.html) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
   - [@ BioConductor](https://www.bioconductor.org/) :
-    - [affxparser]() _to read CEL files_
-    - [BSgenome]() _to handle the reference genome and its sequences_
-    - [BSgenome.Hsapiens.UCSC.hg19]() _as default genome_
-    - [changepoint]() _to perform small events rescue segmentation using PELT_
-    - [copynumber]() _to perform PCF segmentation_
-    - [GenomeInfoDb]() _to use genome annotations_
-    - [GenomicRanges]() _to handle genomic intervals_
-    - [limma]() _to perform lowess normalization_
-    - [rhdf5]() _to read HDF5 file format_
-    - [Rsamtools]() _to compute counts and variants from BAM files_
+    - [affxparser](https://bioconductor.org/packages/release/bioc/html/affxparser.html) _to read CEL files_
+    - [aroma.light](https://bioconductor.org/packages/release/bioc/html/aroma.light.html) _to perform optional BAF TumorBoost normalization_
+    - [BSgenome](https://bioconductor.org/packages/release/bioc/html/BSgenome.html) _to handle the reference genome and its sequences_
+    - [BSgenome.Hsapiens.UCSC.hg19](https://bioconductor.org/packages/release/bioc/html/BSgenome.Hsapiens.UCSC.hg19.html) _as default genome_
+    - [changepoint](https://bioconductor.org/packages/release/bioc/html/changepoint.html) _to perform small events rescue segmentation using PELT_
+    - [copynumber](https://bioconductor.org/packages/release/bioc/html/copynumber.html) _to perform PCF segmentation_
+    - [GenomeInfoDb](https://bioconductor.org/packages/release/bioc/html/GenomeInfoDb.html) _to use genome annotations_
+    - [GenomicRanges](https://bioconductor.org/packages/release/bioc/html/GenomicRanges.html) _to handle genomic intervals_
+    - [limma](https://bioconductor.org/packages/release/bioc/html/limma.html) _to perform lowess normalization_
+    - [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html) _to read HDF5 file format_
+    - [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html) _to compute counts and variants from BAM files_
   - [@ GitHub](https://github.com)
     - [ASCAT](https://github.com/Crick-CancerGenomics/ascat/ASCAT) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
+    - [facets](https://github.com/mskcc/facets) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
 - Elements of the EaCoN workflow :
   - [@ GitHub](https://github.com/gustaveroussy) :
     - [apt.cytoscan.2.4.0](https://github.com/gustaveroussy/apt.cytoscan.2.4.0) _to perform the normalization of CytoScan (750k, HD) arrays using Affymetrix Power Tools_
@@ -191,10 +208,10 @@ WES.Normalize.ff(BIN.RDS.file = "/home/project/EaCoN_results/S4_WES/S4_WES_hg19_
 
 #### **L2R & BAF Segmentation**
 
-- Now that we described the normalization process specific to each type of source data, we can segment it. The good news is that it's the very same step for each source type, one just have to pass the **\_processed.RDS** normalized file. Here is an example with the one obtained for OncoScan data :
+- Now that we described the normalization process specific to each type of source data, we can segment it. The good news is that it's the very same step for each source type, one just have to pass the **\_processed.RDS** normalized file. Here is an example with the one obtained for OncoScan data, using the **ASCAT** segmenter :
 
 ```R
-Segment.ASCAT.ff(RDS.file = "/home/project/EaCoN_results/S1/S1_OncoScan_CNV_hg19_processed.RDS")
+Segment.ff(RDS.file = "/home/me/my_project/EaCoN_results/SAMPLE1/SAMPLE1_OncoScan_CNV_hg19_processed.RDS", segmenter = "ASCAT")
 ```
 
 - This will perform the segmentation, centralization and calling steps, create a **/home/project/EaCoN_results/S1/ASCAT/L2R/** subdirectory and write multiple files in it :
@@ -205,12 +222,16 @@ Segment.ASCAT.ff(RDS.file = "/home/project/EaCoN_results/S1/S1_OncoScan_CNV_hg19
   - _**S1.NoCut.cbs**_ : Same as above, but the segments considered as normal have their L2R value intact
   - _**S1.SegmentedBAF.txt**_ : contains the BAF segmentation results
 
+- To perform the same using the **FACETS** segmenter, just change the value of the _segmenter_ parameter !
+
+- I suppose you guessed how to do the same with **SEQUENZA**, right ? ;)
+
 #### **Copy-number estimation**
 
-- Then an estimation of the total and allele-specific copy-number profiles, as well as global ploidy and sample cellularity can be estimated :
+- Then an estimation of the total and allele-specific copy-number profiles, as well as global ploidy and sample cellularity can be estimated. Here is an example using the **ASCAT** ASCN estimation, from a RDS generated by the Segment.ASCAT() function :
 
 ```R
-ASCN.ASCAT.ff(RDS.file = "/home/project/EaCoN_results/S1/ASCAT/L2R/S1.EaCoN.ASPCF.RDS")
+ASCN.ff(RDS.file = "/home/me/my_project/EaCoN_results/SAMPLE1/ASCAT/L2R/SAMPLE1.ASCAT.RDS")
 ```
 
 - This will perform these estimations for a range of values (default os 0.35 to 0.95, with a step of 0.05) of the "gamma" parameters (see more details in the **ASCAT** R package help pages), create a **/home/project/EaCoN_results/S1/ASCAT/ASCN/** subdirectory, in which other subdirectories will be created, one for each gamma value **/home/project/EaCoN_results/S1/ASCAT/ASCN/gamma_0.xx/**. In each of those will be written :
@@ -221,6 +242,8 @@ ASCN.ASCAT.ff(RDS.file = "/home/project/EaCoN_results/S1/ASCAT/L2R/S1.EaCoN.ASPC
   - _**S1_TCNvsL2R.png**_ : shows a graphical representation of the comparison of the TCN and L2R values of each segment, clustered by TCN level. This is usefull to identify some mistakes in the TCN modelization.
   - _**S1_gamma0.xx.cn**_ : contains the TCN and ASCN segmentation results in a non-standard format derived the CBS format
   - _**S1_gamma0.xx_model.txt**_ : Contains the ploidy, cellularity and model statistics
+
+- To perform the same using the **FACETS** or **SEQUENZA** estimator, just use a RDS generated with Segment.FACETS() or Segment.SEQUENZA(), respectively (or their ".ff" equivalent).
 
 #### **HTML reporting**
 
@@ -316,20 +339,24 @@ You can notice that here we did not specify any RDS or list file to **WES.Normal
 
 #### **L2R & BAF Segmentation**
 
-As for the **WES.Normalize.ff.Batch** function, the **Segment.ASCAT.ff.Batch** function needs as its first argument _RDS.files_, a list of _"\_processed.RDS"_ files (generated at the raw data processing step). Likewise, it will by default recursively search downwards for any compatible RDS file.
+As for the **WES.Normalize.ff.Batch** function, the **Segment.ff.Batch** function needs as its first argument _RDS.files_, a list of _"\_processed.RDS"_ files (generated at the raw data processing step). Likewise, it will by default recursively search downwards for any compatible RDS file.
 
-Here is a synthetic example that will segment our CytoScan HD samples (as defined by the _pattern_ below) :
+Here is a synthetic example that will segment our CytoScan HD samples (as defined by the _pattern_ below) using ASCAT :
 
 ```R
-Segment.ASCAT.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_processed.RDS$", full.names = TRUE, recursive = TRUE), smooth.k = 5, SER.pen = 20, nrf = 1.0, nthread = 2)
+Segment.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_processed.RDS$", full.names = TRUE, recursive = TRUE), segmenter = "ASCAT", smooth.k = 5, SER.pen = 20, nrf = 1.0, nthread = 2)
 ```
+
+- To perform the same using the **FACETS** segmenter, just change the value of the _segmenter_ parameter !
+
+- I suppose you guessed how to do the same with **SEQUENZA**, right ? ;)
 
 #### **Copy-number estimation**
 
-Still the same, with the **ASCN.ASCAT.ff.Batch** :
+Still the same, with the **ASCN.ff.Batch** :
 
 ```R
-ASCN.ASCAT.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_EaCoN.ASPCF.RDS$", full.names = TRUE, recursive = TRUE), nthread = 2)
+ASCN.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_EaCoN.ASPCF.RDS$", full.names = TRUE, recursive = TRUE), nthread = 2)
 ```
 
 #### **HTML reporting**
@@ -343,13 +370,16 @@ Annotate.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_EaCo
 ### **Piped**
 
 EaCoN has been implemented in a way that one can also choose to launch the full workflow in a single command line for a single sample, using pipes from the [magrittr](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html) package. However, this is not recommended as default use : even though EaCoN is provided with recommandations that should fit most case, the user may have to deal with particular profiles that would require parameter tweaking, which is not possible in piped mode...
-Here is an example :
+Here is an example using ASCAT :
 
 ```R
-setwd("/home/project/EaCoN_results")
+samplename <- "SAMPLE1_OS"
+workdir <- "/home/me/my_project/EaCoN_results"
+setwd(workdir)
 require(EaCoN)
 require(magrittr)
-OS.Process(ATChannelCel = "/home/project/CEL/S1_OncoScan_CNV_A.CEL", GCChannelCel = "/home/project/CEL/S1_OncoScan_CNV_C.CEL", samplename = "S1_OS", return.data = TRUE) %>% Segment.ASCAT(out.dir = "/home/project/EaCoN_results/S1_OS", return.data = TRUE) %T>% Annotate(out.dir = "/home/project/EaCoN_results/S1_OS/ASCAT/L2R") %>% ASCN.ASCAT(out.dir = "/home/project/EaCoN_results/S1_OS")
+
+OS.Process(ATChannelCel = "/home/me/my_project/CEL/SAMPLE1_OncoScan_CNV_A.CEL", GCChannelCel = "/home/me/my_project/CEL/SAMPLE1_OncoScan_CNV_C.CEL", samplename = samplename, return.data = TRUE) %>% Segment(out.dir = paste0(workdir, "/", samplename), segmenter = "ASCAT", return.data = TRUE) %T>% Annotate(out.dir = paste0(workdir, "/", samplename, "/ASCAT/L2R")) %>% ASCN.ASCAT(out.dir = paste0(workdir, "/", samplename))
 ```
 
 ### **Conclusion on usage**
@@ -363,7 +393,9 @@ OS.Process(ATChannelCel = "/home/project/CEL/S1_OncoScan_CNV_A.CEL", GCChannelCe
 
 ## **GUIDELINES**
 
-- For each step, default values for each data source already correspond to recommendations. However, for the common **segmentation** step (Segment.ASCAT), adaptation to the data source is recommended, by changing few parameters :
+### **Segmentation using ASCAT**
+
+- For each step, default values for each data source already correspond to recommendations. However, for the common **segmentation** step using the ASCAT segmenter, adaptation to the data source is recommended, by changing few parameters :
 
 SOURCE | SER.pen | smooth.k | nrf | BAF.filter
 --- | --- | --- | --- | ---
@@ -371,6 +403,10 @@ OncoScan | `40` *(default)* | `NULL` *(default)* | `0.5` *(default)* | `0.9`
 CytoScan HD | `20` | `5` | `1.0` | `0.75` *(default)*
 SNP6 | `60` | `5` | `0.25` | `0.75` *(default)*
 WES | `2` | `5` | `0.5` *(default)* | `0.75` *(default)*
+
+- The FACETS segmenter is dedicated to WES data.
+
+### **Getting deeper**
 
 - All the functions depicted above have other non-described parameters. As the above recommandations should do the trick in most case, they certainly won't fit all. To adjust parameters more finely, I suggest to refer to the R help pages for corresponding functions.
 
