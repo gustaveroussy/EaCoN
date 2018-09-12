@@ -72,19 +72,17 @@ BINpack.Maker <- function(bed.file = NULL, bin.size = 50, genome.pkg = "BSgenome
 
 WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = "SAMPLE", Q = 20, nsubthread = 1, cluster.type = "PSOCK", out.dir = getwd(), return.data  = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
   
-  # # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta1")
-  # setwd("/home/job/WORKSPACE/EaCoN_tests")
-  # # testBAM <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/DATA/WES_BAMS/TCGA-A7-A0CE-01A-11W-A019-09_IlluminaGA-DNASeq_exome.bam"
-  # testBAM <- "/home/job/WORKSPACE/EaCoN_tests/WES/TCGA-A7-A0CE-01A-11W-A019-09_IlluminaGA-DNASeq_exome.bam"
-  # # refBAM <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/DATA/WES_BAMS/TCGA-A7-A0CE-10A-01W-A021-09_IlluminaGA-DNASeq_exome.bam"
-  # refBAM <- "/home/job/WORKSPACE/EaCoN_tests/WES/TCGA-A7-A0CE-10A-01W-A021-09_IlluminaGA-DNASeq_exome.bam"
-  # # # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/MATCHR/RESOURCES/SureSelect_ClinicalResearchExome.padded_hg19_b50.rda"
-  # # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.GC.rda"
-  # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/test/SureSelect_ClinicalResearchExome.padded_GRCh37-lite_merged_sorted_hs37d5_b50.GC.rda"
-  # samplename <- "TCGA_A0CE_01.10"
+  # setwd("/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc/Results")
+  # # setwd("/home/job/WORKSPACE/EaCoN_tests")
+  # testBAM <- "/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc/DATA/Sample_PHEO_AG_HS_048_DNA.reord.sorted.dedup.recal.reheaded.bam"
+  # refBAM <- "/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc/DATA/Sample_PHEO_AG_HS_048G_DNA.reord.sorted.dedup.recal.reheaded.bam"
+  # # # # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/MATCHR/RESOURCES/SureSelect_ClinicalResearchExome.padded_hg19_b50.rda"
+  # # # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.GC.rda"
+  # BINpack <- "/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc/Results/V4-UTRs.hg38.fragment_targets_minimal_sorted_longChr_hg38_b50.GC.rda"
+  # samplename <- "ALEX1"
   # Q <- 20
   # out.dir = getwd()
-  # nsubthread = 5
+  # nsubthread = 4
   # cluster.type = "PSOCK"
   # return.data = FALSE
   # write.data = TRUE
@@ -92,7 +90,7 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
   # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # source("/home/job/git_gustaveroussy/EaCoN/R/BED_functions.R")
   # source("/home/job/git_gustaveroussy/EaCoN/R/wes_process.R")
-  suppressPackageStartupMessages(require(foreach))
+  # suppressPackageStartupMessages(require(foreach))
   # require(magrittr)
   
   ## CHECKS (files/parameters)
@@ -189,7 +187,11 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
     param.BAM <- Rsamtools::ScanBamParam(which = GenomicRanges::makeGRangesFromDataFrame(bed.data, seqnames.field = "chr"), flag = scanBamFlag)
     pres <- dplyr::as.tbl(Rsamtools::pileup(BamFile, scanBamParam = param.BAM, pileupParam = pileupParam))
     colnames(pres)[c(1,5)] <- c("chr", "bin")
-    levels(pres$bin) <- rownames(bed.data)
+    levels(pres$bin) <- bed.data$ProbeSetName
+    pres$bin <- as.integer(as.character(pres$bin))
+    
+    # levels(pres$bin) <- rownames(bed.data)
+    
     gc()
     
     if("=" %in% unique(pres$nucleotide)) tmsg("   Bam contains the '=' sign !")
@@ -210,7 +212,8 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
     rm(pres, refblock)
     gc()
     # bed.based <- dplyr::as.tbl(data.frame(chr = unique(bed.data$chr), pos = as.integer(unlist(seq.int2(from = bed.data$start, to = bed.data$end, by = 1))), which_label = rep(paste0(bed.data$chr, ":", bed.data$start, "-", bed.data$end), times = (bed.data$end - bed.data$start +1))))
-    bed.based <- dplyr::as.tbl(data.frame(chr = unique(bed.data$chr), pos = as.integer(unlist(seq.int2(from = bed.data$start, to = bed.data$end, by = 1))), bin = rep(rownames(bed.data), times = (bed.data$end - bed.data$start +1))))
+    # bed.based <- dplyr::as.tbl(data.frame(chr = unique(bed.data$chr), pos = as.integer(unlist(seq.int2(from = bed.data$start, to = bed.data$end, by = 1))), bin = rep(rownames(bed.data), times = (bed.data$end - bed.data$start +1))))
+    bed.based <- dplyr::as.tbl(data.frame(chr = unique(bed.data$chr), pos = as.integer(unlist(seq.int2(from = bed.data$start, to = bed.data$end, by = 1))), bin = rep(bed.data$ProbeSetName, times = (bed.data$end - bed.data$start +1))))
     bed.joint <- suppressWarnings(dplyr::left_join(bed.based, merged, c("chr", "pos", "bin"))) ### yeah !
     rm(bed.based)
     gc()
@@ -255,7 +258,7 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
     cl <- parallel::makeCluster(spec = nsubthread, type = cluster.type, outfile = "")
     doParallel::registerDoParallel(cl)
     k <- 0
-    BAMcounts <- foreach::foreach(k = unique(bed.data$chr), .inorder = TRUE, .export = c("tmsg", "BSg.obj", "bedbam2pup", "seq.int2")) %dopar% {
+    BAMcounts <- foreach::foreach(k = unique(as.character(bed.data$chr)), .inorder = TRUE, .export = c("tmsg", "BSg.obj", "bedbam2pup", "seq.int2")) %dopar% {
       
       tmsg(paste0(" Sequence : ", k))
 
@@ -449,31 +452,33 @@ WES.Bin.Batch <- function(BAM.list.file = NULL, BINpack = NULL, nthread = 1, clu
 ## Performs the normalization of WES L2R and BAF signals
 WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.renorm = FALSE, wave.rda = NULL, RD.tot.min = 20, RD.alt.min = 3, BAF.hetmin = .33, sex.chr = c("chrX", "chrY"), TumorBoost = FALSE, out.dir = getwd(), return.data = FALSE, write.data = TRUE, plot = TRUE) {
 
-  # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta1/WES/TCGA-AC-A2BK-01A_vs_11A")
-  # # data <- readRDS("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta1/TCGA-AC-A2BK-01A_vs_11A/TCGA-AC-A2BK-01A_vs_11A_hs37d5_b_binned.RDS")
-  # # # # data <- readRDS("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_DEV/TCGA_A0CE_01.10/TCGA_A0CE_01.10_hs37d5_b50_binned.RDS")
-  # # # # # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.rda"
-  # # # # # BINpack <- "/mnt/data_cigogne/job/OS2006/WES/RESOURCES/SureSelect_ClinicalResearchExome.padded_hg19_b50.rda"
-  # data <- readRDS("TCGA-AC-A2BK-01A_vs_11A_hs37d5_b_binned.RDS")
-  # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_GRCh37-lite_merged_sorted_hs37d5_b50.GC.rda"
+  # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta2/WES/TCGA-A7-A0CE-01A_vs_10A")
+  # setwd("/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc")
+  # # data <- readRDS("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta2/WES/TCGA-A7-A0CE-01A_vs_10A/TCGA-A7-A0CE-01A_vs_10A_hs37d5_b_binned.RDS")
+  # # # # # # data <- readRDS("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_DEV/TCGA_A0CE_01.10/TCGA_A0CE_01.10_hs37d5_b50_binned.RDS")
+  # # # # # # # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.rda"
+  # # # # # # # BINpack <- "/mnt/data_cigogne/job/OS2006/WES/RESOURCES/SureSelect_ClinicalResearchExome.padded_hg19_b50.rda"
+  # # # data <- readRDS("TCGA-AC-A2BK-01A_vs_11A_hs37d5_b_binned.RDS")
+  # data <- readRDS("Sample_PHEO_AG_HS_048_DNA_hg38_b50_binned.RDS")
+  # # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_GRCh37-lite_merged_sorted_hs37d5_b50.GC.rda"
+  # BINpack <- "V4-UTRs.hg38.fragment_targets_minimal_sorted_longChr_hg38_b50.GC.rda"
   # gc.renorm <- TRUE
-  # wave.renorm <- TRUE
-  # wave.rda <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_GRCh37-lite_merged_sorted_hs37d5_b50.Wave.rda"
+  # wave.renorm <- FALSE
+  # # wave.rda <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_GRCh37-lite_merged_sorted_hs37d5_b50.Wave.rda"
+  # wave.rds <- NULL
   # RD.tot.min = 20
   # RD.alt.min = 3
   # TumorBoost = FALSE
-  # sex.chr <- c("X", "Y")
+  # # sex.chr <- c("X", "Y")
+  # sex.chr <- c("chrX", "chrY")
   # out.dir = getwd()
   # return.data = FALSE
   # write.data = TRUE
   # plot = TRUE
   # BAF.hetmin <- .33
-  # BAF.filter <- .75
   # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # source("/home/job/git_gustaveroussy/EaCoN/R/renorm_functions.R")
   # require(foreach)
-
-  
 
   ### AJOUTER UN CONTROLE DU RDS (pour que ce ne soit pas un _processed.RDS donné en entrée!)
   
@@ -514,8 +519,6 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
   genome <- BSgenome::providerVersion(BSg.obj)
   cs <- chromobjector(BSg.obj)
 
-
-
   ## BAF HANDLING
   tmsg("Processing BAF ...")
   
@@ -548,8 +551,14 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
 
   data$SNP <- BAF.adder(Bdata = data$SNP, Bvalues = data$SNP$BAF.test.ori, newname = "BAF.test.ori")
   data$SNP <- BAF.adder(Bdata = data$SNP, Bvalues = data$SNP$BAF.ref.ori, newname = "BAF.ref.ori", type = "ref")
-
-
+  
+  ###### Computing LOR (and variance)
+  rcmat <- round(cbind(data$SNP$BAF.test.ori*data$SNP$tot_count.test, (1-data$SNP$BAF.test.ori)*data$SNP$tot_count.test))
+  data$SNP$LOR <- log(rcmat[,1]+1/6) - log(rcmat[,2]+1/6)
+  data$SNP$LORvar <- 1/(rcmat[,1]+1/6) + 1/(rcmat[,2]+1/6)
+  rm(rcmat)
+  gc()
+  
   ### BAF : TumorBoost
   if (TumorBoost) {
     message(tmsg("Applying TumorBoost BAF normalization ..."))
@@ -599,7 +608,6 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
   if (length(which(GCOL)) == nrow(data$RD)) stop("All RD bins were flagged as GC% outliers  ! There may be something wrong with your reference genome and/or capture BED.")
   tmsg(paste0("Flagged ", length(which(GCOL)), " (", round(length(which(GCOL)) / rd.ori * 100, digits = 2), "%) RD bins as GC% outliers."))
 
-
   ### Pooling and imputing
   FLAGS <- RDlow + GCOL > 0
 
@@ -610,8 +618,6 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
     data$RD$L2R <- data$RD$L2R.imp <- approxfun(seq_along(l2r.tmp), l2r.tmp, rule = 2)(seq_along(l2r.tmp))
   } else data$RD$L2R.imp <- data$RD$L2R
   gc()
-
-
 
   ## L2R : Normalization
   smo <- round(nrow(data$RD) / 550)
@@ -724,8 +730,12 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
 
   ## Merging
   data$RD$BAF <- dplyr::left_join(data$RD[, c(1:4,9)], data$SNP[, c(1,3,which(colnames(data$SNP) == "BAF.test"))], by = c("chr", "bin"))$BAF.test
-  data$RD$LOR <- dplyr::left_join(data$RD[, c(1:4,9)], data$SNP[, c(1,3,which(colnames(data$SNP) == "LOR.test"))], by = c("chr", "bin"))$LOR.test
-
+  # data$RD$LOR <- dplyr::left_join(data$RD[, c(1:4,9)], data$SNP[, c(1,3,which(colnames(data$SNP) == "LOR.test"))], by = c("chr", "bin"))$LOR.test
+  data$RD$LOR <- dplyr::left_join(data$RD[, c(1:4,9)], data$SNP[, c(1,3,which(colnames(data$SNP) == "LOR"))], by = c("chr", "bin"))$LOR
+  data$RD$LORvar <- dplyr::left_join(data$RD[, c(1:4,9)], data$SNP[, c(1,3,which(colnames(data$SNP) == "LORvar"))], by = c("chr", "bin"))$LORvar
+  data$RD$RD.test <- dplyr::left_join(data$RD[, c(1:4,9)], data$SNP[, c(1,3,which(colnames(data$SNP) == "tot_count.test"))], by = c("chr", "bin"))$tot_count.test
+  data$RD$RD.ref <- dplyr::left_join(data$RD[, c(1:4,9)], data$SNP[, c(1,3,which(colnames(data$SNP) == "tot_count.ref"))], by = c("chr", "bin"))$tot_count.ref
+  
   ## Building ASCAT object
   tmsg("Building normalized object ...")
 
@@ -735,7 +745,6 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
     data = list(
       Tumor_LogR.ori = data.frame(sample = data$RD$L2R.ori, row.names = data$RD$bin),
       Tumor_LogR = data.frame(sample = data$RD$L2R, row.names = data$RD$bin),
-      Tumor_LOR = data.frame(sample = data$RD$LOR, row.names = data$RD$bin),
       Tumor_BAF = data.frame(sample = data$RD$BAF, row.names = data$RD$bin),
       Tumor_LogR_segmented = NULL,
       Tumor_BAF_segmented = NULL,
@@ -748,12 +757,14 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
       samples = samplename,
       gender = "NA",
       sexchromosomes = sex.chr,
-      failedarrays = NULL
+      failedarrays = NULL,
+      additional = data$RD[,colnames(data$RD) %in% c("RD.test", "RD.ref", "LOR", "LORvar")]
     ),
     meta = data$meta,
     germline = list(germlinegenotypes = matrix(is.na(data$RD$BAF), ncol = 1, dimnames = list(data$RD$bin, samplename)), failedarrays = NULL)
   )
-  colnames(my.ascat.obj$data$Tumor_LogR) <- colnames(my.ascat.obj$data$Tumor_LogR.ori) <- colnames(my.ascat.obj$data$Tumor_BAF) <- colnames(my.ascat.obj$data$Tumor_LOR) <- samplename
+  # colnames(my.ascat.obj$data$Tumor_LogR) <- colnames(my.ascat.obj$data$Tumor_LogR.ori) <- colnames(my.ascat.obj$data$Tumor_BAF) <- colnames(my.ascat.obj$data$Tumor_LOR) <- samplename
+  colnames(my.ascat.obj$data$Tumor_LogR) <- colnames(my.ascat.obj$data$Tumor_LogR.ori) <- colnames(my.ascat.obj$data$Tumor_BAF) <- samplename
   # rm(my.ch, data)
   gc()
 
@@ -812,12 +823,7 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
   if(return.data) return(my.ascat.obj)
 }
 
-
-
-
-
-
-## Runs EaCoN.WES.Normalize using a RDS filename
+## Runs WES.Normalize using a RDS filename
 WES.Normalize.ff <- function(BIN.RDS.file = NULL, ...) {
   
   ## CHECKS
@@ -831,6 +837,7 @@ WES.Normalize.ff <- function(BIN.RDS.file = NULL, ...) {
   WES.Normalize(data = my.data, out.dir = dirname(BIN.RDS.file), ...)
 }
 
+## Runs WES.Normalize.ff, batch mode
 WES.Normalize.ff.Batch <- function(BIN.RDS.files = list.files(path = getwd(), pattern = "_binned.RDS$", all.files = FALSE, full.names = TRUE, recursive = TRUE, ignore.case = FALSE, include.dirs = FALSE), nthread = 1, cluster.type = "PSOCK", ...) {
   if (length(BIN.RDS.files) == 0) stop("No file found to process !")
   message("Running EaCoN.WES.Normalize.ff() in batch mode ...")
@@ -846,63 +853,13 @@ WES.Normalize.ff.Batch <- function(BIN.RDS.files = list.files(path = getwd(), pa
   parallel::stopCluster(cl)
 }
 
-bedBinner.old <- function(bed = NULL, bin.size = 50, nthread = 1) {
-  
-  bin.size <- as.integer(bin.size)
-  cl <- parallel::makeCluster(spec = nthread, type = "PSOCK", outfile = "")
-  doParallel::registerDoParallel(cl)
-  `%dopar%` <- foreach::"%dopar%"
-  bed.binned <- foreach::foreach(b = seq_len(nrow(bed)), .combine = "rbind") %dopar% {
-    # print(b)
-    ### Smaller exon
-    exon.length <- (bed$end[b] - bed$start[b] + 1L)
-    if (exon.length <= bin.size) return(bed[b,])
-    mod.rest <- exon.length %% bin.size
-    mod.count <- as.integer((exon.length - mod.rest) / bin.size)
-
-    bin.starts <- bed$start[b] + ((seq_len(mod.count)-1L) * bin.size)
-    bin.ends <- bin.starts + bin.size - 1L
-
-    ## Non-Round count
-    if (mod.rest > 0L) {
-      ## Enough for a new bin
-      if (mod.rest >= (bin.size / 2L)) {
-        bin.starts <- c(bin.starts, bin.starts[mod.count]+bin.size)
-        bin.ends <- c(bin.ends, bed$end[b])
-        mod.count <- mod.count+1L
-      } else { ## Dispatch to inside bins
-        if (mod.rest >= mod.count) {
-          mod.rest2 <- mod.rest %% mod.count
-          mod.count2 <- as.integer((mod.rest - mod.rest2) / mod.count)
-
-          bin.starts <- bed$start[b] + ((seq_len(mod.count)-1L) * (bin.size + mod.count2))
-          bin.ends <- bin.starts + (bin.size + mod.count2) - 1L
-          bin.ends[mod.count] <- bin.ends[mod.count] + mod.rest2
-        } else {
-          # bin.ends[mod.count] <- bin.ends[mod.count] + mod.rest
-          bin.ends[mod.count] <- bed$end[b]
-        }
-      }
-    }
-    # if(length(bin.starts) != length(bin.starts))
-    chrs = rep(bed$chr[b], mod.count)
-    return(data.frame(chr = chrs, start = bin.starts, end = bin.ends, stringsAsFactors = FALSE))
-  }
-  parallel::stopCluster(cl)
-  return(bed.binned)
-}
-
-
 bedBinner <- function(bed = NULL, bin.size = 50, nthread = 1) {
   
   bin.size <- as.integer(bin.size)
   cl <- parallel::makeCluster(spec = nthread, type = "PSOCK", outfile = "")
   suppressPackageStartupMessages(require(foreach))
-  # requireNamespace("foreach", quietly = TRUE)
   doParallel::registerDoParallel(cl)
-  # `%dopar%` <- foreach::"%dopar%"
-  # `%do%` <- foreach::"%do%"
-  # `%:%` <- foreach::"%:%"
+  k <- 0
   bed.binned <- foreach::foreach(k = unique(bed$chr), .combine = "rbind", .export = "tmsg") %dopar% {
     tmsg(k)
     

@@ -25,15 +25,15 @@
   \item{force}{If some result files already exist, delete them before runing.}
 }
 \description{
-  This function performs the BAF germline prediction, joint L2R and BAF segmentation, centering and calling of WES, CytoScan, OncoScan or SNP6 data.
+  This function performs the joint L2R and BAF segmentation using ASCAT PCF-based segmenter, centering and calling of WES, CytoScan, OncoScan or SNP6 data.
 }
 \value{
-  Several RDS objects, PNG plots, CBS files and data tables. If \code{ASCN} set to \code{TRUE}, several folders containing the different ASCN (allele-specific copy number) analyses performed for each value in \code{gammaRange}. The directory corresponding to the best evaluated gamma will also have an "_optimal" suffix.
+  Several RDS objects, PNG plots, CBS files and data tables.
 }
 \details{
   Depending on the data source, different parameter values are recommended :
   \itemize{
-    \item{for WES :             SER.pen = NULL}
+    \item{for WES :             SER.pen = 2}
     \item{for CytoScan array :  SER.pen = 20, smooth.k = 5}
     \item{for OncoScan array :  SER.pen = 40}
     \item{for SNP6 array :      SER.pen = 60, smooth.k = 5, nrf = .25}

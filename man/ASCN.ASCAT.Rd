@@ -1,9 +1,9 @@
 \name{ASCN.ASCAT}
 \alias{ASCN.ASCAT}
-\title{Allele-Specific Copy Number estimation using ASCAT.}
+\title{Allele-Specific Copy Number estimation using ASCAT}
 \usage{
   ASCN.ASCAT(data = NULL, gammaRange = c(.35,.95), nsubthread = 1,
-  cluster.type = "PSOCK", out.dir = getwd(), force = FALSE)
+  cluster.type = "PSOCK", out.dir = getwd(), force = FALSE, ...)
 }
 \arguments{
   \item{data}{Data object contained in a RDS file generated with \code{Segment.ASCAT()} (or corresponding wrappers \code{Segment.ASCAT.ff()} and \code{Segment.ASCAT.ff.Batch()}.}
@@ -12,6 +12,7 @@
   \item{cluster.type}{Type of subthreading cluster (see \code{?parallel::makeCluster()}).}
   \item{out.dir}{Output directory.}
   \item{force}{If some result files already exist, delete them before runing.}
+  \item{...}{Any additional parameter to give to \code{ASCAT::ascat.runAscat()}.}
 }
 \description{
   This function performs the estimation of allele-specific copy number using ASCAT.

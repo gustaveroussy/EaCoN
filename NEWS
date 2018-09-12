@@ -1,22 +1,49 @@
 EaCoN
 -----
 
-v0.3.0-1 (20180725) *BzzzzSnap!*
+v0.3.3 (20180911) *Trinity*
 -----------------
-* Bug : BINpack.maker() :  subfunction failed to load the foreach package [corrected].
-* Bug : WES.Bin() : BAM indexation failed [corrected].
-* Bug : ASCN.ASCAT.ff() : Typo in dirname replacement made it non functional [corrected].
-* Bug : OS.Provess() : chromosomes cutting with mingap failed due to calling an inexisting column [corrected].
-* Added a control on list type for functions that require a 'data' object as first parameter.
-* Removed some commented code chunks.
+* NEW : SEQUENZA segmentation plainly implemented, for both L2R+BAF bivariate segmentation [Segment.SEQUENZA()] AND copy number estimation [ASCN.SEQUENZA()].
+* BUG : Segment.ff() : Corrected wrong do.call() call (parameters not given as a list).
+* CORR : ASCN.ASCAT() : CN output file was badly formatted.
+* MOD : ASCN.ff() : Suppressed the "segmenter" parameter, which is read from the RDS meta$eacon$segmenter value.
+
+v0.3.2-1 (20180906) *Bak2Skool*
+-------------------
+* BUG : WES.Bin() : bin order was totally messed up when capture BED is not properly ordered (desynch due to bin name converted to factor, then levels replaced by mis-ordered rowname). This made WES.Normalize() stop at the GC/wave normalization step due to non-synched bin orders in data when compared to BINpack [Thx to Alexander Lefranc for reporting it] [fixed].
+* BUG : ASCN.ff() : fixed a bug in the do.call() call (arguments of ellipsis not converted to a list) [fixed].
+* CORR : ASCN.ff() : fixed the handling of out.dir sub() call.
+* CORR : README.md : Missing aroma.light dependency [Thx to Alexander Lefranc for reporting it, again].
+* ADD : ASCN.ff() : Added a control to check if provided segmentation RDS file is compatible with requested ASCN method.
+* MOD : Changed license to MIT.
+
+v0.3.2 (20180808) *PapeMamiePichine*
+-----------------
+* ADD : FACETS segmentation plainly implemented, for both L2R+BAF bivariate segmentation AND copy number estimation. Coincidentaly, some modifications were performed :
+* . Segment.ASCAT() and ASCN.ASCAT() wrappers have been renamed to generic Segment() and ASCN(), with a new "segmenter" parameter, to support both of ASCAT and FACETS.
+* . Help functions for all segmentation / ASCN functions have been updated.
+
+v0.3.1 (20180731) *Recalcitrante*
+-----------------
+* ADD : New feature : preparing the inclusion of FACETS segmentation methods.
+* . This required to include some additional data in the normalized RDS.
+
+v0.3.0-1 (20180725) *BzzzzSnap!*
+-------------------
+* BUG : BINpack.maker() :  subfunction failed to load the foreach package [fixed].
+* BUG : WES.Bin() : BAM indexation failed [fixed].
+* BUG : ASCN.ASCAT.ff() : Typo in dirname replacement made it non functional [fixed].
+* BUG : OS.Process() : chromosomes cutting with mingap failed due to calling an inexisting column [fixed].
+* ADD : Added a control on list type for functions that require a 'data' object as first parameter.
+* DEL : Removed some commented code chunks.
 
 v0.3.0 (20180724) *PapoQueen*
 -----------------
 * WES : Revamped the WES.bin() function to limit RAM consumption and maximize BAM files access when using subthreads.
 * WES : Almost completely rewrote the WES.Normalize() function :
- - Better L2R normalization using simpler and finer filters.
- - Incorporated the segregation of homo / hetero SNPs, using matched normal BAF.
- - Added logOR heterozygosity expression for futher compatibility with the FACETS CBS-based bivariate segmenter.
+* . Better L2R normalization using simpler and finer filters.
+* . Incorporated the segregation of homo / hetero SNPs, using matched normal BAF.
+* . Added logOR heterozygosity expression for futher compatibility with the FACETS CBS-based bivariate segmenter.
 * Discarded the germline prediction from Segment.ASCAT(), now included in each ofthe *.Process() functions (to be more source-specific, mainly for WES).
 * All : Removed timestamped dir that made things tricky on some systems (I'm looking at you, Snakemake!)
 * All : Removed "EaCoN." prefix from most functions (less self-centric...)
@@ -179,11 +206,11 @@ v0.0.3-1 (20170629) *BBQ*
 v0.0.3-0 (20170511) *PupilsPair*
 -----------------
 * Added new functions/methods to prepare WES data :
-  . A2p.BAMConv : to generate RD (read depth) and SNP (single nucleotide polymorphisms) data from a pair (normal + tumor) of WES BAM files. This uses samtools (v1.4 mpileup), now included in the package as a linux x86_64 binary, and a in-house perl script included too.
-  . A2p.ExomeRun : to perform L2R GC-content normalization, BAF selection and generate files compatible with ASCAT.
-  . A2p.BAMConv.ExomeRun : as a wrapper to chained A2p.BAMConv > A2p.ExomeRun in a single run.
-  . A2p.BedGC and A2p.BedGC.chr : to compute GC-content tracks from a (binned) bed, using BioStrings. Both functions perform the same task, but the A2p.BedGC.chr is recommended as it works by chromosome (instead of at the whole genome level), thus consumes much less RAM than A2p.BedGC.
-  . A2p.BedCheck : To (control and) clean a be file, removing duplicates, merging overlaps and sorting by chr > start > end.
+* . A2p.BAMConv : to generate RD (read depth) and SNP (single nucleotide polymorphisms) data from a pair (normal + tumor) of WES BAM files. This uses samtools (v1.4 mpileup), now included in the package as a linux x86_64 binary, and a in-house perl script included too.
+* . A2p.ExomeRun : to perform L2R GC-content normalization, BAF selection and generate files compatible with ASCAT.
+* . A2p.BAMConv.ExomeRun : as a wrapper to chained A2p.BAMConv > A2p.ExomeRun in a single run.
+* . A2p.BedGC and A2p.BedGC.chr : to compute GC-content tracks from a (binned) bed, using BioStrings. Both functions perform the same task, but the A2p.BedGC.chr is recommended as it works by chromosome (instead of at the whole genome level), thus consumes much less RAM than A2p.BedGC.
+* . A2p.BedCheck : To (control and) clean a be file, removing duplicates, merging overlaps and sorting by chr > start > end.
 * Renamed functions for the sake of homogeneity.
 * Added the generation of a CBS-like (with extended columns for allelic CN, ploidy and GoF) for ASCN results.
 
@@ -225,12 +252,12 @@ v0.0.2-1 (20170215) *LostBread*
 -----------------
 * Merged BAF and L2R segmentation results in the report for the targets table.
 * Several ameliorations in the HTML report :
-  . Page width/margins hacks by Yannick BOURSIN.
-  . Better readability of scan date in array info table.
-  . More readable plots, especially for BAF (slightly increased ylim and line width, nice colors, ...).
-  . Added germline prediction plot.
-  . Fixed Symbol column in the target table (usefull for small-res 4:3 screens).
-  . Added missing parameters in the last last pane.
+* . Page width/margins hacks by Yannick BOURSIN.
+* . Better readability of scan date in array info table.
+* . More readable plots, especially for BAF (slightly increased ylim and line width, nice colors, ...).
+* . Added germline prediction plot.
+* . Fixed Symbol column in the target table (usefull for small-res 4:3 screens).
+* . Added missing parameters in the last last pane.
 
 v0.0.2-0 (20170214) *CoulFaZ Edition*
 -----------------

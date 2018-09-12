@@ -1,32 +1,32 @@
 ## Performs CS CEL processing
 CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.diploid = FALSE, l2r.level = "weighted", gc.renorm = TRUE, gc.rda = NULL, wave.renorm = TRUE, wave.rda = NULL, mingap = 1E+06, out.dir = getwd(), oschp.keep = FALSE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r4", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
   
-  # setwd("/home/job/WORKSPACE/EaCoN_tests/CSHD")
-  # CEL = "M2568_K02.CEL.bz2"
-  # samplename = "M2568_K02"
-  # dual.norm = FALSE
-  # normal.diploid = FALSE
-  # l2r.level = "normal"
-  # wave.renorm = TRUE
-  # wave.rda <- NULL
-  # gc.renorm = TRUE
-  # gc.rda <- NULL
-  # BAF.filter <- .75
-  # # BAF.binsize = 1E+07
-  # mingap = 1E+06
-  # out.dir = getwd()
-  # oschp.keep = TRUE
-  # force.OS = NULL
-  # apt.version = "2.4.0"
-  # apt.build = "na33.r4"
-  # return.data = FALSE
-  # write.data = TRUE
-  # plot = TRUE
-  # force = FALSE
-  # genome.pkg = "BSgenome.Hsapiens.UCSC.hg19"
-  # require(foreach)
-  # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
-  # source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
+  setwd("/home/job/WORKSPACE/EaCoN_tests/CSHD")
+  CEL = "M2568_K02.CEL.bz2"
+  samplename = "M2568_K02"
+  dual.norm = FALSE
+  normal.diploid = FALSE
+  l2r.level = "normal"
+  wave.renorm = TRUE
+  wave.rda <- NULL
+  gc.renorm = TRUE
+  gc.rda <- NULL
+  BAF.filter <- .75
+  # BAF.binsize = 1E+07
+  mingap = 1E+06
+  out.dir = getwd()
+  oschp.keep = TRUE
+  force.OS = NULL
+  apt.version = "2.4.0"
+  apt.build = "na33.r4"
+  return.data = FALSE
+  write.data = TRUE
+  plot = TRUE
+  force = FALSE
+  genome.pkg = "BSgenome.Hsapiens.UCSC.hg19"
+  require(foreach)
+  source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
   # source("~/git_gustaveroussy/EaCoN/R/germline_functions.R")
 
   
@@ -166,7 +166,7 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   baf.df <- baf.df[!is.na(baf.df$BAF),]
   gc()
   
-  ao.df <- Reduce(function(t1, t2) dplyr::left_join(t1, t2, by = "ProbeSetName"), list(ao.df, dplyr::as.tbl(data.frame(ProbeSetName = rownames(baf.df), BAF = baf.df$BAF)), dplyr::as.tbl(my.oschp$ProbeSets$AllelicData[,c(1,4)]), dplyr::as.tbl(my.oschp$Genotyping$Calls[,c(2,5)])))
+  ao.df <- suppressWarnings(Reduce(function(t1, t2) dplyr::left_join(t1, t2, by = "ProbeSetName"), list(ao.df, dplyr::as.tbl(data.frame(ProbeSetName = rownames(baf.df), BAF = baf.df$BAF)), dplyr::as.tbl(my.oschp$ProbeSets$AllelicData[,c(1,4)]), dplyr::as.tbl(my.oschp$Genotyping$Calls[,c(2,5)]))))
   rm(baf.df)
   gc()
   
@@ -264,13 +264,13 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   
   ## Rescaling
   # if (BAF.rescale) {
-    ao.df$BAF.unscaled <- ao.df$BAF
-    for(g in unique(ao.df$chrgap)) {
-      ing <- ao.df$chrgap == g
-      lmed <- median(ao.df$BAF[ing][ao.df$ForcedCall[ing] == 6], na.rm = TRUE)
-      umed <- median(ao.df$BAF[ing][ao.df$ForcedCall[ing] == 7], na.rm = TRUE)
-      ao.df$BAF[ing] <- (lmed - ao.df$BAF[ing]) / (lmed - umed)
-    }
+  ao.df$BAF.unscaled <- ao.df$BAF
+  for(g in unique(ao.df$chrgap)) {
+    ing <- ao.df$chrgap == g
+    lmed <- median(ao.df$BAF[ing][ao.df$ForcedCall[ing] == 6], na.rm = TRUE)
+    umed <- median(ao.df$BAF[ing][ao.df$ForcedCall[ing] == 7], na.rm = TRUE)
+    ao.df$BAF[ing] <- (lmed - ao.df$BAF[ing]) / (lmed - umed)
+  }
   # }
   
   ## Preparing germline
