@@ -87,7 +87,7 @@ While the current EaCoN package is the core of the process, multiple others are 
     - [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html) _to read HDF5 file format_
     - [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html) _to compute counts and variants from BAM files_
   - [@ GitHub](https://github.com)
-    - [ASCAT](https://github.com/Crick-CancerGenomics/ascat/ASCAT) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
+    - [ASCAT](https://github.com/Crick-CancerGenomics/ascat) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
     - [facets](https://github.com/mskcc/facets) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
 - Elements of the EaCoN workflow :
   - [@ GitHub](https://github.com/gustaveroussy) :
