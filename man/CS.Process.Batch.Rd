@@ -16,7 +16,7 @@
 \details{
   \code{CEL.list.file} is a tab-separated text file containing 2 columns (header and specified column names are mandatory) :
     \itemize{
-      \item{cel_files : Name (and path) of the CEL file(s)}
+      \item{CEL : Name (and path) of the CEL file(s)}
       \item{SampleName : The output sample name(s)}
     }
 }

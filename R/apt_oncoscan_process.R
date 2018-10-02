@@ -263,7 +263,7 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
       chrs = unique(ao.df$chr),
       samples = samplename,
       gender = as.vector(meta.b$predicted.gender),
-      sexchromosomes = c("X", "Y"),
+      sexchromosomes = sex.chr,
       failedarrays = NULL
     ),
     meta = list(

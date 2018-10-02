@@ -2,9 +2,9 @@
 \alias{Segment.SEQUENZA}
 \title{L2R and BAF joint segmentation using SEQUENZA.}
 \usage{
-  Segment.SEQUENZA(data = NULL, smooth.k = NULL, BAF.filter = .9, homoCut = .05,
+  Segment.SEQUENZA(data = NULL, smooth.k = NULL, BAF.filter = .75, homoCut = .05,
   SEQUENZA.pen = 50, recenter = "l2r.centeredpeak", calling.method = "mad",
-  nrf = .5, SER.pen = 2, out.dir = getwd(), return.data = FALSE,
+  nrf = .5, SER.pen = 40, out.dir = getwd(), return.data = FALSE,
   write.data = TRUE, plot = TRUE, force = FALSE)
 }
 \arguments{

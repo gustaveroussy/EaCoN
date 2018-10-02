@@ -52,7 +52,6 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
       stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
     }
   }
-  # data(list = genome, package = "chromosomes", envir = environment())
   tmsg(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
@@ -411,7 +410,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
 }
 
 ## FACETS L2R + BAF segmentation
-Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .9, homoCut = .05, FACETS.pen = 150, recenter = "l2r.centeredpeak", calling.method = "mad", nrf = .5, SER.pen = 2, out.dir = getwd(), return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
+Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoCut = .05, FACETS.pen = 150, recenter = "l2r.centeredpeak", calling.method = "mad", nrf = .5, SER.pen = 2, out.dir = getwd(), return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
   
   # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta2/WES/TCGA-A7-A0CE-01A_vs_10A")
   # data = readRDS("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta2/WES/TCGA-A7-A0CE-01A_vs_10A/TCGA-A7-A0CE-01A_vs_10A_hs37d5_b_processed.RDS")
@@ -459,7 +458,6 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .9, homoCu
       stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
     }
   }
-  # data(list = genome, package = "chromosomes", envir = environment())
   tmsg(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
@@ -483,6 +481,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .9, homoCu
   
   data$meta$eacon <- c(data$meta$eacon, list(
     "segmenter" = "FACETS",
+    "BAF.filter" = BAF.filter,
     "BAF.segments.homo.limit" = homoCut,
     "winsorize.k" = if(is.null(smooth.k)) "NA" else smooth.k,
     "FACETS.penalty" = FACETS.pen,
@@ -848,7 +847,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .9, homoCu
 }
 
 ## SEQUENZA L2R + BAF segmentation
-Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .9, homoCut = .05, SEQUENZA.pen = 50, recenter = "l2r.centeredpeak", calling.method = "mad", nrf = .5, SER.pen = 2, out.dir = getwd(), return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
+Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoCut = .05, SEQUENZA.pen = 50, recenter = "l2r.centeredpeak", calling.method = "mad", nrf = .5, SER.pen = 40, out.dir = getwd(), return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
   
   # setwd("/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc/Results/ALEX1")
   # data = readRDS("/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc/Results/ALEX1/ALEX1_hg38_b50_processed.RDS")
@@ -859,7 +858,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .9, homo
   # recenter = "l2r.centeredpeak"
   # calling.method = "mad"
   # nrf = 0.5
-  # SER.pen = 2
+  # SER.pen = 40
   # out.dir = getwd()
   # return.data = FALSE
   # write.data = TRUE
@@ -877,9 +876,6 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .9, homo
   if (calling.method == "mad" & is.null(nrf)) stop(tmsg("If calling.method is set to 'MAD', nrf is required !"))
   if (!is.null(SER.pen)) if (!is.character(SER.pen)) if (SER.pen <= 0) stop(tmsg("SER.pen should be NULL, a character or an integer/float > 0 !"))
   
-  valid.types <- c("WES", "WGS")
-  # if(!(data$meta$basic$type %in% valid.types)) stop(tmsg("SEQUENZA is only available for WES data !"))
-  
   ## Extract samplename
   samplename <- data$meta$basic$samplename
   tmsg(paste0("Sample : ", samplename))
@@ -894,7 +890,6 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .9, homo
       stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
     }
   }
-  # data(list = genome, package = "chromosomes", envir = environment())
   tmsg(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
@@ -918,6 +913,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .9, homo
   
   data$meta$eacon <- c(data$meta$eacon, list(
     "segmenter" = "SEQUENZA",
+    "BAF.filter" = BAF.filter,
     "BAF.segments.homo.limit" = homoCut,
     "winsorize.k" = if(is.null(smooth.k)) "NA" else smooth.k,
     "SEQUENZA.penalty" = SEQUENZA.pen,
@@ -986,14 +982,23 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .9, homo
   tmsg("SEQUENZA segmentation ...")
   
   ### Data conversion
-  l2r.df <- data.frame(chrs = as.numeric(as.factor(data$data$SNPpos$chrs)), pos = as.integer(data$data$SNPpos$pos), s1 = data$data$Tumor_LogR[,1], stringsAsFactors = FALSE)
-  baf.df <- data.frame(chrs = as.numeric(as.factor(data$data$SNPpos$chrs)), pos = as.integer(data$data$SNPpos$pos), s1 = data$data$Tumor_BAF[,1], stringsAsFactors = FALSE)
+  tpos <- as.integer(unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)]))
+  l2r.df <- data.frame(chrs = tpos, pos = as.integer(data$data$SNPpos$pos), s1 = data$data$Tumor_LogR[,1], stringsAsFactors = FALSE)
+  tbaf <- data$data$Tumor_BAF[,1]
+  tbaf[data$germline$germlinegenotypes] <- 0
+  baf.df <- data.frame(chrs = tpos, pos = as.integer(data$data$SNPpos$pos), s1 = tbaf, stringsAsFactors = FALSE)
   colnames(l2r.df)[3] <- colnames(baf.df)[3] <- samplename
   
   ### Blanking bins uncovered by BAF
   isna <- is.na(baf.df[[samplename]])
   baf.df[[samplename]][isna] <- 1
   baf.df[[samplename]][isna][baf.df$pos[isna] %% 2 == 0] <- 0
+  
+  ### Imputing missing L2R values
+  if(any(is.na(l2r.df[,3]))) {
+    l2r.tmp <- l2r.df[,3]
+    l2r.df[,3] <- approxfun(seq_along(l2r.tmp), l2r.tmp, rule = 2)(seq_along(l2r.tmp))
+  }
   
   ### Halving test
   # bafhi <- baf.df[[samplename]] < .5
@@ -1324,13 +1329,11 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
       stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
     }
   }
-  # data(list = genome, package = "chromosomes", envir = environment())
   tmsg(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   cs <- chromobjector(BSg.obj)
   
-  # data(list = genome, package = "chromosomes", envir = environment())
   tmsg("ASCN modeling (using ASCAT) ...")
   gammavec <- if(length(gammaRange) > 1 ) seq(gammaRange[1], gammaRange[2], 0.05) else gammaRange
   oridirx <- getwd()
@@ -1435,7 +1438,6 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
                  pch = ".", col = "darkgreen", lwd = 6)
       abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
       abline(h = 0:ylim, col = "grey75", lty = 3)
-      # try(text(x = cs$chromosomes$mid.chr.geno, y = ylim, labels = cs$chromosomes$chrA, pos = 1, cex = 1.5))
       
       try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
       
@@ -1615,13 +1617,11 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
       stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
     }
   }
-  # data(list = genome, package = "chromosomes", envir = environment())
   tmsg(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   cs <- chromobjector(BSg.obj)
   
-  # data(list = genome, package = "chromosomes", envir = environment())
   tmsg("ASCN modeling (using FACETS) ...")
   ascn.res <- facets::emcncf(x = data$data$additional, ...)
   ascn.res$cncf$lcn.em[is.na(ascn.res$cncf$lcn.em)] <- 0
@@ -1789,13 +1789,11 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
       stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
     }
   }
-  # data(list = genome, package = "chromosomes", envir = environment())
   tmsg(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   cs <- chromobjector(BSg.obj)
   
-  # data(list = genome, package = "chromosomes", envir = environment())
   tmsg("ASCN modeling (using sequenza) ...")
   
   ## Loading segments table
@@ -1988,7 +1986,7 @@ ASCN.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern = ".EaC
 }
 
 ## Generate the HTML report
-Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, report = TRUE, author.name = "", out.dir = getwd(), solo = FALSE, ldb = "/mnt/data_cigogne/bioinfo/") {
+Annotate.old <- function(data = NULL, refGene.table = NULL, targets.table = NULL, report = TRUE, author.name = "", out.dir = getwd(), solo = FALSE, ldb = "/mnt/data_cigogne/bioinfo/") {
 
   # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-E9-A1NH-01A_vs_11A/20180119203804")
   # data <- readRDS("TCGA-E9-A1NH-01A_vs_11A.EaCoN.ASPCF.RDS")
@@ -2530,6 +2528,569 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
 
   }
 
+  if (solo) {
+    tmsg("Making SOLO ...")
+    # tmpcbsname <- paste0(out.dir, "/", samplename, "_tmp.cbs")
+    tmpcbsname <- paste0(samplename, "_solo.cbs")
+    write.table(data$cbs$cut, tmpcbsname, sep="\t", quote = FALSE, row.names = FALSE)
+    # EaCoN.Annotate.solo(out.dir = out.dir, samplename = samplename, genome = genome, ldb = ldb)
+    Annotate.solo(cbs.file = tmpcbsname, genome = genome, ldb = ldb)
+    file.remove(tmpcbsname)
+  }
+  setwd(oridir)
+  tmsg("Done.")
+}
+
+Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, report = TRUE, author.name = "", out.dir = getwd(), solo = FALSE, ldb = "/mnt/data_cigogne/bioinfo/") {
+  
+  # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-E9-A1NH-01A_vs_11A/20180119203804")
+  # data <- readRDS("TCGA-E9-A1NH-01A_vs_11A.EaCoN.ASPCF.RDS")
+  # setwd("/home/job/WORKSPACE/MP/SNP6/BITES_p_TCGAb61_SNP_S_GenomeWideSNP_6_B12_697124/20180123165450")
+  # data <- readRDS("BITES_p_TCGAb61_SNP_S_GenomeWideSNP_6_B12_697124.EaCoN.ASPCF.RDS")
+  # setwd("/home/job/WORKSPACE/MP/ONCO/18H00752/20180214114019")
+  # data <- readRDS("/home/job/WORKSPACE/MP/ONCO/18H00752/20180214114019/18H00752.EaCoN.ASPCF.RDS")
+  # targets.table <- NULL
+  # out.dir <- getwd()
+  # refGene.table = NULL
+  # solo = TRUE
+  # report = TRUE
+  # ldb = "/mnt/data_cigogne/bioinfo/"
+  # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # source("/home/job/git_gustaveroussy/EaCoN/R/plot_functions.R")
+  # require(foreach)
+  
+  oridir <- getwd()
+  
+  if (!is.list(data)) stop(tmsg("data should be a list !"))
+  
+  valid.genomes <- get.valid.genomes()
+  my.ascat.seg <- data$data
+  
+  samplename <- data$meta$basic$samplename
+  genome <- data$meta$basic$genome
+  manufacturer <- data$meta$basic$manufacturer
+  source <- data$meta$basic$source
+  
+  tmsg("Loading genome data ...")
+  ## No refGene provided ...
+  if (is.null(refGene.table)) {
+    ## ... but some in bank : loading !
+    if (genome %in% names(valid.genomes)) {
+      self.pkg.name <- "EaCoN"
+      data(list = paste0("refGene_cl_", genome), package = self.pkg.name, envir = environment())
+      data(list = genome, package = "chromosomes", envir = environment())
+    } else {
+      ## ... and none in bank : no genes !
+      tmsg("WARNING : No refGene table provided, and none banked for current genome : Gene information won't exist in the report!")
+    }
+  } else if (!file.exists(refGene.table)) {
+    ## A refGene was provided, but could not be found : stopping !
+    stop(tmsg(paste0("Could not open file ", refGene.table, " !")))
+  } else {
+    ## A refGene was provided and file exists : loading !
+    rg.df <- read.table.fast(file = refGene.table)
+    rg.df <- rg.df[grep(pattern = "^chr([0-9]+|X|Y)$", x = rg.df$chrom),]
+    gen.df <- foreach::foreach(k = sort(unique(rg.df$chrom)), .combine = "rbind") %do% {
+      rg.k <- rg.df[rg.df$chrom == k, ]
+      rg.gr <- GenomicRanges::GRanges(seqnames = rg.k$name2, IRanges::IRanges(rg.k$txStart, rg.k$txEnd), strand = rg.k$strand)
+      rdx.k <- as.data.frame(GenomicRanges::reduce(rg.gr, ignore.strand = FALSE))
+      rdx.df <- data.frame(symbol = as.character(rdx.k$seqnames), chrom = k, chrN = as.numeric(cs$chrom2chr[k]), start = rdx.k$start, end = rdx.k$end, width = rdx.k$width, strand = as.character(rdx.k$strand), stringsAsFactors = FALSE)
+      return(rdx.df)
+    }
+    gen.df <- gen.df[order(gen.df$chrN, gen.df$start, gen.df$end),]
+  }
+  
+  if (!("cbs" %in% names(data))) stop(tmsg("CBS slot not found in RDS object ! Are you sure it is a valid one ?"))
+  cbs.df <- foreach::foreach(seg = 1:nrow(data$cbs$cut), .combine = "rbind") %do% {
+    ingenz <- if(exists(gen.df)) gen.df$symbol[gen.df$chrN == data$cbs$cut$Chr[seg] & gen.df$start <= data$cbs$cut$End[seg] & gen.df$end >= data$cbs$cut$Start[seg]] else ingenz <- "NA"
+    ingenz.len <- if(exists(gen.df)) length(ingenz) else "NA"
+    return(data.frame(data$cbs$cut[seg, ], Genes = ingenz.len, Symbol = paste0(ingenz, collapse = ","), stringsAsFactors = FALSE))
+  }
+  
+  tmsg("Building L2R segmentation table ...")
+  l2r.segments <- foreach::foreach(k = 1:length(my.ascat.seg$ch), .combine = "rbind") %do% {
+    segrle <- rle(my.ascat.seg$Tumor_LogR_segmented[my.ascat.seg$ch[[k]],1])
+    segdf <- data.frame(Probes = segrle$lengths, Value = segrle$values, stringsAsFactors = FALSE)
+    segdf$Chr <- k
+    segdf$Chrom <- my.ascat.seg$chrs[[k]]
+    probecs <- cumsum(segdf$Probes)
+    segdf$End.idx <- cumsum(segdf$Probes) + my.ascat.seg$ch[[k]][1] - 1
+    segdf$Start.idx <- c(my.ascat.seg$ch[[k]][1], segdf$End.idx[-nrow(segdf)] + 1)
+    segdf$Start <- my.ascat.seg$SNPpos$pos[segdf$Start.idx]
+    segdf$End <- my.ascat.seg$SNPpos$pos[segdf$End.idx]
+    segdf <- segdf[, c(3, 4, 7, 8, 2, 1, 6, 5)]
+  }
+  
+  tmsg("Building BAF segmentation table ...")
+  bafpos <- my.ascat.seg$SNPpos[rownames(my.ascat.seg$Tumor_LogR_segmented) %in% rownames(my.ascat.seg$Tumor_BAF_segmented[[1]]),]
+  bafpos$ProbeSet <- rownames(my.ascat.seg$Tumor_BAF_segmented[[1]])
+  bafpos$BAF <- my.ascat.seg$Tumor_BAF_segmented[[1]][,1]
+  bafpos$chrs <- as.character(bafpos$chrs)
+  bafkend <- vapply(unique(bafpos$chrs), function(x) { max(which(bafpos$chrs == x))}, 1)
+  bafbreaks <- cumsum(rle(bafpos$BAF)$lengths)
+  baf.seg <- data.frame(end.idx = sort(unique(c(bafkend, bafbreaks))), stringsAsFactors = FALSE)
+  baf.seg$start.idx <- c(1, baf.seg$end.idx[-nrow(baf.seg)]+1)
+  baf.seg$length.idx <- baf.seg$end.idx - baf.seg$start.idx +1
+  baf.seg$start.probeset <- bafpos$ProbeSet[baf.seg$start.idx]
+  baf.seg$end.probeset <- bafpos$ProbeSet[baf.seg$end.idx]
+  baf.seg$chrA <- bafpos$chrs[baf.seg$start.idx]
+  # baf.seg$Chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", baf.seg$chrA)]) else unlist(cs$chrom2chr[baf.seg$chrA])
+  baf.seg$Chr <- unlist(cs$chrom2chr[baf.seg$chrA])
+  # baf.seg$Chr <- unlist(cs$chrom2chr[paste0("chr", baf.seg$chrA)])
+  baf.seg$Start <- bafpos$pos[baf.seg$start.idx]
+  baf.seg$End <- bafpos$pos[baf.seg$end.idx]
+  baf.seg$Width <- baf.seg$End - baf.seg$Start + 1
+  baf.seg$Value <- bafpos$BAF[baf.seg$start.idx]
+  
+  ## BAF calling
+  # baf.homocut <- as.numeric(data$meta$eacon[["BAF-segments-homo-limit"]])
+  baf.homocut <- as.numeric(data$meta$eacon[["BAF.segments.homo.limit"]])
+  
+  ### Calling
+  baf.seg$Status <- "Unbalanced"
+  baf.homo <- sort(which(baf.seg$Value <= baf.homocut))
+  if (length(baf.homo) > 0) baf.seg$Status[baf.homo] <- "Homo"
+  baf.hetero <- sort(which(baf.seg$Value == .5))
+  if (length(baf.hetero) > 0) baf.seg$Status[baf.hetero] <- "Hetero"
+  
+  ## Writing ACBS (cut)
+  setwd(out.dir)
+  if (exists(gen.df)) {
+    tmsg("Building Targets table ...")
+    write.table(cbs.df, file = paste0(samplename, ".Cut.acbs"), sep = "\t", quote = FALSE, row.names = FALSE)
+  }
+  
+  cbsNC.df <- data$cbs$nocut
+  cbsNC.df <- cbind(cbsNC.df, cbs.df[, c(7, 8)])
+  cbsNC.df$Status <- "Normal"
+  cbsNC.df$Status[cbs.df$Log2Ratio > 0] <- "Gain"
+  cbsNC.df$Status[cbs.df$Log2Ratio < 0] <- "Loss"
+  
+  ## Loading targets
+  if (is.null(targets.table) & (genome %in% c("hg19", "hs37d5"))) {
+    self.pkg.name <- "EaCoN"
+    data(targetlist_475, package = self.pkg.name, envir = environment())
+  } else load(targets.table)
+  gen.targ <- gen.df[gen.df$symbol %in% targetlist, ]
+  targ.regz <- foreach::foreach(g = 1:nrow(gen.targ), .combine = "rbind") %do% {
+    ginreg.idx <- which(cbsNC.df$Chr == gen.targ$chrN[g] & cbsNC.df$Start <= gen.targ$end[g] & cbsNC.df$End >= gen.targ$start[g])
+    ginreg <- foreach::foreach(gg = ginreg.idx, .combine = "rbind") %do% {
+      match.start <- max(cbsNC.df$Start[gg], gen.targ$start[g])
+      match.end <- min(cbsNC.df$End[gg], gen.targ$end[g])
+      return(cbind(gen.targ[g, c(1, 2, 4:7)], match.start = match.start, match.end = match.end, cbsNC.df[gg,c(6, 9)], l2rwidth = cbsNC.df$End[gg] - cbsNC.df$Start[gg] + 1))
+    }
+    return(ginreg)
+  }
+  targ.regz <- foreach::foreach(g = 1:nrow(targ.regz), .combine = "rbind") %do% {
+    # ginreg.idx <- which(paste0("chr", baf.seg$chrA) == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
+    ginreg.idx <- which(baf.seg$chrA == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
+    ginreg <- foreach::foreach(gg = ginreg.idx, .combine = "rbind") %do% {
+      match.start <- max(baf.seg$Start[gg], targ.regz$match.start[g])
+      match.end <- min(baf.seg$End[gg], targ.regz$match.end[g])
+      return(cbind(targ.regz[g,c(1:6)], match.start = match.start, match.end = match.end, match.width = match.end - match.start +1, targ.regz[g,c(10,9,11)], baf.seg[gg,c(12,11)], bafwidth = baf.seg$End[gg] - baf.seg$Start[gg] + 1))
+    }
+    return(ginreg)
+  }
+  targ.regz$Cytoband <- vapply(1:nrow(targ.regz), function(x) {
+    scb <- cs$cytobands$chrom == targ.regz$chrom[x] & cs$cytobands$start <= targ.regz$start[x] & cs$cytobands$end >= targ.regz$start[x]
+    return(paste0(cs$cytobands$chrA[scb], cs$cytobands$cytoband[scb]))
+  }, "a")
+  
+  targ.regz <- targ.regz[order(as.numeric(unlist(cs$chrom2chr[targ.regz$chrom])), targ.regz$match.start, targ.regz$match.end), c(1:6,16,7:15)]
+  colnames(targ.regz) <- c("Target Symbol", "Chr", "Gene Start", "Gene End", "Gene Width", "Gene Strand", "Gene Cytoband", "Match Start", "Match End", "Match Width", "L2R Status", "L2R Value", "L2R Segment Width", "BAF Status", "BAF Value", "BAF Segment Width")
+  # write.table(targ.regz, file = paste0(out.dir, "/", samplename, ".TargetGenes.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
+  write.table(targ.regz, file = paste0(samplename, ".TargetGenes.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
+  
+  tmsg("Building Truncated table ...")
+  # gen.trunk.idx <- which(gen.df$chrN == cbsNC.df$Chr & gen.df$start < cbsNC.df$End & gen.df & gen.df$end > cbsNC.df$Start)
+  gen.trunk.idx.list <- sapply(1:nrow(gen.df), function(g) {
+    gidx <- which(cbsNC.df$Chr == gen.df$chrN[g] & ((cbsNC.df$Start > gen.df$start[g] & cbsNC.df$Start < gen.df$end[g]) | (cbsNC.df$End > gen.df$start[g] & cbsNC.df$End < gen.df$end[g])))
+    return(length(gidx))
+    # if(length(gen.trunk.idx) > 0) return(gidx) else return(NULL)
+  })
+  gen.trunk.idx <- which(gen.trunk.idx.list > 1)
+  if (length(gen.trunk.idx) > 0) {
+    gen.trunk <- gen.df[gen.trunk.idx,]
+    trunc.regz <- foreach::foreach(g = 1:nrow(gen.trunk), .combine = "rbind") %do% {
+      ginreg.idx <- which(cbsNC.df$Chr == gen.trunk$chrN[g] & cbsNC.df$Start <= gen.trunk$end[g] & cbsNC.df$End >= gen.trunk$start[g])
+      ginreg <- foreach::foreach(gg = ginreg.idx, .combine = "rbind") %do% {
+        match.start <- max(cbsNC.df$Start[gg], gen.trunk$start[g])
+        match.end <- min(cbsNC.df$End[gg], gen.trunk$end[g])
+        return(cbind(gen.trunk[g, c(1, 2, 4:7)], match.start = match.start, match.end = match.end, cbsNC.df[gg,c(6, 9)], l2rwidth = cbsNC.df$End[gg] - cbsNC.df$Start[gg] + 1))
+      }
+      return(ginreg)
+    }
+    trunc.regz <- foreach::foreach(g = 1:nrow(trunc.regz), .combine = "rbind") %do% {
+      # ginreg.idx <- which(paste0("chr", baf.seg$chrA) == trunc.regz$chrom[g] & baf.seg$Start <= trunc.regz$match.end[g] & baf.seg$End >= trunc.regz$match.start[g])
+      # ginreg.idx <- which(paste0("chr", baf.seg$chrA) == trunc.regz$chrom[g] & ((baf.seg$Start <= trunc.regz$match.start[g] & baf.seg$End >= trunc.regz$match.start[g]) | (baf.seg$Start <= trunc.regz$match.end[g] & baf.seg$End >= trunc.regz$match.end[g])))
+      # ginreg.idx <- which(paste0("chr", baf.seg$chrA) == trunc.regz$chrom[g] & baf.seg$Start <= trunc.regz$match.end[g] & baf.seg$End >= trunc.regz$match.start[g])
+      ginreg.idx <- which(baf.seg$chrA == trunc.regz$chrom[g] & baf.seg$Start <= trunc.regz$match.end[g] & baf.seg$End >= trunc.regz$match.start[g])
+      if (length(ginreg.idx > 0)) {
+        ginreg <- foreach::foreach(gg = ginreg.idx, .combine = "rbind") %do% {
+          match.start <- max(baf.seg$Start[gg], trunc.regz$match.start[g])
+          match.end <- min(baf.seg$End[gg], trunc.regz$match.end[g])
+          return(cbind(trunc.regz[g,c(1:6)], match.start = match.start, match.end = match.end, match.width = match.end - match.start +1, trunc.regz[g,c(10,9,11)], baf.seg[gg,c(12,11)], bafwidth = baf.seg$End[gg] - baf.seg$Start[gg] + 1))
+        }
+      } else {
+        ginreg <- data.frame(trunc.regz[g,c(1:8)], match.width = trunc.regz$match.end[g] - trunc.regz$match.start[g] + 1, trunc.regz[g,c(10,9,11)], Status = NA, Value = NA, bafwidth = NA, stringsAsFactors = FALSE, check.names = FALSE)
+      }
+      return(ginreg)
+    }
+    trunc.regz$Cytoband <- vapply(1:nrow(trunc.regz), function(x) {
+      scb <- cs$cytobands$chrom == trunc.regz$chrom[x] & cs$cytobands$start <= trunc.regz$start[x] & cs$cytobands$end >= trunc.regz$start[x]
+      return(paste0(cs$cytobands$chrA[scb], cs$cytobands$cytoband[scb]))
+    }, "a")
+    trunc.regz <- trunc.regz[order(as.numeric(unlist(cs$chrom2chr[trunc.regz$chrom])), trunc.regz$match.start, trunc.regz$match.end), c(1:6,16,7:15)]
+    colnames(trunc.regz) <- c("Gene Symbol", "Chr", "Gene Start", "Gene End", "Gene Width", "Gene Strand", "Gene Cytoband", "Match Start", "Match End", "Match Width", "L2R Status", "L2R Value", "L2R Segment Width", "BAF Status", "BAF Value", "BAF Segment Width")
+    # write.table(trunc.regz, file = paste0(out.dir, "/", samplename, ".TruncatedGenes.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
+    write.table(trunc.regz, file = paste0(samplename, ".TruncatedGenes.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
+  }
+  
+  if (report) {
+    tmsg("Preparing HTML report ...")
+    
+    ## Locating RMD
+    self.pkg.name <- "EaCoN"
+    rmd.path <- system.file("extdata", "html_report.Rmd", package = self.pkg.name)
+    
+    if ( (source == "microarray") & (manufacturer == "Affymetrix") ) {
+      
+      ## Getting meta data
+      tmsg("Getting META keys ...")
+      meta.tags <- data.frame(
+        key = c("affymetrix-algorithm-param-option-set-analysis-name",
+                "affymetrix-array-type",
+                "affymetrix-array-id",
+                "affymetrix-array-barcode",
+                "affymetrix-scanner-id",
+                "affymetrix-scan-date",
+                "affymetrix-chipsummary-MAPD",
+                "affymetrix-chipsummary-iqr",
+                "affymetrix-chipsummary-snp-qc",
+                "affymetrix-chipsummary-waviness-sd",
+                "predicted.gender"
+        ),
+        entry = c("analysis",
+                  "analysis",
+                  "array",
+                  "array",
+                  "acquisition",
+                  "acquisition",
+                  "analysis",
+                  "analysis",
+                  "analysis",
+                  "analysis",
+                  "basic"
+        ),
+        sig = c("Sample Name",
+                "Array Type",
+                "Array ID",
+                "Array Barcode",
+                "Scanner ID",
+                "Scan Date",
+                "MAPD",
+                "IQR",
+                "SNPQC",
+                "WavinessSd",
+                "Predicted Gender"
+        ),
+        stringsAsFactors = FALSE
+      )
+      
+      chip.list <- names(data$meta$affy)[names(data$meta$affy) != "analysis"]
+      meta.tags$val <- foreach(t = seq_len(nrow(meta.tags)), .combine = "c") %do% {
+        if (meta.tags$entry[t] == "analysis") {
+          ext.meta <- getmeta(key = meta.tags$key[t], meta = data$meta$affy$analysis)
+        } else if (meta.tags$entry[t] %in% c("eacon", "basic")) {
+          ext.meta <- getmeta(key = meta.tags$key[t], meta = data$meta[[meta.tags$entry[t]]])
+        } else {
+          ext.meta <- paste0(sapply(chip.list, function(p) { getmeta(key = meta.tags$key[t], meta = data$meta$affy[[p]][[meta.tags$entry[t]]])}), collapse = " ")
+        }
+        return(ext.meta)
+      }
+      
+      arraytype <- meta.tags$val[meta.tags$key == "affymetrix-array-type"]
+      meta.tags$val[meta.tags$key == "affymetrix-scan-date"] <- gsub(replacement = "/", x = gsub(replacement = "_", x = gsub(replacement = "", x = meta.tags$val[meta.tags$key == "affymetrix-scan-date"], pattern = "Z", ignore.case = FALSE), pattern = "T", ignore.case = FALSE), pattern = "-", ignore.case = FALSE)
+      meta.tags$val[meta.tags$key == "affymetrix-array-id"] <- gsub(replacement = "_", x = meta.tags$val[meta.tags$key == "affymetrix-array-id"], pattern = "-", ignore.case = FALSE)
+      
+      ## Loading CEL files for intensity data/plot
+      tmsg("Plotting CEL file(s) intensity map ...")
+      # intplotf <- paste0(out.dir, "/", samplename, ".INT.png")
+      intplotf <- paste0(samplename, ".INT.png")
+      narray <- length(names(data$CEL))
+      plot.grid <- num2mat(narray)
+      png(intplotf, width = 600*plot.grid[1], height = 600*plot.grid[2])
+      par(mar=c(1,1,1,1),xaxs='i',yaxs='i',las=1, mfrow=rev(plot.grid))
+      co <- grDevices::colorRampPalette(c('black','white'))
+      for(p in seq_len(narray)) {
+        celobj <- celstruc(celdat = data$CEL[[p]])
+        graphics::image(log2(celobj$intensities[,ncol(celobj$intensities):1]),col=co(20),zlim=c(5,14),axes=F,xlab='',ylab='',useRaster=T)
+        box(lwd=3)
+      }
+      dev.off()
+      intplotf <- tools::file_path_as_absolute(intplotf)
+      # meta.tags <- rbind(meta.tags, data.frame(key = c("a2p-cel-median-intensity", "a2p-cel-outliers", "a2p-cel-outliers-pc"), sig = c("Median Raw Intensity", "# Outliers", "Outliers (%)"), val = c(celobj$int.median, celobj$n.outliers, paste0(round(celobj$pc.outliers / 100, digits = 3), " %")), stringsAsFactors = FALSE))
+      
+      ## Building array & QC tables
+      tmsg("Building Array & QC tables ...")
+      array.df <- data.frame(t(meta.tags$val[1:6]), stringsAsFactors = FALSE)
+      colnames(array.df) <- meta.tags$sig[1:6]
+      qc.df <- data.frame(t(meta.tags$val[7:11]), stringsAsFactors = FALSE)
+      colnames(qc.df) <- meta.tags$sig[7:11]
+      qc.df[["Median Raw Intensity"]] <- paste0(vapply(chip.list, function(p) { return(median(data$CEL[[p]]$intensities, na.rm = TRUE)) }, 1), collapse = " ; ")
+      qc.df[["Outlier Probes"]] <- paste0(vapply(chip.list, function(p) { return(length(data$CEL[[p]]$outliers)) }, 1), collapse = " ; ")
+      
+      qc.df$mapd.flag <- if(is.na(as.numeric(qc.df$MAPD))) "#e0e0e0" else if(as.numeric(qc.df$MAPD) < .2) "#00cc00" else if(as.numeric(qc.df$MAPD) < .25) "#ff9900" else "#f7543b"
+      qc.df$snpqc.flag <- if(is.na(as.numeric(qc.df$SNPQC))) "#e0e0e0" else if(as.numeric(qc.df$SNPQC) >= 26) "#00cc00" else if(as.numeric(qc.df$SNPQC) >= 15) "#ff9900" else "#f7543b"
+      qc.df$waviness.flag <- if(is.na(as.numeric(qc.df$WavinessSd))) "#e0e0e0" else if(as.numeric(qc.df$WavinessSd) < .12) "#00cc00" else "#f7543b"
+    }
+    ## PLOTS
+    ### Genomic L2R plot
+    tmsg("Plotting L2R (geno) ...")
+    mad.diff <- abs(diff(my.ascat.seg$Tumor_LogR[,1]))
+    my.mad <- stats::median(mad.diff[mad.diff>0], na.rm = TRUE)
+    
+    # g.cut <- getmeta(key = "L2R-segments-gain-cutoff", meta = data$meta$eacon)
+    g.cut <- data$meta$eacon[["L2R-segments-gain-cutoff"]]
+    # l.cut <- getmeta(key = "L2R-segments-loss-cutoff", meta = data$meta$eacon)
+    l.cut <- data$meta$eacon[["L2R-segments-loss-cutoff"]]
+    
+    gain.idx <- which(l2r.segments$Value > g.cut)
+    loss.idx <- which(l2r.segments$Value < l.cut)
+    normal.idx <- which(l2r.segments$Value >= l.cut & l2r.segments$Value <= g.cut)
+    l2r.seg.obj <- list(pos = l2r.segments, idx = list(gain = gain.idx, loss = loss.idx, normal = normal.idx), cutval = c(l.cut, g.cut))
+    seg.col <- list(gain = "blue", outscale.gain = "midnightblue", loss = "red", outscale.loss = "darkred", normal = "black")
+    # l2r.chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(my.ascat.seg$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(my.ascat.seg$SNPpos$chrs)])
+    l2r.chr <- unlist(cs$chrom2chr[as.character(my.ascat.seg$SNPpos$chrs)])
+    l2r.value <- data.frame(Chr = l2r.chr,
+                            Start = my.ascat.seg$SNPpos$pos,
+                            End = my.ascat.seg$SNPpos$pos,
+                            Value = my.ascat.seg$Tumor_LogR_wins[,1],
+                            stringsAsFactors = FALSE)
+    genome.pkg <- data$meta$basic$genome.pkg
+    
+    # png(paste0(out.dir, "/", samplename, ".L2R.G.png"), width = 1850, height = 980)
+    png(paste0(samplename, ".L2R.G.png"), width = 1850, height = 980)
+    par(mar = c(1, 6, 3, 1))
+    EaCoN.l2rplot.geno(l2r = l2r.value,
+                       seg = l2r.seg.obj,
+                       seg.col = seg.col,
+                       seg.type = "block",
+                       seg.normal = TRUE,
+                       genome.pkg = genome.pkg,
+                       title = paste0(samplename, " L2R"),
+                       ylim = c(-1.5,1.5))
+    dev.off()
+    
+    ### Genomic BAF plot
+    tmsg("Plotting BAF ...")
+    # baf.chr <-if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(my.ascat.seg$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(my.ascat.seg$SNPpos$chrs)])
+    baf.chr <- unlist(cs$chrom2chr[as.character(my.ascat.seg$SNPpos$chrs)])
+    baf.value <- data.frame(Chr = baf.chr,
+                            Start = my.ascat.seg$SNPpos$pos,
+                            End = my.ascat.seg$SNPpos$pos,
+                            Value = my.ascat.seg$Tumor_BAF[,1],
+                            stringsAsFactors = FALSE)
+    
+    # png(paste0(out.dir, "/", samplename, ".BAF.png"), width = 1850, height = 980)
+    png(paste0(samplename, ".BAF.png"), width = 1850, height = 980)
+    par(mar = c(1, 6, 3, 1))
+    EaCoN.bafplot.geno(baf = baf.value,
+                       seg = baf.seg,
+                       seg.type = "both",
+                       genome.pkg = genome.pkg,
+                       title = paste0(samplename, " BAF")
+    )
+    dev.off()
+    
+    ### L2R Karyotypic plot
+    tmsg("Plotting L2R (karyotype) ...")
+    # karyoplotf <- paste0(out.dir, "/", samplename, ".L2R.K.png")
+    karyoplotf <- paste0(samplename, ".L2R.K.png")
+    png(karyoplotf, width = 1850, height = 980)
+    EaCoN.l2rplot.karyo(l2r = l2r.value, seg = l2r.seg.obj, seg.col = seg.col, seg.type = "block", seg.normal = TRUE, ylim = c(-1.5,1.5), genome.pkg = genome.pkg)
+    dev.off()
+    karyoplotf <- tools::file_path_as_absolute(karyoplotf)
+    
+    ### Chromosomal plots
+    tmsg("Plotting L2R (chromosomes) ...")
+    # kpdir <- paste0(out.dir, "/chromosomes/")
+    kpdir <- "chromosomes/"
+    dir.create(kpdir)
+    krN <- unique(l2r.seg.obj$pos$Chr)
+    krA <- unlist(cs$chr2chrom[krN])
+    for (kr in 1:length(krN)) {
+      
+      png(paste0(kpdir, "/", krA[kr], ".png"), width=1350, height = 750)
+      EaCoN.l2rplot.chromo(chr = krN[kr],
+                           l2r = l2r.value,
+                           l2r.seg = l2r.seg.obj,
+                           baf = baf.value,
+                           baf.seg = baf.seg,
+                           l2r.seg.type = "block",
+                           baf.seg.type = "both",
+                           seg.normal = TRUE,
+                           genome.pkg = genome.pkg
+      )
+      dev.off()
+    }
+    # kplotlist <- fpaav(list.files(path = "chromosomes", pattern = "\\.png", full.names = TRUE, ignore.case = FALSE, include.dirs = FALSE, recursive = FALSE))
+    kplotlist <- fpaav(vapply(krA, function(k) { paste0("chromosomes/", k, ".png")}, "a"))
+    
+    ## Instability metrics
+    tmsg("Building instability metrics table ...")
+    gi.df <- data.frame(Status = c("Gain", "Loss", "Aberrant (Gain + Loss)", "Normal", "TOTAL"), stringsAsFactors = FALSE)
+    gi.idx <- list(gi.gain.idx = gain.idx,
+                   gi.loss.idx = loss.idx,
+                   gi.aberrant.idx = sort(c(gain.idx, loss.idx)),
+                   gi.normal.idx = normal.idx,
+                   gi.all.idx = 1:nrow(cbsNC.df))
+    gi.df$Segments <- vapply(gi.idx, length, 1)
+    gi.df$SumWidth <- vapply(names(gi.idx), function(x) { if(length(gi.idx[[x]]) > 0) return(sum(cbsNC.df$End[gi.idx[[x]]] - cbsNC.df$Start[gi.idx[[x]]] +1)) else return(0) }, 1)
+    gi.df$Frac <- gi.df$SumWidth / cs$genome.length
+    gi.df$MedianWidth <- vapply(names(gi.idx), function(x) { if(length(gi.idx[[x]]) > 0) return(median(cbsNC.df$End[gi.idx[[x]]] - cbsNC.df$Start[gi.idx[[x]]] +1)) else return(0)}, 1)
+    gi.df$MedianL2R <- round(vapply(names(gi.idx), function(x) { if(length(gi.idx[[x]]) > 0) return(median(cbsNC.df$Log2Ratio[gi.idx[[x]]])) else return(NA)}, 1), digits = 2)
+    
+    gi.df$SumWidth <- format(gi.df$SumWidth, big.mark = ",")
+    gi.df$Frac <- paste0(format(gi.df$Frac * 100, digits = 2), " %")
+    gi.df$MedianWidth <- format(ceiling(gi.df$MedianWidth), big.mark = ",")
+    colnames(gi.df) <- c("CNA Status", "# Segments", "Total Width (nt)", "Genome Fraction", "Median Width (nt)", "Median log2(ratio)")
+    # write.table(gi.df, file = paste0(out.dir, "/", samplename, ".Instab.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
+    write.table(gi.df, file = paste0(samplename, ".Instab.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
+    
+    ## Segments table
+    ### L2R
+    tmsg("Polishing L2R segments table ...")
+    minbold <- 1
+    segtab.df <- l2r.segments
+    segtab.df$Ratio <- 2^segtab.df$Value
+    # segtab.df$ChromFull <- paste0("chr", segtab.df$Chrom)
+    # segtab.df$ChromFull <- segtab.df$Chrom
+    segtab.df$Width <- segtab.df$End - segtab.df$Start +1
+    segtab.df$Start.band <- vapply(1:nrow(segtab.df), function(x) {
+      scb <- cs$cytobands$chrN == segtab.df$Chr[x] & cs$cytobands$start <= segtab.df$Start[x] & cs$cytobands$end >= segtab.df$Start[x]
+      return(paste0(cs$cytobands$chrA[scb], cs$cytobands$cytoband[scb]))
+    }, "a")
+    segtab.df$End.band <- vapply(1:nrow(segtab.df), function(x) {
+      ecb <- cs$cytobands$chrN == segtab.df$Chr[x] & cs$cytobands$start <= segtab.df$End[x] & cs$cytobands$end >= segtab.df$End[x]
+      return(paste0(cs$cytobands$chrA[ecb], cs$cytobands$cytoband[ecb]))
+    }, "a")
+    segtab.df$Status <- "Normal"
+    segtab.df$Status[gain.idx] <- "Gain"
+    segtab.df$Status[loss.idx] <- "Loss"
+    segtab.df$Symbol <- cbs.df$Symbol
+    segtab.df$NrSymbol <- vapply(1:nrow(segtab.df), function(x) { length(unlist(strsplit(x = segtab.df$Symbol[x], split = ","))) }, 1)
+    segtab.df$l2rbold <- 0
+    segtab.df$l2rbold[abs(segtab.df$Value) > minbold] <- 1
+    # segtab.df <- segtab.df[,c(10,3,4,11:14,5,9,6,16,15,17)]
+    
+    # segtab.df <- segtab.df[,c(1,3,4,10:13,5,9,6,15,14,16)]
+    segtab.df <- segtab.df[,c(2,3,4,10:13,5,9,6,15,14,16)]
+    
+    colnames(segtab.df) <- c("Chr", "Start", "End", "Width", "Start Cytoband", "End Cytoband", "Status", "L2R", "Ratio", "# Markers", "# Genes", "symbols", "l2rbold")
+    # segtab.df$Start <- format(segtab.df$Start, big.mark = ",")
+    # segtab.df$End <- format(segtab.df$End, big.mark = ",")
+    # segtab.df$Width <- width.unit.conv(segtab.df$Width)
+    segtab.df$L2R <- round(segtab.df$L2R, digits = 3)
+    segtab.df$Ratio <- round(segtab.df$Ratio, digits = 3)
+    
+    l2r.segstat <- c("Gain", "Loss", "Normal")
+    l2r.segcol <- c(seg.col$gain, seg.col$loss, seg.col$normal)
+    
+    ### BAF
+    tmsg("Polishing BAF segmentation table ...")
+    segbaf.df <- baf.seg
+    # segbaf.df$Chrom <- paste0("chr", segbaf.df$chrA)
+    segbaf.df$Chrom <- segbaf.df$chrA
+    segbaf.df$Start.band <- vapply(1:nrow(segbaf.df), function(x) {
+      scb <- cs$cytobands$chrN == segbaf.df$Chr[x] & cs$cytobands$start <= segbaf.df$Start[x] & cs$cytobands$end >= segbaf.df$Start[x]
+      return(paste0(cs$cytobands$chrA[scb], cs$cytobands$cytoband[scb]))
+    }, "a")
+    segbaf.df$End.band <- vapply(1:nrow(segbaf.df), function(x) {
+      ecb <- cs$cytobands$chrN == segbaf.df$Chr[x] & cs$cytobands$start <= segbaf.df$End[x] & cs$cytobands$end >= segbaf.df$End[x]
+      return(paste0(cs$cytobands$chrA[ecb], cs$cytobands$cytoband[ecb]))
+    }, "a")
+    segbaf.df <- foreach::foreach(seg = 1:nrow(segbaf.df), .combine = "rbind") %do% {
+      ingenz <- gen.df$symbol[gen.df$chrN == segbaf.df$Chr[seg] & gen.df$start <= segbaf.df$End[seg] & gen.df$end >= segbaf.df$Start[seg]]
+      return(data.frame(segbaf.df[seg, ], Genes = length(ingenz), Symbol = paste0(ingenz, collapse = ","), stringsAsFactors = FALSE))
+    }
+    segbaf.df <- segbaf.df[,c(13,8:10,14,15,12,11,3,16,17)]
+    colnames(segbaf.df) <- c("Chr", "Start", "End", "Width", "Start Cytoband", "End Cytoband", "Status", "BAF", "# Markers", "# Genes", "symbols")
+    # segbaf.df$Start <- format(segbaf.df$Start, big.mark = ",")
+    # segbaf.df$End <- format(segbaf.df$End, big.mark = ",")
+    # segbaf.df$Width <- format(segbaf.df$Width, big.mark = ",")
+    # segbaf.df$Width <- width.unit.conv(segbaf.df$Width)
+    segbaf.df$BAF <- round(segbaf.df$BAF, digits = 3)
+    
+    baf.segstat <- c("Hetero", "Homo", "Unbalanced")
+    baf.segcol <- c(paste0("rgb(", paste0(col2rgb("black"), collapse = ","), ")"), paste0("rgb(", paste0(col2rgb("cadetblue4"), collapse = ","), ")"), paste0("rgb(", paste0(col2rgb("coral1"), collapse = ","), ")"))
+    
+    
+    ## Targets table
+    tmsg("Polishing targets table ...")
+    # targ.regz[["Gene Start"]] <- format(targ.regz[["Gene Start"]], big.mark = ",")
+    # targ.regz[["Gene End"]] <- format(targ.regz[["Gene End"]], big.mark = ",")
+    # targ.regz[["Gene Width"]] <- width.unit.conv(targ.regz[["Gene Width"]])
+    # targ.regz[["Match Start"]] <- format(targ.regz[["Match Start"]], big.mark = ",")
+    # targ.regz[["Match End"]] <- format(targ.regz[["Match End"]], big.mark = ",")
+    # targ.regz[["Match Width"]] <- width.unit.conv(targ.regz[["Match Width"]])
+    # targ.regz[["L2R Segment Width"]] <- width.unit.conv(targ.regz[["L2R Segment Width"]])
+    # targ.regz[["BAF Segment Width"]] <- width.unit.conv(targ.regz[["BAF Segment Width"]])
+    targ.regz[["L2R Value"]] <- round(targ.regz[["L2R Value"]], digits = 3)
+    targ.regz[["BAF Value"]] <- round(targ.regz[["BAF Value"]], digits = 3)
+    
+    targ.regz$l2rbold <- 0
+    targ.regz$l2rbold[abs(targ.regz[["L2R Value"]]) > minbold] <- 1
+    
+    ## Truncated table
+    if (length(gen.trunk.idx) > 0) {
+      
+      # trunc.regz[["Gene Start"]] <- format(trunc.regz[["Gene Start"]], big.mark = ",")
+      # trunc.regz[["Gene End"]] <- format(trunc.regz[["Gene End"]], big.mark = ",")
+      # trunc.regz[["Gene Width"]] <- width.unit.conv(trunc.regz[["Gene Width"]])
+      # trunc.regz[["Match Start"]] <- format(trunc.regz[["Match Start"]], big.mark = ",")
+      # trunc.regz[["Match End"]] <- format(trunc.regz[["Match End"]], big.mark = ",")
+      # trunc.regz[["Match Width"]] <- width.unit.conv(trunc.regz[["Match Width"]])
+      # trunc.regz[["L2R Segment Width"]] <- width.unit.conv(trunc.regz[["L2R Segment Width"]])
+      # trunc.regz[["BAF Segment Width"]] <- width.unit.conv(trunc.regz[["BAF Segment Width"]])
+      trunc.regz[["L2R Value"]] <- round(trunc.regz[["L2R Value"]], digits = 3)
+      trunc.regz[["BAF Value"]] <- round(trunc.regz[["BAF Value"]], digits = 3)
+      
+      trunc.regz$l2rbold <- 0
+      trunc.regz$l2rbold[abs(trunc.regz[["L2R Value"]]) > minbold] <- 1
+    }
+    
+    ## Deactivate SOLO if no abnormal segment available
+    if (solo & (length(which(segtab.df$Status != "Normal")) == 0)) {
+      solo <- FALSE
+      tmsg("No aberrant segment identified, deactivating SOLO ...")
+    }
+    
+    ## Render
+    message(tmsg("Rendering report ..."))
+    # htmlout <- paste0(out.dir, "/", samplename, ".REPORT.html")
+    # gplotlist <- fpaav(paste0(samplename, ".", c("ASPCF", "L2R.G", "BAF", "PredictedGermline"), ".png"))
+    gplotlist <- fpaav(paste0(samplename, ".", c("ASPCF", "L2R.G", "BAF"), ".png"))
+    htmlout <- paste0(samplename, ".REPORT.html")
+    show.flag <- if ((data$meta$basic$source == "microarray") & (data$meta$basic$manufacturer == "Affymetrix")) TRUE else FALSE
+    rmarkdown::render(input = rmd.path, output_format = "html_document", output_file = htmlout, output_dir = getwd(), intermediates_dir = getwd())
+    
+    ## Hacking HTML
+    message(tmsg("Hacking HTML ..."))
+    htmltmp <- readLines(htmlout)
+    ### Page width
+    ltcidx <- grep(pattern = ".main-container \\{", x = htmltmp)
+    for (x in ltcidx) htmltmp[x+1] <- "  max-width: 2000px;"
+    ### Page margin
+    mtocidx1 <- grep(pattern = "<div class=\"col-xs-12 col-sm-4 col-md-3\">", x = htmltmp)
+    if(length(mtocidx1) > 0) htmltmp[mtocidx1] <- "<div class=\"col-xs-12 col-sm-3 col-md-2\">"
+    mtocidx2 <- grep(pattern = "<div class=\"toc-content col-xs-12 col-sm-8 col-md-9\">", x = htmltmp)
+    if(length(mtocidx2) > 0) htmltmp[mtocidx2] <- "<div class=\"toc-content col-xs-12 col-sm-9 col-md-10\">"
+    writeLines(htmltmp, htmlout)
+    tmsg("Done.")
+    
+  }
+  
   if (solo) {
     tmsg("Making SOLO ...")
     # tmpcbsname <- paste0(out.dir, "/", samplename, "_tmp.cbs")

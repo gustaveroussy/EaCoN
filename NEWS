@@ -1,9 +1,17 @@
 EaCoN
 -----
 
+v0.3.3-1 (20180918) **
+-----------------
+* BUG : Segment.SEQUENZA() : added imputation of NA values in L2R object that made copynumber::aspcf() unable to work (happened with microarrays for flagged probes, not WES).
+* BUG : Segment.SEQUENZA() : BAF filtering wasn't working properly, resulting in wrong BAF segmentation, for all microarrays.
+* BUG : CS.Process.Batch() : wrong variable name in header check.
+* CORR : OS.Process() : corrected wrong handling of sex.chr output was forced as c("X", "Y") instead of variable, default c("chrX", "chrY").
+* CORR : Segment.FACETS() Segment.SEQUENZA() : Added missing meta 'BAF.filter' in the object.
+
 v0.3.3 (20180911) *Trinity*
 -----------------
-* NEW : SEQUENZA segmentation plainly implemented, for both L2R+BAF bivariate segmentation [Segment.SEQUENZA()] AND copy number estimation [ASCN.SEQUENZA()].
+* NEW : SEQUENZA segmentation plainly implemented, for both L2R+BAF bivariate segmentation Segment.SEQUENZA() AND copy number estimation ASCN.SEQUENZA().
 * BUG : Segment.ff() : Corrected wrong do.call() call (parameters not given as a list).
 * CORR : ASCN.ASCAT() : CN output file was badly formatted.
 * MOD : ASCN.ff() : Suppressed the "segmenter" parameter, which is read from the RDS meta$eacon$segmenter value.
@@ -49,13 +57,13 @@ v0.3.0 (20180724) *PapoQueen*
 * All : Removed "EaCoN." prefix from most functions (less self-centric...)
 * All : Took care of vectors and columns that could be converted to factor or integer (to free some RAM up).
 * All : Added missing support for manual PELT penalty (only asymptotic mode was considered when SER.value was numeric).
-* SNP6 : Revamped BAF homozygous calling and rescaling.
+* SNP6 : Revamped BAF homozygous calling and rescaling. 
 * Defined the novel sets of default parameters for all supported technologies.
 * Redacted the README.md
 
 v0.2.13 (20180531) *SunIsBack*
 ------------------
-* WES : Added more data to the BIN  RDS output (counts with the reference genome nucleotide for both test and ref BAMs). This is in order to 1) filter out on a minimum alternative allele count 2) allow the use of other segmenters that do not rely on BAF but rather on AD (like PSCBS) or logOR (like FACETS).
+* WES : Added more data to the BIN RDS output (counts with the reference genome nucleotide for both test and ref BAMs). This is in order to 1) filter out on a minimum alternative allele count 2) allow the use of other segmenters that do not rely on BAF but rather on AD (like PSCBS) or logOR (like FACETS).
 * Modified the subthreading scheme for EaCoN.WES.Bin() : now each subthread has its own connection to the BAM files. This allows each thread to work fully (but increases simultaneous IO).
 * Now each SNP variant has its corresponding bin index, which will allow to perform density-based selection like in FACETS.
 
