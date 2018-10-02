@@ -1,32 +1,32 @@
 ## Performs CS CEL processing
 CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.diploid = FALSE, l2r.level = "weighted", gc.renorm = TRUE, gc.rda = NULL, wave.renorm = TRUE, wave.rda = NULL, mingap = 1E+06, out.dir = getwd(), oschp.keep = FALSE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r4", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
   
-  setwd("/home/job/WORKSPACE/EaCoN_tests/CSHD")
-  CEL = "M2568_K02.CEL.bz2"
-  samplename = "M2568_K02"
-  dual.norm = FALSE
-  normal.diploid = FALSE
-  l2r.level = "normal"
-  wave.renorm = TRUE
-  wave.rda <- NULL
-  gc.renorm = TRUE
-  gc.rda <- NULL
-  BAF.filter <- .75
+  # setwd("/home/job/WORKSPACE/EaCoN_tests/CSHD")
+  # CEL = "M2568_K02.CEL.bz2"
+  # samplename = "M2568_K02"
+  # dual.norm = FALSE
+  # normal.diploid = FALSE
+  # l2r.level = "normal"
+  # wave.renorm = TRUE
+  # wave.rda <- NULL
+  # gc.renorm = TRUE
+  # gc.rda <- NULL
+  # BAF.filter <- .75
   # BAF.binsize = 1E+07
-  mingap = 1E+06
-  out.dir = getwd()
-  oschp.keep = TRUE
-  force.OS = NULL
-  apt.version = "2.4.0"
-  apt.build = "na33.r4"
-  return.data = FALSE
-  write.data = TRUE
-  plot = TRUE
-  force = FALSE
-  genome.pkg = "BSgenome.Hsapiens.UCSC.hg19"
-  require(foreach)
-  source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
-  source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
+  # mingap = 1E+06
+  # out.dir = getwd()
+  # oschp.keep = TRUE
+  # force.OS = NULL
+  # apt.version = "2.4.0"
+  # apt.build = "na33.r4"
+  # return.data = FALSE
+  # write.data = TRUE
+  # plot = TRUE
+  # force = FALSE
+  # genome.pkg = "BSgenome.Hsapiens.UCSC.hg19"
+  # require(foreach)
+  # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
   # source("~/git_gustaveroussy/EaCoN/R/germline_functions.R")
 
   
