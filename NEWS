@@ -1,7 +1,7 @@
 EaCoN
 -----
 
-v0.3.3-1 (20180918) **
+v0.3.3-1 (20181002) *LittleWomanNoCry*
 -----------------
 * BUG : Segment.SEQUENZA() : added imputation of NA values in L2R object that made copynumber::aspcf() unable to work (happened with microarrays for flagged probes, not WES).
 * BUG : Segment.SEQUENZA() : BAF filtering wasn't working properly, resulting in wrong BAF segmentation, for all microarrays.

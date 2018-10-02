@@ -1,33 +1,32 @@
 ## Performs CS CEL processing
 CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.diploid = FALSE, l2r.level = "weighted", gc.renorm = TRUE, gc.rda = NULL, wave.renorm = TRUE, wave.rda = NULL, mingap = 1E+06, out.dir = getwd(), oschp.keep = FALSE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r4", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
   
-  setwd("/home/job/WORKSPACE/EaCoN_tests/CSHD")
-  CEL = "M2568_K02.CEL.bz2"
-  samplename = "M2568_K02"
-  dual.norm = FALSE
-  normal.diploid = FALSE
-  l2r.level = "normal"
-  wave.renorm = TRUE
-  wave.rda <- NULL
-  gc.renorm = TRUE
-  gc.rda <- NULL
-  BAF.filter <- .75
-  # BAF.binsize = 1E+07
-  mingap = 1E+06
-  out.dir = getwd()
-  oschp.keep = TRUE
-  force.OS = NULL
-  apt.version = "2.4.0"
-  apt.build = "na33.r4"
-  return.data = FALSE
-  write.data = TRUE
-  plot = TRUE
-  force = FALSE
-  genome.pkg = "BSgenome.Hsapiens.UCSC.hg19"
-  require(foreach)
-  source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
-  source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
-  # source("~/git_gustaveroussy/EaCoN/R/germline_functions.R")
+  # setwd("/home/job/WORKSPACE/EaCoN_tests/CSHD")
+  # CEL = "M2568_K02.CEL.bz2"
+  # samplename = "M2568_K02"
+  # dual.norm = FALSE
+  # normal.diploid = FALSE
+  # l2r.level = "normal"
+  # wave.renorm = TRUE
+  # wave.rda <- NULL
+  # gc.renorm = TRUE
+  # gc.rda <- NULL
+  # BAF.filter <- .75
+  # # BAF.binsize = 1E+07
+  # mingap = 1E+06
+  # out.dir = getwd()
+  # oschp.keep = TRUE
+  # force.OS = NULL
+  # apt.version = "2.4.0"
+  # apt.build = "na33.r4"
+  # return.data = FALSE
+  # write.data = TRUE
+  # plot = TRUE
+  # force = FALSE
+  # genome.pkg = "BSgenome.Hsapiens.UCSC.hg19"
+  # require(foreach)
+  # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
 
   
   ## Early checks
@@ -384,8 +383,8 @@ CS.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.type = "
   if (!file.exists(CEL.list.file)) stop("Could not find CEL.list.file !")
   message("Reading and checking CEL.list.file ...")
   myCELs <- read.table(file = CEL.list.file, header = TRUE, sep="\t", check.names = FALSE, as.is = TRUE)
-  head.ok <- c("cel_files", "SampleName")
-  head.chk <- all(colnames(CEL.list.file) == head.ok)
+  head.ok <- c("CEL", "SampleName")
+  head.chk <- all(colnames(myCELs) == head.ok)
   if (!head.chk) {
     message("Invalid header in CEL.list.file !")
     message(paste0("EXPECTED : ", head.ok))
@@ -398,9 +397,9 @@ CS.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.type = "
     message(myCELs$SampleName[which(duplicated(myCELs$SampleName))])
     stop("Duplicated SampleNames.")
   }
-  fecheck <- !vapply(myCELs$cel_files, file.exists, TRUE)
+  fecheck <- !vapply(myCELs$CEL, file.exists, TRUE)
   fecheck.pos <- which(fecheck)
-  if (length(fecheck.pos) > 0) stop(paste0("\n", "CEL file could not be found : ", myCELs$cel_files[fecheck.pos], collapse = ""))
+  if (length(fecheck.pos) > 0) stop(paste0("\n", "CEL file could not be found : ", myCELs$CEL[fecheck.pos], collapse = ""))
 
   message(paste0("Found ", nrow(myCELs), " samples to process."))
 
@@ -421,7 +420,7 @@ CS.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.type = "
   p <- 0
   csres <- foreach::foreach(p = seq_len(nrow(myCELs)), .inorder = FALSE, .errorhandling = "pass") %dopar% {
     EaCoN.set.bitmapType(type = current.bitmapType)
-    CS.Process(CEL = myCELs$cel_files[p], samplename = myCELs$SampleName[p], ...)
+    CS.Process(CEL = myCELs$CEL[p], samplename = myCELs$SampleName[p], ...)
   }
 
   ## Stopping cluster
