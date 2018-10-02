@@ -94,7 +94,6 @@ While the current EaCoN package is the core of the process, multiple others are 
     - [apt.cytoscan.2.4.0](https://github.com/gustaveroussy/apt.cytoscan.2.4.0) _to perform the normalization of CytoScan (750k, HD) arrays using Affymetrix Power Tools_
     - [apt.oncoscan.2.4.0](https://github.com/gustaveroussy/apt.oncoscan.2.4.0) _to perform the normalization of OncoScan / OncoScan\_CNV arrays using Affymetrix Power Tools_
     - [apt.snp6.1.20.0](https://github.com/gustaveroussy/apt.snp6.1.20.0) _to perform the normalization of GenomeWide SNP6 arrays using Affymetrix Power Tools_
-    - [chromosomes](https://github.com/gustaveroussy/chromosomes) _to provide the structure of chromsomes for homo sapiens (hg17 to hg38), mus musculus (mm7 to mm10) and rattus norvegicus (rn5 to rn6)_
   - [@ Google Drive](http://bit.ly/EaCoNpackages) : _Containing numerous data, these packages could not fit on GitHub_
     - Affymetrix design annotations :
       - [CytoScanHD.Array.na33.r4](http://bit.ly/CSHDna33) _Affymetrix design annotations for the CytoScan HD array (build na33.r4 / hg19)_
@@ -109,7 +108,8 @@ While the current EaCoN package is the core of the process, multiple others are 
     - Re-normalization :
       - GC% & wave-effect normalization :
         - [affy.CN.norm.data](http://bit.ly/AffyCNnorm) _Pre-computed tracks for all supported Affmetrix designs (both hg19 and hg38)_
-        - [rcnorm](http://bit.ly/chromosomespackage) _Code and tracks to re-normalize BAF for the CytoScan family of designs and SNP6, using *rawcopy*_
+        - [rcnorm](http://bit.ly/rcnorm) _Code and tracks to re-normalize BAF for the CytoScan family of designs and SNP6, using *rawcopy*_
+        - [chromosomes](http://bit.ly/chromosomespackage) _to provide the structure of chromsomes for homo sapiens (hg17 to hg38), mus musculus (mm7 to mm10) and rattus norvegicus (rn5 to rn6)_
 - Raw data :
   - For Affymetrix microarrays : the **CEL** files, fresh out of the Affymetrix Scanner
   - For WES data :
