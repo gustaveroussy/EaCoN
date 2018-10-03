@@ -2543,17 +2543,17 @@ Annotate.old <- function(data = NULL, refGene.table = NULL, targets.table = NULL
 
 Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, report = TRUE, author.name = "", out.dir = getwd(), solo = FALSE, ldb = "/mnt/data_cigogne/bioinfo/") {
   
-  setwd("/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc/Results/ALEX1/ASCAT/L2R")
-  data <- readRDS("/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc/Results/ALEX1/ASCAT/L2R/ALEX1.SEG.ASCAT.RDS")
-  targets.table <- NULL
-  out.dir <- getwd()
-  refGene.table = NULL
-  solo = FALSE
-  report = TRUE
-  # ldb = "/mnt/data_cigogne/bioinfo/"
-  source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
-  source("/home/job/git_gustaveroussy/EaCoN/R/plot_functions.R")
-  require(foreach)
+  # setwd("/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc/Results/ALEX1/ASCAT/L2R")
+  # data <- readRDS("/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc/Results/ALEX1/ASCAT/L2R/ALEX1.SEG.ASCAT.RDS")
+  # targets.table <- NULL
+  # out.dir <- getwd()
+  # refGene.table = NULL
+  # solo = FALSE
+  # report = TRUE
+  # # ldb = "/mnt/data_cigogne/bioinfo/"
+  # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  # source("/home/job/git_gustaveroussy/EaCoN/R/plot_functions.R")
+  # require(foreach)
   
   oridir <- getwd()
   
