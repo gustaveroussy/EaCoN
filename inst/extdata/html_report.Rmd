@@ -21,7 +21,7 @@ always_allow_html: yes
 
 ```{r setup, echo = FALSE, include = FALSE}
 `%>%` <- magrittr::"%>%"
-show.flag <- if ((data$meta$basic$source == "microarray") & (data$meta$basic$manufacturer == "Affymetrix")) TRUE else FALSE
+# show.flag <- if ((data$meta$basic$source == "microarray") & (data$meta$basic$manufacturer == "Affymetrix")) TRUE else FALSE
 knitr::opts_knit$set(base.dir = tempdir())
 ```
 
@@ -36,6 +36,12 @@ DT::datatable(data = array.df, rownames = FALSE, caption = "", class = "cell-bor
 cat("<HR><HR><BR><BR>\n")
 ```
 
+```{r wes_info, results = "asis", echo = FALSE, eval = as.logical(!show.flag)}
+cat('# WES Data Information\n')
+## Insert table here !
+cat("<HR><HR><BR><BR>\n")
+```
+
 <!-- *** -->
 <!-- *** -->
 
@@ -44,6 +50,12 @@ cat("<HR><HR><BR><BR>\n")
 ```{r intplot, results = "asis", fig.height = 10, fig.width = 10, fig.align="center", echo = FALSE, eval = as.logical(show.flag)}
 cat("# Microarray Intensity Plot\n")
 cat(paste0("\n![](", intplotf, ")\n"))
+cat("<HR><HR><BR><BR>\n")
+```
+
+```{r covplot, results = "asis", fig.height = 10, fig.width = 10, fig.align="center", echo = FALSE, eval = FALSE}
+cat("# Coverage Plot\n")
+cat(paste0("\n![](", covplotf, ")\n"))
 cat("<HR><HR><BR><BR>\n")
 ```
 

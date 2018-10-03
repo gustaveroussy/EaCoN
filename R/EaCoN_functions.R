@@ -379,7 +379,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
                             Value = data$data$Tumor_BAF[,1],
                             stringsAsFactors = FALSE)
     
-    png(paste0(samplename, ".ASCAT.png"), width = 1850, height = 980)
+    png(paste0(samplename, ".SEG.ASCAT.png"), width = 1850, height = 980)
     par(mar = c(1, 6, 3, 1), mfrow = c(2, 1))
     EaCoN.l2rplot.geno(l2r = l2r.value,
                        seg = l2r.seg.obj,
@@ -401,7 +401,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   ## Saving segmentation object
   if (write.data) {
     tmsg("Saving data ...")
-    saveRDS(data, paste0(samplename, ".ASCAT.RDS"), compress = "bzip2")
+    saveRDS(data, paste0(samplename, ".SEG.ASCAT.RDS"), compress = "bzip2")
   }
   
   setwd(oridir)
@@ -816,7 +816,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
                             Value = data$data$Tumor_BAF[,1],
                             stringsAsFactors = FALSE)
     
-    png(paste0(samplename, ".FACETS.png"), width = 1850, height = 980)
+    png(paste0(samplename, ".SEG.FACETS.png"), width = 1850, height = 980)
     par(mar = c(1, 6, 3, 1), mfrow = c(2, 1))
     EaCoN.l2rplot.geno(l2r = l2r.value,
                        seg = l2r.seg.obj,
@@ -838,7 +838,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   ## Saving segmentation object
   if (write.data) {
     tmsg("Saving data ...")
-    saveRDS(data, paste0(samplename, ".FACETS.RDS"), compress = "bzip2")
+    saveRDS(data, paste0(samplename, ".SEG.FACETS.RDS"), compress = "bzip2")
   }
   
   setwd(oridir)
@@ -1232,7 +1232,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
                             Value = data$data$Tumor_BAF[,1],
                             stringsAsFactors = FALSE)
     
-    png(paste0(samplename, ".SEQUENZA.png"), width = 1850, height = 980)
+    png(paste0(samplename, ".SEG.SEQUENZA.png"), width = 1850, height = 980)
     par(mar = c(1, 6, 3, 1), mfrow = c(2, 1))
     EaCoN.l2rplot.geno(l2r = l2r.value,
                        seg = l2r.seg.obj,
@@ -1254,7 +1254,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   ## Saving segmentation object
   if (write.data) {
     tmsg("Saving data ...")
-    saveRDS(data, paste0(samplename, ".SEQUENZA.RDS"), compress = "bzip2")
+    saveRDS(data, paste0(samplename, ".SEG.SEQUENZA.RDS"), compress = "bzip2")
   }
   
   setwd(oridir)
@@ -1407,7 +1407,7 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
       segments.genostart <- cs$chromosomes$chr.length.toadd[outdf$Chr] + my.ascat.seg.ascn$segments$startpos
       segments.genoend <- cs$chromosomes$chr.length.toadd[outdf$Chr] + my.ascat.seg.ascn$segments$endpos
       ink <- cs$chromosomes$chrN %in% outdf$Chr
-      png(paste0(samplename, ".ASCN.ASCAT.profile.png"), width = 1850, height = 980)
+      png(paste0(samplename, ".ASCN.ASCAT.png"), width = 1850, height = 980)
       par(mar = c(1, 4, 5, 1), mfrow = c(2, 1))
       # plot(0, 0, type = "n", xlim = c(0,max(segments.genoend)), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " Allele-Specific Copy Number (Gamma = ", gamma, ")\n Cellularity = ", my.ascat.seg.ascn$aberrantcellfraction, " // Ploidy = (A:", round(my.ascat.seg.ascn$ploidy$ascat, digits = 2), ", M:", round(my.ascat.seg.ascn$ploidy$median, digits = 2), ", MW:", round(my.ascat.seg.ascn$ploidy$most.width, digits = 2), ", WW:", round(my.ascat.seg.ascn$ploidy$width.weighted, digits = 2), ") // Goodness of fit = ", round(my.ascat.seg.ascn$goodnessOfFit, digits = 2), "% // Psi = ", my.ascat.seg.ascn$psi, " // nSeg = ", nrow(my.ascat.seg.ascn$segments), " // Predicted gender = ", data$data$gender), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
       plot(0, 0, type = "n", xlim = c(0,cs$genome.length), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " Allele-Specific Copy Number (Gamma = ", gamma, ")\n Cellularity = ", my.ascat.seg.ascn$aberrantcellfraction, " // Ploidy = (A:", round(my.ascat.seg.ascn$ploidy$ascat, digits = 2), ", M:", round(my.ascat.seg.ascn$ploidy$median, digits = 2), ", MW:", round(my.ascat.seg.ascn$ploidy$most.width, digits = 2), ", WW:", round(my.ascat.seg.ascn$ploidy$width.weighted, digits = 2), ") // Goodness of fit = ", round(my.ascat.seg.ascn$goodnessOfFit, digits = 2), "% // Psi = ", my.ascat.seg.ascn$psi, " // nSeg = ", nrow(my.ascat.seg.ascn$segments), " // Predicted gender = ", data$data$gender), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
@@ -1671,7 +1671,7 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
   segments.genostart <- cs$chromosomes$chr.length.toadd[ascn.res$cncf$chrom] + ascn.res$cncf$start
   segments.genoend <- cs$chromosomes$chr.length.toadd[ascn.res$cncf$chrom] + ascn.res$cncf$end
   ink <- cs$chromosomes$chrN %in% ascn.res$cncf$chrom
-  png(paste0(samplename, ".ASCN.FACETS.profile.png"), width = 1850, height = 980)
+  png(paste0(samplename, ".ASCN.FACETS.png"), width = 1850, height = 980)
   par(mar = c(1, 4, 5, 1), mfrow = c(2, 1))
   # plot(0, 0, type = "n", xlim = c(0,max(segments.genoend)), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " Allele-Specific Copy Number (Gamma = ", gamma, ")\n Cellularity = ", my.ascat.seg.ascn$aberrantcellfraction, " // Ploidy = (A:", round(my.ascat.seg.ascn$ploidy$ascat, digits = 2), ", M:", round(my.ascat.seg.ascn$ploidy$median, digits = 2), ", MW:", round(my.ascat.seg.ascn$ploidy$most.width, digits = 2), ", WW:", round(my.ascat.seg.ascn$ploidy$width.weighted, digits = 2), ") // Goodness of fit = ", round(my.ascat.seg.ascn$goodnessOfFit, digits = 2), "% // Psi = ", my.ascat.seg.ascn$psi, " // nSeg = ", nrow(my.ascat.seg.ascn$segments), " // Predicted gender = ", data$data$gender), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
   plot(0, 0, type = "n", xlim = c(0, cs$genome.length), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " Allele-Specific Copy Number\n Cellularity = ", round(ascn.res$purity, digits = 2), " // Ploidy = (F:", round(ascn.res$ploidy$facets, digits = 2), ", M:", round(ascn.res$ploidy$median, digits = 2), ", MW:", round(ascn.res$ploidy$most.width, digits = 2), ", WW:", round(ascn.res$ploidy$width.weighted, digits = 2), ") // nSeg = ", nrow(ascn.res$cncf), " // Predicted gender = ", data$data$gender), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
@@ -1880,7 +1880,7 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
   segments.genostart <- cs$chromosomes$chr.length.toadd[ascn.res$data$chr] + ascn.res$data$start
   segments.genoend <- cs$chromosomes$chr.length.toadd[ascn.res$data$chr] + ascn.res$data$end
   ink <- cs$chromosomes$chrN %in% ascn.res$data$chr
-  png(paste0(samplename, ".ASCN.SEQUENZA.profile.png"), width = 1850, height = 980)
+  png(paste0(samplename, ".ASCN.SEQUENZA.png"), width = 1850, height = 980)
   par(mar = c(1, 4, 5, 1), mfrow = c(2, 1))
   plot(0, 0, type = "n", xlim = c(0, cs$genome.length), xaxs = "i", ylim = c(0,(ylim + 0.1)), main = paste0(samplename, " Allele-Specific Copy Number\n Cellularity = ", round(ascn.res$purity, digits = 2), " // Ploidy = (S:", round(ascn.res$ploidy$sequenza, digits = 2), ", M:", round(ascn.res$ploidy$median, digits = 2), ", MW:", round(ascn.res$ploidy$most.width, digits = 2), ", WW:", round(ascn.res$ploidy$width.weighted, digits = 2), ") // nSeg = ", nrow(ascn.res$cncf), " // Predicted gender = ", data$data$gender), xlab = "Genomic position", ylab = "ASCN", xaxt = "n", cex.main = 2)
   abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
@@ -1968,7 +1968,7 @@ ASCN.ff <- function(RDS.file = NULL, ...) {
 }
 
 ## Run ASCN.ff() in batch mode
-ASCN.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern = ".EaCoN.ASPCF.RDS$", full.names = TRUE, recursive = TRUE, ignore.case = TRUE, include.dirs = FALSE), nthread = 1, cluster.type = "PSOCK", ...) {
+ASCN.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern = "\\.SEG\\.ASCAT\\.RDS$", full.names = TRUE, recursive = TRUE, ignore.case = TRUE, include.dirs = FALSE), nthread = 1, cluster.type = "PSOCK", ...) {
   if (length(RDS.files) == 0) stop("A list of RDS files is required !")
   message("Running EaCoN.ASCN.ff() in batch mode ...")
   message(paste0(" Found ", length(RDS.files), " files to process."))
@@ -2106,7 +2106,7 @@ Annotate.old <- function(data = NULL, refGene.table = NULL, targets.table = NULL
   cbsNC.df$Status[cbs.df$Log2Ratio < 0] <- "Loss"
   if (is.null(targets.table) & (genome %in% c("hg19", "hs37d5"))) {
     self.pkg.name <- "EaCoN"
-    data(targetlist_475, package = self.pkg.name, envir = environment())
+    data("targetlist_475", package = self.pkg.name, envir = environment())
   } else load(targets.table)
   gen.targ <- gen.df[gen.df$symbol %in% targetlist, ]
   targ.regz <- foreach::foreach(g = 1:nrow(gen.targ), .combine = "rbind") %do% {
@@ -2507,7 +2507,7 @@ Annotate.old <- function(data = NULL, refGene.table = NULL, targets.table = NULL
     message(tmsg("Rendering report ..."))
     # htmlout <- paste0(out.dir, "/", samplename, ".REPORT.html")
     # gplotlist <- fpaav(paste0(samplename, ".", c("ASPCF", "L2R.G", "BAF", "PredictedGermline"), ".png"))
-    gplotlist <- fpaav(paste0(samplename, ".", c("ASPCF", "L2R.G", "BAF"), ".png"))
+    gplotlist <- fpaav(paste0(samplename, ".", c(paste0("SEG.", data$meta$eacon$segmenter), "L2R.G", "BAF"), ".png"))
     htmlout <- paste0(samplename, ".REPORT.html")
     show.flag <- if ((data$meta$basic$source == "microarray") & (data$meta$basic$manufacturer == "Affymetrix")) TRUE else FALSE
     rmarkdown::render(input = rmd.path, output_format = "html_document", output_file = htmlout, output_dir = getwd(), intermediates_dir = getwd())
@@ -2543,21 +2543,17 @@ Annotate.old <- function(data = NULL, refGene.table = NULL, targets.table = NULL
 
 Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, report = TRUE, author.name = "", out.dir = getwd(), solo = FALSE, ldb = "/mnt/data_cigogne/bioinfo/") {
   
-  # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/EaCoN_v0.2.8/TCGA-E9-A1NH-01A_vs_11A/20180119203804")
-  # data <- readRDS("TCGA-E9-A1NH-01A_vs_11A.EaCoN.ASPCF.RDS")
-  # setwd("/home/job/WORKSPACE/MP/SNP6/BITES_p_TCGAb61_SNP_S_GenomeWideSNP_6_B12_697124/20180123165450")
-  # data <- readRDS("BITES_p_TCGAb61_SNP_S_GenomeWideSNP_6_B12_697124.EaCoN.ASPCF.RDS")
-  # setwd("/home/job/WORKSPACE/MP/ONCO/18H00752/20180214114019")
-  # data <- readRDS("/home/job/WORKSPACE/MP/ONCO/18H00752/20180214114019/18H00752.EaCoN.ASPCF.RDS")
-  # targets.table <- NULL
-  # out.dir <- getwd()
-  # refGene.table = NULL
-  # solo = TRUE
-  # report = TRUE
+  setwd("/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc/Results/ALEX1/ASCAT/L2R")
+  data <- readRDS("/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc/Results/ALEX1/ASCAT/L2R/ALEX1.SEG.ASCAT.RDS")
+  targets.table <- NULL
+  out.dir <- getwd()
+  refGene.table = NULL
+  solo = FALSE
+  report = TRUE
   # ldb = "/mnt/data_cigogne/bioinfo/"
-  # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
-  # source("/home/job/git_gustaveroussy/EaCoN/R/plot_functions.R")
-  # require(foreach)
+  source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
+  source("/home/job/git_gustaveroussy/EaCoN/R/plot_functions.R")
+  require(foreach)
   
   oridir <- getwd()
   
@@ -2602,8 +2598,8 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
   
   if (!("cbs" %in% names(data))) stop(tmsg("CBS slot not found in RDS object ! Are you sure it is a valid one ?"))
   cbs.df <- foreach::foreach(seg = 1:nrow(data$cbs$cut), .combine = "rbind") %do% {
-    ingenz <- if(exists(gen.df)) gen.df$symbol[gen.df$chrN == data$cbs$cut$Chr[seg] & gen.df$start <= data$cbs$cut$End[seg] & gen.df$end >= data$cbs$cut$Start[seg]] else ingenz <- "NA"
-    ingenz.len <- if(exists(gen.df)) length(ingenz) else "NA"
+    ingenz <- if(exists("gen.df")) gen.df$symbol[gen.df$chrN == data$cbs$cut$Chr[seg] & gen.df$start <= data$cbs$cut$End[seg] & gen.df$end >= data$cbs$cut$Start[seg]] else ingenz <- "NA"
+    ingenz.len <- if(exists("gen.df")) length(ingenz) else "NA"
     return(data.frame(data$cbs$cut[seg, ], Genes = ingenz.len, Symbol = paste0(ingenz, collapse = ","), stringsAsFactors = FALSE))
   }
   
@@ -2655,7 +2651,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
   
   ## Writing ACBS (cut)
   setwd(out.dir)
-  if (exists(gen.df)) {
+  if (exists("gen.df")) {
     tmsg("Building Targets table ...")
     write.table(cbs.df, file = paste0(samplename, ".Cut.acbs"), sep = "\t", quote = FALSE, row.names = FALSE)
   }
@@ -2667,39 +2663,43 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
   cbsNC.df$Status[cbs.df$Log2Ratio < 0] <- "Loss"
   
   ## Loading targets
-  if (is.null(targets.table) & (genome %in% c("hg19", "hs37d5"))) {
-    self.pkg.name <- "EaCoN"
-    data(targetlist_475, package = self.pkg.name, envir = environment())
+  if (is.null(targets.table)) {
+    if (data$meta$basic$species %in% c("Homo sapiens")) {
+      self.pkg.name <- "EaCoN"
+      data("targetlist_475", package = self.pkg.name, envir = environment())
+    }
   } else load(targets.table)
-  gen.targ <- gen.df[gen.df$symbol %in% targetlist, ]
-  targ.regz <- foreach::foreach(g = 1:nrow(gen.targ), .combine = "rbind") %do% {
-    ginreg.idx <- which(cbsNC.df$Chr == gen.targ$chrN[g] & cbsNC.df$Start <= gen.targ$end[g] & cbsNC.df$End >= gen.targ$start[g])
-    ginreg <- foreach::foreach(gg = ginreg.idx, .combine = "rbind") %do% {
-      match.start <- max(cbsNC.df$Start[gg], gen.targ$start[g])
-      match.end <- min(cbsNC.df$End[gg], gen.targ$end[g])
-      return(cbind(gen.targ[g, c(1, 2, 4:7)], match.start = match.start, match.end = match.end, cbsNC.df[gg,c(6, 9)], l2rwidth = cbsNC.df$End[gg] - cbsNC.df$Start[gg] + 1))
+  if(exists("targetlist")) {
+    gen.targ <- gen.df[gen.df$symbol %in% targetlist, ]
+    targ.regz <- foreach::foreach(g = 1:nrow(gen.targ), .combine = "rbind") %do% {
+      ginreg.idx <- which(cbsNC.df$Chr == gen.targ$chrN[g] & cbsNC.df$Start <= gen.targ$end[g] & cbsNC.df$End >= gen.targ$start[g])
+      ginreg <- foreach::foreach(gg = ginreg.idx, .combine = "rbind") %do% {
+        match.start <- max(cbsNC.df$Start[gg], gen.targ$start[g])
+        match.end <- min(cbsNC.df$End[gg], gen.targ$end[g])
+        return(cbind(gen.targ[g, c(1, 2, 4:7)], match.start = match.start, match.end = match.end, cbsNC.df[gg,c(6, 9)], l2rwidth = cbsNC.df$End[gg] - cbsNC.df$Start[gg] + 1))
+      }
+      return(ginreg)
     }
-    return(ginreg)
-  }
-  targ.regz <- foreach::foreach(g = 1:nrow(targ.regz), .combine = "rbind") %do% {
-    # ginreg.idx <- which(paste0("chr", baf.seg$chrA) == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
-    ginreg.idx <- which(baf.seg$chrA == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
-    ginreg <- foreach::foreach(gg = ginreg.idx, .combine = "rbind") %do% {
-      match.start <- max(baf.seg$Start[gg], targ.regz$match.start[g])
-      match.end <- min(baf.seg$End[gg], targ.regz$match.end[g])
-      return(cbind(targ.regz[g,c(1:6)], match.start = match.start, match.end = match.end, match.width = match.end - match.start +1, targ.regz[g,c(10,9,11)], baf.seg[gg,c(12,11)], bafwidth = baf.seg$End[gg] - baf.seg$Start[gg] + 1))
+    targ.regz <- foreach::foreach(g = 1:nrow(targ.regz), .combine = "rbind") %do% {
+      # ginreg.idx <- which(paste0("chr", baf.seg$chrA) == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
+      ginreg.idx <- which(baf.seg$chrA == targ.regz$chrom[g] & baf.seg$Start <= targ.regz$match.end[g] & baf.seg$End >= targ.regz$match.start[g])
+      ginreg <- foreach::foreach(gg = ginreg.idx, .combine = "rbind") %do% {
+        match.start <- max(baf.seg$Start[gg], targ.regz$match.start[g])
+        match.end <- min(baf.seg$End[gg], targ.regz$match.end[g])
+        return(cbind(targ.regz[g,c(1:6)], match.start = match.start, match.end = match.end, match.width = match.end - match.start +1, targ.regz[g,c(10,9,11)], baf.seg[gg,c(12,11)], bafwidth = baf.seg$End[gg] - baf.seg$Start[gg] + 1))
+      }
+      return(ginreg)
     }
-    return(ginreg)
+    targ.regz$Cytoband <- vapply(1:nrow(targ.regz), function(x) {
+      scb <- cs$cytobands$chrom == targ.regz$chrom[x] & cs$cytobands$start <= targ.regz$start[x] & cs$cytobands$end >= targ.regz$start[x]
+      return(paste0(cs$cytobands$chrA[scb], cs$cytobands$cytoband[scb]))
+    }, "a")
+    
+    targ.regz <- targ.regz[order(as.numeric(unlist(cs$chrom2chr[targ.regz$chrom])), targ.regz$match.start, targ.regz$match.end), c(1:6,16,7:15)]
+    colnames(targ.regz) <- c("Target Symbol", "Chr", "Gene Start", "Gene End", "Gene Width", "Gene Strand", "Gene Cytoband", "Match Start", "Match End", "Match Width", "L2R Status", "L2R Value", "L2R Segment Width", "BAF Status", "BAF Value", "BAF Segment Width")
+    # write.table(targ.regz, file = paste0(out.dir, "/", samplename, ".TargetGenes.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
+    write.table(targ.regz, file = paste0(samplename, ".TargetGenes.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
   }
-  targ.regz$Cytoband <- vapply(1:nrow(targ.regz), function(x) {
-    scb <- cs$cytobands$chrom == targ.regz$chrom[x] & cs$cytobands$start <= targ.regz$start[x] & cs$cytobands$end >= targ.regz$start[x]
-    return(paste0(cs$cytobands$chrA[scb], cs$cytobands$cytoband[scb]))
-  }, "a")
-  
-  targ.regz <- targ.regz[order(as.numeric(unlist(cs$chrom2chr[targ.regz$chrom])), targ.regz$match.start, targ.regz$match.end), c(1:6,16,7:15)]
-  colnames(targ.regz) <- c("Target Symbol", "Chr", "Gene Start", "Gene End", "Gene Width", "Gene Strand", "Gene Cytoband", "Match Start", "Match End", "Match Width", "L2R Status", "L2R Value", "L2R Segment Width", "BAF Status", "BAF Value", "BAF Segment Width")
-  # write.table(targ.regz, file = paste0(out.dir, "/", samplename, ".TargetGenes.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
-  write.table(targ.regz, file = paste0(samplename, ".TargetGenes.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
   
   tmsg("Building Truncated table ...")
   # gen.trunk.idx <- which(gen.df$chrN == cbsNC.df$Chr & gen.df$start < cbsNC.df$End & gen.df & gen.df$end > cbsNC.df$Start)
@@ -2935,7 +2935,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
       dev.off()
     }
     # kplotlist <- fpaav(list.files(path = "chromosomes", pattern = "\\.png", full.names = TRUE, ignore.case = FALSE, include.dirs = FALSE, recursive = FALSE))
-    kplotlist <- fpaav(vapply(krA, function(k) { paste0("chromosomes/", k, ".png")}, "a"))
+    kplotlist <- fpaav(vapply(krA, function(k) { paste0("chromosomes/", k, ".png") }, "a"))
     
     ## Instability metrics
     tmsg("Building instability metrics table ...")
@@ -3070,7 +3070,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     message(tmsg("Rendering report ..."))
     # htmlout <- paste0(out.dir, "/", samplename, ".REPORT.html")
     # gplotlist <- fpaav(paste0(samplename, ".", c("ASPCF", "L2R.G", "BAF", "PredictedGermline"), ".png"))
-    gplotlist <- fpaav(paste0(samplename, ".", c("ASPCF", "L2R.G", "BAF"), ".png"))
+    gplotlist <- fpaav(paste0(samplename, ".", c(paste0("SEG.", data$meta$eacon$segmenter), "L2R.G", "BAF"), ".png"))
     htmlout <- paste0(samplename, ".REPORT.html")
     show.flag <- if ((data$meta$basic$source == "microarray") & (data$meta$basic$manufacturer == "Affymetrix")) TRUE else FALSE
     rmarkdown::render(input = rmd.path, output_format = "html_document", output_file = htmlout, output_dir = getwd(), intermediates_dir = getwd())
@@ -3115,7 +3115,7 @@ Annotate.ff <- function (RDS.file = NULL, ...) {
 }
 
 ## Run EaCoN.Annotate() in batch mode
-Annotate.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern = ".EaCoN.ASPCF.RDS$", full.names = TRUE, recursive = TRUE, ignore.case = TRUE, include.dirs = FALSE), nthread = 1, cluster.type = "PSOCK", ...) {
+Annotate.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern = "\\.SEG\\.ASCAT\\.RDS$", full.names = TRUE, recursive = TRUE, ignore.case = TRUE, include.dirs = FALSE), nthread = 1, cluster.type = "PSOCK", ...) {
 
   if (length(RDS.files) == 0) stop("A list of RDS files is required !")
   message("Running EaCoN.ASCN.ff() in batch mode ...")

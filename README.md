@@ -87,14 +87,13 @@ While the current EaCoN package is the core of the process, multiple others are 
     - [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html) _to read HDF5 file format_
     - [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html) _to compute counts and variants from BAM files_
   - [@ GitHub](https://github.com)
-    - [ASCAT](https://github.com/Crick-CancerGenomics/ascat/ASCAT) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
+    - [ASCAT](https://github.com/Crick-CancerGenomics/ascat) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
     - [facets](https://github.com/mskcc/facets) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
 - Elements of the EaCoN workflow :
   - [@ GitHub](https://github.com/gustaveroussy) :
     - [apt.cytoscan.2.4.0](https://github.com/gustaveroussy/apt.cytoscan.2.4.0) _to perform the normalization of CytoScan (750k, HD) arrays using Affymetrix Power Tools_
     - [apt.oncoscan.2.4.0](https://github.com/gustaveroussy/apt.oncoscan.2.4.0) _to perform the normalization of OncoScan / OncoScan\_CNV arrays using Affymetrix Power Tools_
     - [apt.snp6.1.20.0](https://github.com/gustaveroussy/apt.snp6.1.20.0) _to perform the normalization of GenomeWide SNP6 arrays using Affymetrix Power Tools_
-    - [chromosomes](https://github.com/gustaveroussy/chromosomes) _to provide the structure of chromsomes for homo sapiens (hg17 to hg38), mus musculus (mm7 to mm10) and rattus norvegicus (rn5 to rn6)_
   - [@ Google Drive](http://bit.ly/EaCoNpackages) : _Containing numerous data, these packages could not fit on GitHub_
     - Affymetrix design annotations :
       - [CytoScanHD.Array.na33.r4](http://bit.ly/CSHDna33) _Affymetrix design annotations for the CytoScan HD array (build na33.r4 / hg19)_
@@ -109,7 +108,8 @@ While the current EaCoN package is the core of the process, multiple others are 
     - Re-normalization :
       - GC% & wave-effect normalization :
         - [affy.CN.norm.data](http://bit.ly/AffyCNnorm) _Pre-computed tracks for all supported Affmetrix designs (both hg19 and hg38)_
-        - [rcnorm](http://bit.ly/chromosomespackage) _Code and tracks to re-normalize BAF for the CytoScan family of designs and SNP6, using *rawcopy*_
+        - [rcnorm](http://bit.ly/rcnorm) _Code and tracks to re-normalize BAF for the CytoScan family of designs and SNP6, using *rawcopy*_
+        - [chromosomes](http://bit.ly/chromosomespackage) _to provide the structure of chromsomes for homo sapiens (hg17 to hg38), mus musculus (mm7 to mm10) and rattus norvegicus (rn5 to rn6)_
 - Raw data :
   - For Affymetrix microarrays : the **CEL** files, fresh out of the Affymetrix Scanner
   - For WES data :
@@ -344,10 +344,10 @@ As for the **WES.Normalize.ff.Batch** function, the **Segment.ff.Batch** functio
 Here is a synthetic example that will segment our CytoScan HD samples (as defined by the _pattern_ below) using ASCAT :
 
 ```R
-Segment.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_processed.RDS$", full.names = TRUE, recursive = TRUE), segmenter = "ASCAT", smooth.k = 5, SER.pen = 20, nrf = 1.0, nthread = 2)
+Segment.ff.Batch(RDS.files = list.files(path = getwd(), pattern = ".*_processed.RDS$", full.names = TRUE, recursive = TRUE), segmenter = "ASCAT", smooth.k = 5, SER.pen = 20, nrf = 1.0, nthread = 2)
 ```
 
-- To perform the same using the **FACETS** segmenter, just change the value of the _segmenter_ parameter !
+- To perform the same using the **FACETS** segmenter, just change the value of the _segmenter_ parameter, but **please remember that FACETS will only work with WES data !**
 
 - I suppose you guessed how to do the same with **SEQUENZA**, right ? ;)
 
@@ -356,16 +356,21 @@ Segment.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_proce
 Still the same, with the **ASCN.ff.Batch** :
 
 ```R
-ASCN.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_EaCoN.ASPCF.RDS$", full.names = TRUE, recursive = TRUE), nthread = 2)
+ASCN.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\.ASCAT\\.RDS$", full.names = TRUE, recursive = TRUE), nthread = 2)
 ```
+
+- To perform the same using results obtained using the **FACETS** or **SEQUENZA** segmenter, just edit the _pattern_ argument with the name of corresponding segmenter.
+
 
 #### **HTML reporting**
 
 And here again with the **Annotate.ff.Batch** :
 
 ```R
-Annotate.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_EaCoN.ASPCF.RDS$", full.names = TRUE, recursive = TRUE), author.name = "Me!")
+Annotate.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\.ASCAT\\.RDS$", full.names = TRUE, recursive = TRUE), author.name = "Me!")
 ```
+
+- To perform the same using results obtained using the **FACETS** or **SEQUENZA** segmenter, just edit the _pattern_ argument with the name of corresponding segmenter.
 
 ### **Piped**
 
@@ -393,7 +398,7 @@ OS.Process(ATChannelCel = "/home/me/my_project/CEL/SAMPLE1_OncoScan_CNV_A.CEL", 
 
 ## **GUIDELINES**
 
-### **Segmentation using ASCAT**
+### **Segmentation**
 
 - For each step, default values for each data source already correspond to recommendations. However, for the common **segmentation** step using the ASCAT segmenter, adaptation to the data source is recommended, by changing few parameters :
 

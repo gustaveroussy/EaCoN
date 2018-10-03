@@ -8,6 +8,9 @@ v0.3.3-1 (20181002) *LittleWomanNoCry*
 * BUG : CS.Process.Batch() : wrong variable name in header check.
 * CORR : OS.Process() : corrected wrong handling of sex.chr output was forced as c("X", "Y") instead of variable, default c("chrX", "chrY").
 * CORR : Segment.FACETS() Segment.SEQUENZA() : Added missing meta 'BAF.filter' in the object.
+* CORR : README.md : fixed few links to dependencies, corrected default regex.
+* MOD : Segment.* : Changed the structure of the profile PNG filename to "[samplename].SEG.[segmenter].png" (to ease the use of regex for further steps in batch mode).
+* MOD : ASCN.ff.Batch() Annotate.ff.Batch() : corrected the default regex.
 
 v0.3.3 (20180911) *Trinity*
 -----------------
