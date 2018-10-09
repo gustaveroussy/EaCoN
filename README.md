@@ -344,10 +344,10 @@ As for the **WES.Normalize.ff.Batch** function, the **Segment.ff.Batch** functio
 Here is a synthetic example that will segment our CytoScan HD samples (as defined by the _pattern_ below) using ASCAT :
 
 ```R
-Segment.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_processed.RDS$", full.names = TRUE, recursive = TRUE), segmenter = "ASCAT", smooth.k = 5, SER.pen = 20, nrf = 1.0, nthread = 2)
+Segment.ff.Batch(RDS.files = list.files(path = getwd(), pattern = ".*_processed.RDS$", full.names = TRUE, recursive = TRUE), segmenter = "ASCAT", smooth.k = 5, SER.pen = 20, nrf = 1.0, nthread = 2)
 ```
 
-- To perform the same using the **FACETS** segmenter, just change the value of the _segmenter_ parameter !
+- To perform the same using the **FACETS** segmenter, just change the value of the _segmenter_ parameter, but **please remember that FACETS will only work with WES data !**
 
 - I suppose you guessed how to do the same with **SEQUENZA**, right ? ;)
 
@@ -356,16 +356,21 @@ Segment.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_proce
 Still the same, with the **ASCN.ff.Batch** :
 
 ```R
-ASCN.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_EaCoN.ASPCF.RDS$", full.names = TRUE, recursive = TRUE), nthread = 2)
+ASCN.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\.ASCAT\\.RDS$", full.names = TRUE, recursive = TRUE), nthread = 2)
 ```
+
+- To perform the same using results obtained using the **FACETS** or **SEQUENZA** segmenter, just edit the _pattern_ argument with the name of corresponding segmenter.
+
 
 #### **HTML reporting**
 
 And here again with the **Annotate.ff.Batch** :
 
 ```R
-Annotate.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "_CSHD.*_EaCoN.ASPCF.RDS$", full.names = TRUE, recursive = TRUE), author.name = "Me!")
+Annotate.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\.ASCAT\\.RDS$", full.names = TRUE, recursive = TRUE), author.name = "Me!")
 ```
+
+- To perform the same using results obtained using the **FACETS** or **SEQUENZA** segmenter, just edit the _pattern_ argument with the name of corresponding segmenter.
 
 ### **Piped**
 
@@ -393,7 +398,7 @@ OS.Process(ATChannelCel = "/home/me/my_project/CEL/SAMPLE1_OncoScan_CNV_A.CEL", 
 
 ## **GUIDELINES**
 
-### **Segmentation using ASCAT**
+### **Segmentation**
 
 - For each step, default values for each data source already correspond to recommendations. However, for the common **segmentation** step using the ASCAT segmenter, adaptation to the data source is recommended, by changing few parameters :
 

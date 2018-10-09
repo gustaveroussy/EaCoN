@@ -2,7 +2,7 @@
 \alias{Segment.FACETS}
 \title{L2R and BAF joint segmentation using FACETS.}
 \usage{
-  Segment.FACETS(data = NULL, smooth.k = NULL, BAF.filter = .9, homoCut = .05,
+  Segment.FACETS(data = NULL, smooth.k = NULL, BAF.filter = .75, homoCut = .05,
   FACETS.pen = 150, recenter = "l2r.centeredpeak", calling.method = "mad",
   nrf = .5, SER.pen = 2, out.dir = getwd(), return.data = FALSE,
   write.data = TRUE, plot = TRUE, force = FALSE)
