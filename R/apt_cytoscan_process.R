@@ -27,6 +27,7 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
 
+
   
   ## Early checks
   if (is.null(CEL)) stop(tmsg("A CEL file is required !"))
@@ -363,6 +364,7 @@ CS.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.type = "
   myCELs <- read.table(file = CEL.list.file, header = TRUE, sep="\t", check.names = FALSE, as.is = TRUE)
   head.ok <- c("CEL", "SampleName")
   head.chk <- all(colnames(myCELs) == head.ok)
+
   if (!head.chk) {
     message("Invalid header in CEL.list.file !")
     message(paste0("EXPECTED : ", head.ok))
@@ -375,6 +377,7 @@ CS.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.type = "
     message(myCELs$SampleName[which(duplicated(myCELs$SampleName))])
     stop("Duplicated SampleNames.")
   }
+
   fecheck <- !vapply(myCELs$CEL, file.exists, TRUE)
   fecheck.pos <- which(fecheck)
   if (length(fecheck.pos) > 0) stop(paste0("\n", "CEL file could not be found : ", myCELs$CEL[fecheck.pos], collapse = ""))
