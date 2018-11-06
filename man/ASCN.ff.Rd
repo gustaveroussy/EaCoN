@@ -9,7 +9,7 @@
   \item{...}{Any parameter to the copy number estimation method.}
 }
 \description{
-  This function is just a wrapper to any of the copy number estimation functions (\code{ASCN.ASCAT()}, \code{ASCN.FACETS() and \code{ASCN.SEQUENZA()}}), starting from a RDS file rather than a data object.
+  This function is just a wrapper to any of the copy number estimation functions (\code{ASCN.ASCAT()}, \code{ASCN.FACETS()} and \code{ASCN.SEQUENZA()}), starting from a RDS file rather than a data object.
 }
 \author{
   Bastien Job

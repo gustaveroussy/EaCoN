@@ -2,8 +2,8 @@
 CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.diploid = FALSE, l2r.level = "weighted", gc.renorm = TRUE, gc.rda = NULL, wave.renorm = TRUE, wave.rda = NULL, mingap = 1E+06, out.dir = getwd(), oschp.keep = FALSE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r4", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
   
   # setwd("/home/job/WORKSPACE/EaCoN_tests/CSHD")
-  # CEL = "M2568_K02.CEL.bz2"
-  # samplename = "M2568_K02"
+  # CEL = "MR328_sein_K03.CEL.bz2"
+  # samplename = "MR328_sein_K03"
   # dual.norm = FALSE
   # normal.diploid = FALSE
   # l2r.level = "normal"
@@ -12,7 +12,6 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   # gc.renorm = TRUE
   # gc.rda <- NULL
   # BAF.filter <- .75
-  # # BAF.binsize = 1E+07
   # mingap = 1E+06
   # out.dir = getwd()
   # oschp.keep = TRUE
@@ -71,7 +70,6 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   suppressPackageStartupMessages(require(package = apt.cyto.pkg.name, character.only = TRUE))
   
   ## Processing CEL to an OSCHP file
-  # if (dir.exists(samplename) && force) unlink(samplename, recursive = TRUE, force = FALSE)
   oscf <- apt.cytoscan.process(CEL = CEL, samplename = samplename, dual.norm = dual.norm, normal.diploid = normal.diploid, out.dir = out.dir, temp.files.keep = FALSE, force.OS = force.OS, apt.build = apt.build)
   
   ## Reading OSCHP
@@ -79,11 +77,6 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   sex.chr <- c("chrX", "chrY")
   
   ## Processing : meta (and checks)
-  # meta.a1.df <- my.oschp[["Dset_IO_HDF5_Gdh"]][["_&keyvals"]][,1:2]
-  # meta.a1.df <- meta.a1.df[!duplicated(meta.a1.df$key),]
-  # meta.a1 <- meta.df2list(meta.a1.df)
-  # meta.a1[["L2R.level"]] <- l2r.level
-  # rm(meta.a1.df)
   if (!("affymetrix-chipsummary-snp-qc" %in% names(my.oschp$Meta$analysis))) my.oschp$Meta$analysis[["affymetrix-chipsummary-snp-qc"]] <- NA
   
   ### Loading genome info
@@ -96,7 +89,6 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   ### Getting genome build version
   genome <- getmeta("affymetrix-algorithm-param-genome-version", my.oschp$Meta$analysis)
   if (genome != genome2) stop(tmsg(paste0("Genome build name given with BSgenome package '", genome.pkg, "', (", genome2, ") is different from the genome build specified by provided APT build version '", apt.build, "' (", genome, ") !")))
-  # data(list = genome, package = "chromosomes", envir = environment())
   arraytype <- getmeta("affymetrix-array-type", my.oschp$Meta$analysis)
   manufacturer <- getmeta("program-company", my.oschp$Meta$analysis)
   species <- getmeta("affymetrix-algorithm-param-genome-species", my.oschp$Meta$analysis)
@@ -105,13 +97,7 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   pgender <- gender.conv[[(getmeta("affymetrix-chipsummary-Y-gender-call", my.oschp$Meta$analysis))]]
   
   if (!(arraytype %in% sup.array)) stop(tmsg(paste0("Unsupported array : '", arraytype, "' !")))
-  # meta.a2.df <- my.oschp[["Dset_IO_HDF5_Gdh"]][["Dset_IO_HDF5_Gdh:0"]][["Dset_IO_HDF5_Gdh:0:0"]][["_&keyvals"]][,1:2]
-  # meta.a3.df <- my.oschp[["Dset_IO_HDF5_Gdh"]][["Dset_IO_HDF5_Gdh:0"]][["Dset_IO_HDF5_Gdh:0:0"]][["Dset_IO_HDF5_Gdh:0:0:0"]][["_&keyvals"]][,1:2]
-  # meta.a2 <- meta.df2list(meta.a2.df)
-  # rm(meta.a2.df)
-  # meta.a3 <- meta.df2list(meta.a3.df)
-  # rm(meta.a3.df)
-  
+
   ## Reconstructing missing meta
   if (!"CEL1" %in% names(my.oschp$Meta)) {
     datheader.split <- unlist(strsplit(x =  affxparser::readCelHeader(filename = CEL)$datheader, split = "\\s+"))
@@ -131,22 +117,6 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
     predicted.gender = pgender
   )
   
-  ## Extracting data : L2R
-  # ao.df <- data.frame(chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R.ori = as.vector(my.oschp$ProbeSets$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), L2R = as.vector(my.oschp$ProbeSets$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), BAF = NA, AD = NA, CallF = NA, stringsAsFactors = FALSE)
-  # # ao.df <- if (l2r.level == "normal") {
-  # #   data.frame(chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R = as.vector(my.oschp$ProbeSets$CopyNumber$Log2Ratio), BAF = NA, stringsAsFactors = FALSE)
-  # # } else if (l2r.level == "weighted") {
-  # #   data.frame(chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R = as.vector(my.oschp$ProbeSets$CopyNumber$WeightedLog2Ratio), BAF = NA, stringsAsFactors = FALSE)
-  # # } else stop(tmsg("Unrecognized value for [l2r.level] !"))
-  # rownames(ao.df) <- my.oschp$ProbeSets$CopyNumber$ProbeSetName
-  # affy.chrom <- my.oschp$Chromosomes$Summary
-  # ak <- affy.chrom$Display
-  # names(ak) <- affy.chrom$Chromosome
-  # ao.df$chrA <- as.vector(ak[as.character(ao.df$chrs)])
-  # ao.df$chr <- paste0("chr", ao.df$chrA)
-  # ao.df$chrN <- unlist(cs$chrom2chr[ao.df$chr])
-  # ao.df <- ao.df[order(ao.df$chrN, ao.df$pos, rownames(ao.df)),]
-  
   ao.df <- dplyr::as.tbl(data.frame(my.oschp$ProbeSets$CopyNumber[,c(1:3)], L2R.ori = as.vector(my.oschp$ProbeSets$CopyNumber[[l2r.lev.conv[[l2r.level]]]])))
   ao.df$L2R <- ao.df$L2R.ori
   affy.chrom <- my.oschp$Chromosomes$Summary
@@ -165,7 +135,7 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   baf.df <- baf.df[!is.na(baf.df$BAF),]
   gc()
   
-  ao.df <- suppressWarnings(Reduce(function(t1, t2) dplyr::left_join(t1, t2, by = "ProbeSetName"), list(ao.df, dplyr::as.tbl(data.frame(ProbeSetName = rownames(baf.df), BAF = baf.df$BAF)), dplyr::as.tbl(my.oschp$ProbeSets$AllelicData[,c(1,4)]), dplyr::as.tbl(my.oschp$Genotyping$Calls[,c(2,5)]))))
+  ao.df <- suppressWarnings(Reduce(function(t1, t2) dplyr::left_join(t1, t2, by = "ProbeSetName"), list(ao.df, dplyr::as.tbl(data.frame(ProbeSetName = rownames(baf.df), BAF = baf.df$BAF)), dplyr::as.tbl(my.oschp$ProbeSets$AllelicData[,c(1,4)]), dplyr::as.tbl(my.oschp$Genotyping$Calls[,c(2,5:7)]))))
   rm(baf.df)
   gc()
   
@@ -175,6 +145,13 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   
   ## Filtering positions without L2R nor BAF
   ao.df <- ao.df[!(is.na(ao.df$L2R) & is.na(ao.df$BAF)),]
+  
+  ## Adding specific data for FACETS
+  rcmat <- round(cbind(ao.df$BAF * (ao.df$ASignal + ao.df$BSignal), (1-ao.df$BAF)*(ao.df$ASignal + ao.df$BSignal)))
+  ao.df$LOR <- log(rcmat[,1]+1/6) - log(rcmat[,2]+1/6)
+  ao.df$LORvar <- 1/(rcmat[,1]+1/6) + 1/(rcmat[,2]+1/6)
+  rm(rcmat)
+  gc()
   
   ## L2R renormalizations
   smo <- round(nrow(ao.df) / 550)
@@ -308,7 +285,8 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
       samples = samplename,
       gender = as.vector(meta.b$predicted.gender),
       sexchromosomes = sex.chr,
-      failedarrays = NULL
+      failedarrays = NULL,
+      additional = data.frame(RD.test = ao.df$ASignal, RD.ref = ao.df$BSignal, LOR = ao.df$AllelicDifference, LORvar = ao.df$LORvar, stringsAsFactors = FALSE)
     ), 
     germline = list(
       germlinegenotypes = matrix(as.logical(ao.df$germ), ncol = 1),
