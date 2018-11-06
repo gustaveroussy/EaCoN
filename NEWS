@@ -1,8 +1,22 @@
 EaCoN
 -----
 
-v0.3.3-1 (20181002) *LittleWomanNoCry*
+v0.3.4 (20181030) *Papy60*
 -----------------
+* CORR : A typo in the Segment.* doc @ SER.pen parameter.
+* CORR : A typo in a Annotate.ff.Batch() message.
+* CORR : chrom column was wrong in the refGene_cl_hs37d5.rda data package, resulting in erroneous tables in the HTML report (at least!).
+* CORR : EaCoN.l2rplot.karyo() : Added a control to handle chromosome "M", and a trick to handle odd number of chromosomes.
+* MOD : oncoscan.process(), cytoscan.process() : Added additional data required for FACETS.
+* MOD : Segment.FACETS() : Added support for microarrays, and a filter to force BAF segments @ 0.5 +/- homoCut to a value of 0.5
+* MOD : Segment.FACETS() : Changed default penalty to 100 (from 150).
+* MOD : Annotate.ff.Batch(), ASCN.ff.Batch() : Changed default regex to include results from FACETS and SEQUENZA.
+* MOD : README.md : Change the changepoint package link (from BioConductor to CRAN)
+* ADD : Now FACETS is available for microarrays (with the exception of SNP6...) !
+* MOD : Adapted plots to cases with missing chromosomes (auto-gridding / scaling of Rorschard plots, genomic, karyo...)
+
+v0.3.3-1 (20181002) *LittleWomanNoCry*
+-------------------
 * BUG : Segment.SEQUENZA() : added imputation of NA values in L2R object that made copynumber::aspcf() unable to work (happened with microarrays for flagged probes, not WES).
 * BUG : Segment.SEQUENZA() : BAF filtering wasn't working properly, resulting in wrong BAF segmentation, for all microarrays.
 * BUG : CS.Process.Batch() : wrong variable name in header check.
@@ -10,7 +24,7 @@ v0.3.3-1 (20181002) *LittleWomanNoCry*
 * CORR : Segment.FACETS() Segment.SEQUENZA() : Added missing meta 'BAF.filter' in the object.
 * CORR : README.md : fixed few links to dependencies, corrected default regex.
 * MOD : Segment.* : Changed the structure of the profile PNG filename to "[samplename].SEG.[segmenter].png" (to ease the use of regex for further steps in batch mode).
-* MOD : ASCN.ff.Batch() Annotate.ff.Batch() : corrected the default regex.
+* MOD : ASCN.ff.Batch(), Annotate.ff.Batch() : corrected the default regex.
 
 v0.3.3 (20180911) *Trinity*
 -----------------

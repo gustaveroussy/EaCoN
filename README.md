@@ -6,12 +6,27 @@ _**Ea**sy **Co**py **N**umber !_
 
 ## **DESCRIPTION**
 
-EaCoN aims to be an all-packed in,  user-friendly solution to perform relative or absolute copy-number analysis for multiple sources of data.
+EaCoN aims to be an all-packed in,  user-friendly solution to perform relative or absolute copy-number analysis for multiple sources of data, with three different segmenters available (and corresponding three copy-number modelization methods).
 It consists in a series of R packages that perform such type of analysis, from raw CEL files of Affymetrix microarrays (GenomeWide snp6, OncoScan, CytoScan 750K, CytoScan HD) or from aligned reads as BAMs for WES (whole exome sequencing).
 
 ---
 
 ## **QUICK NEWS**
+
+### **2018-10-30 : v0.3.4 _(Papy60)_ is out !**
+
+- Now FACETS can be used on OncoScan, OncoScan_CNV, CytoScan750k and CytoScanHD arrays (still not on SNP6, though).
+- Some bugs corrected, too.
+- Sequenza CN output fixed.
+- Changed the formula for the "most width" ploidy version, so that a value of 0 can't be returned.
+- Paving the way to handle non-canonical genomes in the report (not active yet, though).
+- Small code changes to adapt to "non-completely covered" genomes (ie, few chromosomes for toy datasets, by example).
+- Harmonized the penalty parameter for all segmenters (now just "penalty" rather than "ASCAT.pen", "SEQUENZA.pen" or "FACETS.pen")
+- Officially dropping support for sequenza with SNP6 arrays as it leads to a huge RAM consumption by copynumber::aspcf, due to the few probes covering both L2R and BAF.
+
+### **2018-10-02 : v0.3.3-1 _(LittleWomanNoCry)_ is out !**
+
+- Multiple little bugs correction, tweaks.
 
 ### **2018-09-12 : v0.3.3 _(Trinity)_ is out !**
 
@@ -20,7 +35,7 @@ It consists in a series of R packages that perform such type of analysis, from r
 
 ### **2018-08-08 : v0.3.2 _(PapeMamiePichine)_ is out !**
 
-- Now EaCoN supports [**FACETS**](https://www.ncbi.nlm.nih.gov/pubmed/27270079) segmenter and copy number estimator ! This segmenter extends the famous **CBS** _(Circular Binary Segmentation)_ algorithm by making it compatible with bi-variate segmentation using both the L2R and BAF signals.
+- Now EaCoN supports [**FACETS**](https://www.ncbi.nlm.nih.gov/pubmed/27270079) segmenter and copy number estimator ! This segmenter extends the famous **CBS** _(Circular Binary Segmentation)_ algorithm by making it compatible with bi-variate segmentation using both the L2R and BAF signals. However, please note that **FACETS is only avaiable for WES data**.
 - Few bugs solved.
 
 ---
@@ -45,10 +60,10 @@ It consists in a series of R packages that perform such type of analysis, from r
   - L2R profile centralization
   - L2R profile CNA calling
   - Generation of results as tables and plots
-  - Generation of a portable and interactive HTML report
-  - Total (TCN) and allele-specific copy number (ASCN), ploidy and cellularity estimations using **ASCAT** _(recommended)_, **FACETS** or **SEQUENZA**
+  - Generation of a portable and interactive HTML report (for hs, mm and rn species at the moment)
+  - Total (TCN) and allele-specific copy number (ASCN), ploidy and cellularity estimations using **ASCAT** _(recommended)_, **FACETS** or **SEQUENZA** for both WES and arrays (except for SNP6 arrays for the two latter)
 - Required annotations for Affymetrix data provided (via additional packages)
-- Pre-computed normalization (GC%, wave) tracks provided (either)
+- Pre-computed normalization (GC%, wave) tracks provided for arrays (either)
 - Few functions to call
 - Few parameters
 - Recommended guidelines provided for supported microarray designs, as well as for WES
@@ -60,9 +75,10 @@ It consists in a series of R packages that perform such type of analysis, from r
 While the current EaCoN package is the core of the process, multiple others are needed, depending on the type of the source (WES, Affymetrix microarray design) and corresponding annotations (genome build, Affymetrix annotation databases). Others are required for the normalization, especially pre-computed GC% tracks.
 
 - R > 3.0
-- Public R dependencies :
-  - [@ CRAN](https://cran.r-project.org/) :
+- Public R dependencies
+  - [@ CRAN](https://cran.r-project.org/) _Install under R using : **install.packages("packagename")**_ :
     - [bedr](https://cran.r-project.org/web/packages/bedr/index.html) _to handle capture bed_
+    - [changepoint](https://cran.r-project.org/web/packages/changepoint/index.html) _to perform small events rescue segmentation using PELT_
     - [data.table](https://cran.r-project.org/web/packages/data.table/index.html) _for tab-files / tables / blocks processing_
     - [devtools](https://cran.r-project.org/web/packages/devtools/index.html) _to install ASCAT_
     - [dplyr](https://cran.r-project.org/web/packages/dplyr/index.html) _for tables / blocks processing_
@@ -74,27 +90,26 @@ While the current EaCoN package is the core of the process, multiple others are 
     - [mclust](https://cran.r-project.org/web/packages/mclust/index.html) _for BAF regions clustering_
     - [rmarkdown](https://cran.r-project.org/web/packages/rmarkdown/index.html) _to generate the HTML report_
     - [sequenza](https://cran.r-project.org/web/packages/sequenza/index.html) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
-  - [@ BioConductor](https://www.bioconductor.org/) :
+  - [@ BioConductor](https://www.bioconductor.org/) _Install under R using : **source("https://bioconductor.org/biocLite.R"); biocLite("packagename")**_ :
     - [affxparser](https://bioconductor.org/packages/release/bioc/html/affxparser.html) _to read CEL files_
     - [aroma.light](https://bioconductor.org/packages/release/bioc/html/aroma.light.html) _to perform optional BAF TumorBoost normalization_
     - [BSgenome](https://bioconductor.org/packages/release/bioc/html/BSgenome.html) _to handle the reference genome and its sequences_
     - [BSgenome.Hsapiens.UCSC.hg19](https://bioconductor.org/packages/release/bioc/html/BSgenome.Hsapiens.UCSC.hg19.html) _as default genome_
-    - [changepoint](https://bioconductor.org/packages/release/bioc/html/changepoint.html) _to perform small events rescue segmentation using PELT_
     - [copynumber](https://bioconductor.org/packages/release/bioc/html/copynumber.html) _to perform PCF segmentation_
     - [GenomeInfoDb](https://bioconductor.org/packages/release/bioc/html/GenomeInfoDb.html) _to use genome annotations_
     - [GenomicRanges](https://bioconductor.org/packages/release/bioc/html/GenomicRanges.html) _to handle genomic intervals_
     - [limma](https://bioconductor.org/packages/release/bioc/html/limma.html) _to perform lowess normalization_
     - [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html) _to read HDF5 file format_
     - [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html) _to compute counts and variants from BAM files_
-  - [@ GitHub](https://github.com)
+  - [@ GitHub](https://github.com) _Install using **devtools::install_github("github_url")** (without the "https://github.com/" part)_ :
     - [ASCAT](https://github.com/Crick-CancerGenomics/ascat) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
     - [facets](https://github.com/mskcc/facets) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
 - Elements of the EaCoN workflow :
-  - [@ GitHub](https://github.com/gustaveroussy) :
+  - [@ GitHub](https://github.com/gustaveroussy) _Install using **devtools::install_github("github_url")** (without the "https://github.com/" part)_ :
     - [apt.cytoscan.2.4.0](https://github.com/gustaveroussy/apt.cytoscan.2.4.0) _to perform the normalization of CytoScan (750k, HD) arrays using Affymetrix Power Tools_
     - [apt.oncoscan.2.4.0](https://github.com/gustaveroussy/apt.oncoscan.2.4.0) _to perform the normalization of OncoScan / OncoScan\_CNV arrays using Affymetrix Power Tools_
     - [apt.snp6.1.20.0](https://github.com/gustaveroussy/apt.snp6.1.20.0) _to perform the normalization of GenomeWide SNP6 arrays using Affymetrix Power Tools_
-  - [@ Google Drive](http://bit.ly/EaCoNpackages) : _Containing numerous data, these packages could not fit on GitHub_
+  - [@ Google Drive](http://bit.ly/EaCoNpackages) : _Containing numerous data, these packages could not fit on GitHub. Download, then Install using **install.packages("path/to/the/downloaded/package.tar.gz")**_ :
     - Affymetrix design annotations :
       - [CytoScanHD.Array.na33.r4](http://bit.ly/CSHDna33) _Affymetrix design annotations for the CytoScan HD array (build na33.r4 / hg19)_
       - [CytoScanHD.Array.na36.r1](http://bit.ly/CSHDna36) _Affymetrix design annotations for the CytoScan HD array (build na36.r1 / hg38)_
@@ -109,7 +124,7 @@ While the current EaCoN package is the core of the process, multiple others are 
       - GC% & wave-effect normalization :
         - [affy.CN.norm.data](http://bit.ly/AffyCNnorm) _Pre-computed tracks for all supported Affmetrix designs (both hg19 and hg38)_
         - [rcnorm](http://bit.ly/rcnorm) _Code and tracks to re-normalize BAF for the CytoScan family of designs and SNP6, using *rawcopy*_
-        - [chromosomes](http://bit.ly/chromosomespackage) _to provide the structure of chromsomes for homo sapiens (hg17 to hg38), mus musculus (mm7 to mm10) and rattus norvegicus (rn5 to rn6)_
+        - [chromosomes](http://bit.ly/chromosomespackage) _to provide the structure of chromsomes for homo sapiens (hg17 to hg38, hs37d5), mus musculus (mm7 to mm10) and rattus norvegicus (rn5 to rn6)_
 - Raw data :
   - For Affymetrix microarrays : the **CEL** files, fresh out of the Affymetrix Scanner
   - For WES data :
@@ -211,12 +226,12 @@ WES.Normalize.ff(BIN.RDS.file = "/home/project/EaCoN_results/S4_WES/S4_WES_hg19_
 - Now that we described the normalization process specific to each type of source data, we can segment it. The good news is that it's the very same step for each source type, one just have to pass the **\_processed.RDS** normalized file. Here is an example with the one obtained for OncoScan data, using the **ASCAT** segmenter :
 
 ```R
-Segment.ff(RDS.file = "/home/me/my_project/EaCoN_results/SAMPLE1/SAMPLE1_OncoScan_CNV_hg19_processed.RDS", segmenter = "ASCAT")
+Segment.ff(RDS.file = "/home/me/my_project/EaCoN_results/SAMPLE1/S1_OncoScan_CNV_hg19_processed.RDS", segmenter = "ASCAT")
 ```
 
 - This will perform the segmentation, centralization and calling steps, create a **/home/project/EaCoN_results/S1/ASCAT/L2R/** subdirectory and write multiple files in it :
-  - _**S1.EaCoN.ASPCF.RDS**_ : contains the segmented data which will be provided to the optional next step(s)
-  - _**S1.ASPCF.png**_ : shows a graphical representation of the segmented, centered and called L2R and BAF data
+  - _**S1.SEG.ASCAT.RDS**_ : contains the segmented data which will be provided to the optional next step(s)
+  - _**S1.SEG.ASCAT.png**_ : shows a graphical representation of the segmented, centered and called L2R and BAF data
   - _**S1.Rorschach.png**_ : shows a graphical representation of BAF vs L2R of probes, by chromosome
   - _**S1.Cut.cbs**_ : contains the L2R segmentation results in the standard CBS format. "Cut" means that L2R value for the segments called as normal were set to a value of 0.0
   - _**S1.NoCut.cbs**_ : Same as above, but the segments considered as normal have their L2R value intact
@@ -347,7 +362,7 @@ Here is a synthetic example that will segment our CytoScan HD samples (as define
 Segment.ff.Batch(RDS.files = list.files(path = getwd(), pattern = ".*_processed.RDS$", full.names = TRUE, recursive = TRUE), segmenter = "ASCAT", smooth.k = 5, SER.pen = 20, nrf = 1.0, nthread = 2)
 ```
 
-- To perform the same using the **FACETS** segmenter, just change the value of the _segmenter_ parameter, but **please remember that FACETS will only work with WES data !**
+- To perform the same using the **FACETS** segmenter, just change the value of the _segmenter_ parameter.
 
 - I suppose you guessed how to do the same with **SEQUENZA**, right ? ;)
 
@@ -356,21 +371,16 @@ Segment.ff.Batch(RDS.files = list.files(path = getwd(), pattern = ".*_processed.
 Still the same, with the **ASCN.ff.Batch** :
 
 ```R
-ASCN.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\.ASCAT\\.RDS$", full.names = TRUE, recursive = TRUE), nthread = 2)
+ASCN.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\..*\\.RDS$", full.names = TRUE, recursive = TRUE), nthread = 2)
 ```
-
-- To perform the same using results obtained using the **FACETS** or **SEQUENZA** segmenter, just edit the _pattern_ argument with the name of corresponding segmenter.
-
 
 #### **HTML reporting**
 
 And here again with the **Annotate.ff.Batch** :
 
 ```R
-Annotate.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\.ASCAT\\.RDS$", full.names = TRUE, recursive = TRUE), author.name = "Me!")
+Annotate.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\..*\\.RDS$", full.names = TRUE, recursive = TRUE), author.name = "Me!")
 ```
-
-- To perform the same using results obtained using the **FACETS** or **SEQUENZA** segmenter, just edit the _pattern_ argument with the name of corresponding segmenter.
 
 ### **Piped**
 
@@ -391,8 +401,8 @@ OS.Process(ATChannelCel = "/home/me/my_project/CEL/SAMPLE1_OncoScan_CNV_A.CEL", 
 
 - So, as you may have already noticed, most functions exist in EaCoN in three flavors :
   - The **"directly"** named : that accept a R _data_ object as first parameter, designed to be used in pipe mode.
-  - The **".ff"** named : that require a file as first parameter, designed to be used in step-by-step mode.
-  - The **".ff.Batch"** named : that require a list as first parameter, designed to be used in step-by-step mode, but running multiple samples for each step, possibly with multithreading.
+  - The **".ff"** named ("from file") : that require a file as first parameter, designed to be used in step-by-step mode.
+  - The **".ff.Batch"** named ("from file, in batch") : that require a list as first parameter, designed to be used in step-by-step mode, but running multiple samples for each step, possibly with multithreading.
 
 ---
 
@@ -400,20 +410,25 @@ OS.Process(ATChannelCel = "/home/me/my_project/CEL/SAMPLE1_OncoScan_CNV_A.CEL", 
 
 ### **Segmentation**
 
-- For each step, default values for each data source already correspond to recommendations. However, for the common **segmentation** step using the ASCAT segmenter, adaptation to the data source is recommended, by changing few parameters :
+- For each step, default values for each data source already correspond to recommendations. However, for the common **segmentation** step, adaptation to the data source is recommended, by changing few parameters :
 
 SOURCE | SER.pen | smooth.k | nrf | BAF.filter
 --- | --- | --- | --- | ---
 OncoScan | `40` *(default)* | `NULL` *(default)* | `0.5` *(default)* | `0.9`
 CytoScan HD | `20` | `5` | `1.0` | `0.75` *(default)*
 SNP6 | `60` | `5` | `0.25` | `0.75` *(default)*
-WES | `2` | `5` | `0.5` *(default)* | `0.75` *(default)*
+WES | `2` to `10` | `5` | `0.5` *(default)* to `1` | `0.75` *(default)*
 
-- The FACETS segmenter is dedicated to WES data.
+- The FACETS segmenter cannot currently be used on SNP6 data (due to missing normalized A and B signals).
 
-### **Getting deeper**
+- For WES data, any BAM should work, but we recommend using BAMs for which duplicates were marked/removed (samtools markdup, Picard MarkDuplicates, etc...), for results of better quality.
 
-- All the functions depicted above have other non-described parameters. As the above recommandations should do the trick in most case, they certainly won't fit all. To adjust parameters more finely, I suggest to refer to the R help pages for corresponding functions.
+### NOTES
+
+- All the functions depicted above have other parameters not described here. As the above recommandations should do the trick in most cases, they certainly won't fit all. To adjust parameters more finely, I suggest to refer to the R help pages for corresponding functions.
+
+- FACETS segmenter CAN NOT be used on SNP6 microarrays results (due to missing data types)
+- SEQUENZA segmenter SHOULD NOT be used in SNP6 microarrays (it theoretically can, but requires huge amounts of RAM, ie more than 32 GB). This may halt / swap your computer !
 
 
 ---

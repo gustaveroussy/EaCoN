@@ -2,7 +2,7 @@
 SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", gc.renorm = TRUE, gc.rda = NULL, wave.renorm = TRUE, wave.rda = NULL, mingap = 1E+06, out.dir = getwd(), oschp.keep = FALSE, force.OS = NULL, apt.version = "1.20.0", apt.build = "na35.r1", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
 
   # setwd("/home/job/WORKSPACE/EaCoN_tests/SNP6")
-  # CEL <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/DATA/AFFY_SNP6/PRIMARY/BRCA/BITES_p_TCGAb61_SNP_S_GenomeWideSNP_6_E08_697096.CEL.bz2"
+  # CEL <- "GSM820994.CEL.bz2"
   # samplename <- "BITES_TEST"
   # l2r.level <- "normal"
   # wave.renorm <- TRUE
@@ -131,16 +131,6 @@ SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", gc
   ao.df$chr <- paste0("chr", ao.df$chrA)
   ao.df$chrN <- unlist(cs$chrom2chr[ao.df$chr])
   
-  # ao.df <- data.frame(chrs = as.vector(my.oschp$MultiData$CopyNumber$Chromosome), pos = as.vector(my.oschp$MultiData$CopyNumber$Position), L2R.ori = as.vector(my.oschp$MultiData$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), L2R = as.vector(my.oschp$MultiData$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), BAF = NA, stringsAsFactors = FALSE)
-  # rownames(ao.df) <- my.oschp$MultiData$CopyNumber$ProbeSetName
-  # affy.chrom <- my.oschp$MultiData[["CopyNumber_&keyvals"]][seq.int(3, nrow(my.oschp$MultiData[["CopyNumber_&keyvals"]]), 3),1:2]
-  # ak <- affy.chrom$val
-  # names(ak) <- as.numeric(sub(":display", "", affy.chrom$key))
-  # ao.df$chrA <- as.vector(ak[as.character(ao.df$chrs)])
-  # ao.df$chr <- paste0("chr", ao.df$chrA)
-  # ao.df$chrN <- unlist(cs$chrom2chr[ao.df$chr])
-  # ao.df <- ao.df[order(ao.df$chrN, ao.df$pos),]
-
   ## Normalizing SNPs
   tmsg("Normalizing SNP data (using rcnorm) ...")
   baf.df <- rcnorm::rcnorm.snp(myCEL = CEL, genome = genome, allSNPs = FALSE)
@@ -232,12 +222,12 @@ SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", gc
   }
   ao.df$mBAF <- BAF2mBAF(ao.df$BAF)
   
-  png(paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_hrates.png"), 1600, 1050)
-  par(mfrow = c(2,1))
-  plot(ao.df$BAF[nna], col = ao.df$cluster[nna], pch = ".", xaxs = "i", ylim = c(0,1))
-  abline(v=peltres)
-  plot(density(hrates[smeds > .45]))
-  dev.off()
+  # png(paste0(out.dir, "/", samplename, "/", samplename, "_", arraytype, "_", genome, "_hrates.png"), 1600, 1050)
+  # par(mfrow = c(2,1))
+  # plot(ao.df$BAF[nna], col = ao.df$cluster[nna], pch = ".", xaxs = "i", ylim = c(0,1))
+  # abline(v=peltres)
+  # plot(density(hrates[smeds > .45]))
+  # dev.off()
   
   # length(which(hrates < .2 & smeds < .45))
   

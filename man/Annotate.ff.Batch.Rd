@@ -6,7 +6,7 @@
 }
 \usage{
   Annotate.ff.Batch(RDS.files = list.files(path = getwd(),
-  pattern = "\\.SEG\\.ASCAT\\.RDS$", full.names = TRUE, recursive = TRUE,
+  pattern = "\\\\\\\\.SEG\\\\\\\\..*\\\\\\\\.RDS$", full.names = TRUE, recursive = TRUE,
   ignore.case = TRUE, include.dirs = FALSE), nthread = 1,
   cluster.type = "PSOCK", ...)
 }
