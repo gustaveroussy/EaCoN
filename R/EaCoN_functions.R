@@ -532,7 +532,8 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   deltaCN <- 0
   
   ### Data conversion
-  F.dmat <- data.frame(chrom = as.integer(data$data$SNPpos$chrs), maploc = as.numeric(data$data$SNPpos$pos), rCountT = data$data$additional$RD.test, rCountN = data$data$additional$RD.ref, vafT = data$data$Tumor_BAF[,1], vafN = NA, het = abs(as.numeric(data$germline$germlinegenotypes)-1), keep = NA, gcpct = NA, gcbias = NA, cnlr = data$data$Tumor_LogR[,1], valor = data$data$additional$LOR, lorvar = data$data$additional$LORvar)
+  # F.dmat <- data.frame(chrom = as.integer(data$data$SNPpos$chrs), maploc = as.numeric(data$data$SNPpos$pos), rCountT = data$data$additional$RD.test, rCountN = data$data$additional$RD.ref, vafT = data$data$Tumor_BAF[,1], vafN = NA, het = abs(as.numeric(data$germline$germlinegenotypes)-1), keep = NA, gcpct = NA, gcbias = NA, cnlr = data$data$Tumor_LogR[,1], valor = data$data$additional$LOR, lorvar = data$data$additional$LORvar)
+  F.dmat <- data.frame(chrom = unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)]), maploc = as.numeric(data$data$SNPpos$pos), rCountT = data$data$additional$RD.test, rCountN = data$data$additional$RD.ref, vafT = data$data$Tumor_BAF[,1], vafN = NA, het = abs(as.numeric(data$germline$germlinegenotypes)-1), keep = NA, gcpct = NA, gcbias = NA, cnlr = data$data$Tumor_LogR[,1], valor = data$data$additional$LOR, lorvar = data$data$additional$LORvar)
   
   ### Selection of SNP position to smooth their density
   F.dmat$keep <- if ("germline" %in% names(data)) as.numeric(!unname(data$germline$germlinegenotypes[,1])) else F.dmat$keep <- facets:::scanSnp(maploc = F.dmat$maploc, het = F.dmat$het, nbhd = snp.nbhd)
@@ -1585,10 +1586,10 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
 ## FACETS Total and Allele-Specific Copy Number
 ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
   
-  # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta2/WES/TCGA-A7-A0CE-01A_vs_10A/FACETS/L2R")
-  # data <- readRDS("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta2/WES/TCGA-A7-A0CE-01A_vs_10A/FACETS/L2R/TCGA-A7-A0CE-01A_vs_10A.FACETS.RDS")
-  # out.dir <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta2/WES/TCGA-A7-A0CE-01A_vs_10A"
-  # force <- FALSE
+  # setwd("/home/job/Documents/ROSCOFF/Roscoff_2018/TP_CNV/WES/REDUX/A18R.11.17.18/FACETS/L2R")
+  # data <- readRDS("A18R.11.17.18.SEG.FACETS.RDS")
+  # out.dir <- "/home/job/Documents/ROSCOFF/Roscoff_2018/TP_CNV/WES/REDUX/A18R.11.17.18"
+  # force <- TRUE
   # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # require(foreach)
 
@@ -1622,9 +1623,12 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
   tmsg("ASCN modeling (using FACETS) ...")
   ascn.res <- facets::emcncf(x = data$data$additional, ...)
   ascn.res$cncf$lcn.em[is.na(ascn.res$cncf$lcn.em)] <- 0
-  ## Handling ploidy
-  purity <- ascn.res$purity
   
+  ## Handling purity
+  purity <- ascn.res$purity
+  if (!"loglik" %in% names(ascn.res)) ascn.res$loglik <- NA
+  
+  ## Handling ploidy
   tcn.tbl.ung <- dplyr::as.tbl(cbind(ascn.res$cncf, width = ascn.res$cncf$end - ascn.res$cncf$start + 1))
   tcn.tbl <- dplyr::group_by(tcn.tbl.ung, tcn.em)
   tcn.tbl.prop <- dplyr::summarise(tcn.tbl, tot_width = sum(width))
