@@ -991,11 +991,11 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   sqz.pcf <- copynumber::aspcf(logR = l2r.df, BAF = baf.df, kmin = 10, gamma = penalty, baf.thres = c(0.05,0.95), arms = rep("p", nrow(l2r.df)), verbose = FALSE)
 
   ### Hacking n.probes
-  seg.end.idx <- cumsum(sqz.pcf[["n.probes"]])
-  seg.start.idx <- c(1, seg.end.idx[-length(seg.end.idx)]+1)
-  glob.start.idx <- p.idx[seg.start.idx]
-  glob.end.idx <- p.idx[seg.end.idx]
-  new.n.probes <- p.idx[seg.end.idx] - p.idx[seg.start.idx] + 1
+  # seg.end.idx <- cumsum(sqz.pcf[["n.probes"]])
+  # seg.start.idx <- c(1, seg.end.idx[-length(seg.end.idx)]+1)
+  # glob.start.idx <- p.idx[seg.start.idx]
+  # glob.end.idx <- p.idx[seg.end.idx]
+  # new.n.probes <- p.idx[seg.end.idx] - p.idx[seg.start.idx] + 1
   
   ### Inserting results in data
   
@@ -1343,7 +1343,7 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
     if (is.null(my.ascat.seg.ascn$nA)) {
       tmsg("  ASCAT could not find an optimal ploidy / cellularity from the data.")
       setwd(oridirx)
-      file.remove(odirg)
+      unlink(odirg, recursive = TRUE)
       return(rep(NA, 8))
     }
     else {
