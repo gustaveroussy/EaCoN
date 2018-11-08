@@ -823,16 +823,16 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
 ## SEQUENZA L2R + BAF segmentation
 Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoCut = .05, penalty = 50, recenter = "l2r.centeredpeak", calling.method = "mad", nrf = .5, SER.pen = 40, out.dir = getwd(), return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
   
-  # setwd("/home/job/Documents/ROSCOFF/Roscoff_2018/TP_CNV/SNP6/A0E0_snp6")
-  # data = readRDS("A0E0_snp6_GenomeWideSNP_6_hg19_processed.RDS")
+  # setwd("/home/job/Documents/ROSCOFF/Roscoff_2018/TP_CNV/WES/REDUX/A18R.11.17.18")
+  # data = readRDS("A18R.11.17.18_hs37d5_b50_processed.RDS")
   # smooth.k = 5
   # BAF.filter = .75
   # homoCut = .05
   # penalty = 50
   # recenter = "l2r.centeredpeak"
   # calling.method = "mad"
-  # nrf = 0.25
-  # SER.pen = 60
+  # nrf = 1
+  # SER.pen = 6
   # out.dir = getwd()
   # return.data = FALSE
   # write.data = TRUE
@@ -1006,7 +1006,8 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   
   
   #### Additional
-  sqz.pcf$chrom <- data$data$chrs[sqz.pcf$chrom]
+  # sqz.pcf$chrom <- data$data$chrs[sqz.pcf$chrom]
+  # sqz.pcf$chrom <- unlist(cs$chr2chrom[sqz.pcf$chrom])
   data$data$additional <- sqz.pcf
   
   
@@ -1486,7 +1487,8 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
         segments(segments.genostart[dn.nMinor],
                  -0.05, segments.genoend[dn.nMinor], -0.05,
                  pch = ".", col = "darkgreen", lwd = 6)
-      abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
+      # abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
+      abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
       abline(h = 0:ylim, col = "grey75", lty = 3)
       try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
       # graphics::plot(0, 0, type = "n", xlim = c(0, max(segments.genoend)), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " RAW Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
@@ -1501,7 +1503,8 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
       segments(segments.genostart, nTotal, segments.genoend, nTotal, pch = ".", col = 4, lwd = 6)
       if (length(up.nTotal) > 0) segments(segments.genostart[up.nTotal], (ylim + 0.2) + 0.05, segments.genoend[up.nTotal], (ylim + 0.2) + 0.05, pch = ".", col = "cyan", lwd = 6)
       if (length(dn.nTotal) > 0) segments(segments.genostart[dn.nTotal], 0, segments.genoend[dn.nTotal], 0, pch = ".", col = "midnightblue", lwd = 6)
-      abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
+      # abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
+      abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
       abline(h = 0:ylim, col = "grey75", lty = 3)
       try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
       dev.off()
@@ -1695,7 +1698,8 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
     segments(segments.genostart[dn.nMinor],
              -0.05, segments.genoend[dn.nMinor], -0.05,
              pch = ".", col = "darkgreen", lwd = 6)
-  abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
+  # abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
+  abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
   abline(h = 0:ylim, col = "grey75", lty = 3)
   
   try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
@@ -1710,7 +1714,8 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
   segments(segments.genostart, ascn.res$cncf$tcn.em, segments.genoend, ascn.res$cncf$tcn.em, pch = ".", col = 4, lwd = 6)
   if (length(up.nTotal) > 0) segments(segments.genostart[up.nTotal], (ylim + 0.2) + 0.05, segments.genoend[up.nTotal], (ylim + 0.2) + 0.05, pch = ".", col = "cyan", lwd = 6)
   if (length(dn.nTotal) > 0) segments(segments.genostart[dn.nTotal], 0, segments.genoend[dn.nTotal], 0, pch = ".", col = "midnightblue", lwd = 6)
-  abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
+  # abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
+  abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
   abline(h = 0:ylim, col = "grey75", lty = 3)
   try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
   dev.off()
@@ -1756,7 +1761,13 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
 ### *** and especially for homozygous regions which are totaly wrong...
 ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min.size = 1E+06, out.dir = getwd(), force = FALSE) {
   
-  # force = FALSE
+  # setwd("/home/job/Documents/ROSCOFF/Roscoff_2018/TP_CNV/WES/REDUX/A18R.11.17.18")
+  # data <- readRDS("SEQUENZA/L2R/A18R.11.17.18.SEG.SEQUENZA.RDS")
+  # max.ploidy = 4
+  # ploidy.step = .1
+  # seg.min.size = 1E+06
+  # out.dir = getwd()
+  # force = TRUE
   # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
   
   ## CHECKS
@@ -1906,7 +1917,8 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
     segments(segments.genostart[dn.nMinor],
              -0.05, segments.genoend[dn.nMinor], -0.05,
              pch = ".", col = "darkgreen", lwd = 6)
-  abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
+  # abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
+  abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
   abline(h = 0:ylim, col = "grey75", lty = 3)
   
   try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
@@ -1920,7 +1932,8 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
   segments(segments.genostart, ascn.res$data$CNt, segments.genoend, ascn.res$data$CNt, pch = ".", col = 4, lwd = 6)
   if (length(up.nTotal) > 0) segments(segments.genostart[up.nTotal], (ylim + 0.2) + 0.05, segments.genoend[up.nTotal], (ylim + 0.2) + 0.05, pch = ".", col = "cyan", lwd = 6)
   if (length(dn.nTotal) > 0) segments(segments.genostart[dn.nTotal], 0, segments.genoend[dn.nTotal], 0, pch = ".", col = "midnightblue", lwd = 6)
-  abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
+  # abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
+  abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
   abline(h = 0:ylim, col = "grey75", lty = 3)
   try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
   dev.off()
