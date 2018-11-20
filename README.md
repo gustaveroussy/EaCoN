@@ -23,6 +23,7 @@ It consists in a series of R packages that perform such type of analysis, from r
 - Small code changes to adapt to "non-completely covered" genomes (ie, few chromosomes for toy datasets, by example).
 - Harmonized the penalty parameter for all segmenters (now just "penalty" rather than "ASCAT.pen", "SEQUENZA.pen" or "FACETS.pen")
 - Officially dropping support for sequenza with SNP6 arrays as it leads to a huge RAM consumption by copynumber::aspcf, due to the few probes covering both L2R and BAF.
+- Included chromosomes objects in package for hs, mm and rn, to avaoid dependency to another non-public sourceable package.
 
 ### **2018-10-02 : v0.3.3-1 _(LittleWomanNoCry)_ is out !**
 
@@ -124,7 +125,6 @@ While the current EaCoN package is the core of the process, multiple others are 
       - GC% & wave-effect normalization :
         - [affy.CN.norm.data](http://bit.ly/AffyCNnorm) _Pre-computed tracks for all supported Affmetrix designs (both hg19 and hg38)_
         - [rcnorm](http://bit.ly/rcnorm) _Code and tracks to re-normalize BAF for the CytoScan family of designs and SNP6, using *rawcopy*_
-        - [chromosomes](http://bit.ly/chromosomespackage) _to provide the structure of chromsomes for homo sapiens (hg17 to hg38, hs37d5), mus musculus (mm7 to mm10) and rattus norvegicus (rn5 to rn6)_
 - Raw data :
   - For Affymetrix microarrays : the **CEL** files, fresh out of the Affymetrix Scanner
   - For WES data :

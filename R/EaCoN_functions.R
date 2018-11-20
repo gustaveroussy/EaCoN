@@ -2034,7 +2034,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     if (genome %in% names(valid.genomes)) {
       self.pkg.name <- "EaCoN"
       data(list = paste0("refGene_cl_", genome), package = self.pkg.name, envir = environment())
-      data(list = genome, package = "chromosomes", envir = environment())
+      data(list = genome, package = self.pkg.name, envir = environment())
     } else {
       ## ... and none in bank : no genes !
       tmsg("WARNING : No refGene table provided, and none banked for current genome : Gene information won't exist in the report!")
@@ -2601,7 +2601,8 @@ Annotate.solo <- function(cbs.file = NULL, genome = NULL, ldb = "/mnt/data_cigog
   # if (length(cbs.cut.file) > 1) stop(paste0("Found multiple Cut CBS files for ", sample.dir))
   if (!file.exists(cbs.file)) stop(tmsg(paste0("Could not find CBS file [", cbs.file, "] !")))
   cbs.df <- read.table.fast(cbs.file)
-  data(list = genome, package = "chromosomes", envir = environment())
+  self.pkg.name <- "EaCoN"
+  data(list = genome, package = self.pkg.name, envir = environment())
   ## Converting CBS to SOLO
   message(tmsg(" Converting to SOLO ..."))
   solo.df <- data.frame(Loc = paste0(unlist(cs$chr2chrom[cbs.df$Chr]), ":", cbs.df$Start, "-", cbs.df$End), Probes = cbs.df$Probes, Status = sign(cbs.df$Log2Ratio), L2R = cbs.df$Log2Ratio, Ratio = 2^cbs.df$Log2Ratio, stringsAsFactors = FALSE)

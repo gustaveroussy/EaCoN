@@ -97,7 +97,8 @@ EaCoN.l2rplot.karyo <- function(l2r = NULL, seg = NULL, seg.col = list(gain = "b
   genome <- BSgenome::providerVersion(BSg.obj)
   # cs <- chromobjector(BSg.obj)
   
-  data(list = genome, package = "chromosomes", envir = environment())
+  self.pkg.name <- "EaCoN"
+  data(list = genome, package = self.pkg.name, envir = environment())
   l2r <- l2r[!is.na(l2r$Value),]
 
   par(mgp=c(0,0,0), omi=c(0,0.2,0.1,0), xaxt="n", yaxt="n", bty="n")
@@ -155,7 +156,8 @@ EaCoN.l2rplot.chromo <- function(chr = NULL, l2r = NULL, l2r.seg = NULL, baf = N
   genome <- BSgenome::providerVersion(BSg.obj)
   # cs <- chromobjector(BSg.obj)
   
-  data(list = genome, package = "chromosomes", envir = environment())
+  self.pkg.name <- "EaCoN"
+  data(list = genome, package = self.pkg.name, envir = environment())
 
   l2r <- l2r[!is.na(l2r$Value),]
   kLprob.idx <- which(l2r$Chr == chr)
