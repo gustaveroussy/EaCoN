@@ -1,3 +1,15 @@
 refGene_cl_hg19: gen.df
 targetlist_270: targetlist
 targetlist_475: targetlist
+hg17: homo_sapiens_build_17
+hg18: homo_sapiens_build_18
+hg19: homo_sapiens_build_19
+GRCh37-lite: homo_sapiens_build_19_TCGA
+hs37d5: homo_sapiens_build_19_1000Genomes
+hg38: homo_sapiens_build_38
+mm7: mus_musculus_build_7
+mm8: mus_musculus_build_8
+mm9: mus_musculus_build_9
+mm10: mus_musculus_build_10
+rn5: rattus_norvegicus_build_5
+rn6: rattus_norvegicus_build_6

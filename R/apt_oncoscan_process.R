@@ -1,11 +1,11 @@
 ## Performs OS CEL pairs processing
 OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NULL, dual.norm = TRUE, l2r.level = "weighted", gc.renorm = TRUE, gc.rda = NULL, wave.renorm = TRUE, wave.rda = NULL, mingap = 1E+06, out.dir = getwd(), oschp.keep = FALSE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r2", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
   
-  # ## TEMP
+  ## TEMP
   # setwd("/home/job/WORKSPACE/EaCoN_tests/OS")
-  # ATChannelCel = "/home/job/WORKSPACE/EaCoN_tests/OS/18H03436_A.CEL.bz2"
-  # GCChannelCel = "/home/job/WORKSPACE/EaCoN_tests/OS/18H03436_C.CEL.bz2"
-  # samplename = "ERROR"
+  # ATChannelCel = "/home/job/WORKSPACE/EaCoN_tests/OS/18H03657_A.CEL.bz2"
+  # GCChannelCel = "/home/job/WORKSPACE/EaCoN_tests/OS/18H03657_C.CEL.bz2"
+  # samplename = "FACETSTEST"
   # dual.norm = TRUE
   # out.dir = getwd()
   # temp.files.keep = TRUE
@@ -27,7 +27,7 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   # require(foreach)
   # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # source("~/git_gustaveroussy/EaCoN/R/renorm_functions.R")
-  
+
   
   
   ## Early checks
@@ -97,10 +97,8 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   cs <- chromobjector(BSg.obj)
   
   ### Getting basic meta
-  # genome <- getmeta("affymetrix-algorithm-param-genome-version", my.oschp$Meta$analysis)
   genome <- getmeta("affymetrix-algorithm-param-genome-version", my.oschp$Meta$analysis)
   if (genome != genome2) stop(tmsg(paste0("Genome build name given with BSgenome package '", genome.pkg, "', (", genome2, ") is different from the genome build specified by provided APT build version '", apt.build, "' (", genome, ") !")))
-  # data(list = genome, package = "chromosomes", envir = environment())
   arraytype <- getmeta("affymetrix-array-type", my.oschp$Meta$analysis)
   manufacturer <- getmeta("program-company", my.oschp$Meta$analysis)
   species <- getmeta("affymetrix-algorithm-param-genome-species", my.oschp$Meta$analysis)
@@ -123,24 +121,22 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   )
   
   ## Extracting data : L2R
-  ao.df <- data.frame(ProbeSetName = my.oschp$ProbeSets$CopyNumber$ProbeSetName, chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R.ori = as.vector(my.oschp$ProbeSets$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), L2R = as.vector(my.oschp$ProbeSets$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), BAF = as.vector(my.oschp$ProbeSets$AllelicData$BAF), AD = as.vector(my.oschp$ProbeSets$AllelicData$AllelicDifference), CallF = as.vector(my.oschp$Genotyping$Calls$ForcedCall), stringsAsFactors = FALSE)
-  # ao.df <- if (l2r.level == "normal") {
-  #   data.frame(chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R = as.vector(my.oschp$ProbeSets$CopyNumber$Log2Ratio), BAF = as.vector(my.oschp$ProbeSets$AllelicData$BAF), stringsAsFactors = FALSE)
-  # } else if (l2r.level == "weighted") {
-  #   data.frame(chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R = as.vector(my.oschp$ProbeSets$CopyNumber$WeightedLog2Ratio), BAF = as.vector(my.oschp$ProbeSets$AllelicData$BAF), stringsAsFactors = FALSE)
-  # } else stop(tmsg("Unrecognized value for [l2r.level] !"))
-  # rownames(ao.df) <- my.oschp$ProbeSets$CopyNumber$ProbeSetName
+  ao.df <- data.frame(ProbeSetName = my.oschp$ProbeSets$CopyNumber$ProbeSetName, chrs = as.vector(my.oschp$ProbeSets$CopyNumber$Chromosome), pos = as.vector(my.oschp$ProbeSets$CopyNumber$Position), L2R.ori = as.vector(my.oschp$ProbeSets$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), L2R = as.vector(my.oschp$ProbeSets$CopyNumber[[l2r.lev.conv[[l2r.level]]]]), BAF = as.vector(my.oschp$ProbeSets$AllelicData$BAF), AD = as.vector(my.oschp$ProbeSets$AllelicData$AllelicDifference), CallF = as.vector(my.oschp$Genotyping$Calls$ForcedCall), ASignal = my.oschp$Genotyping$Calls$ASignal, BSignal = my.oschp$Genotyping$Calls$BSignal, stringsAsFactors = FALSE)
   affy.chrom <- my.oschp$Chromosomes$Summary
   ak <- affy.chrom$Display
   names(ak) <- affy.chrom$Chromosome
   ao.df$chrA <- as.vector(ak[as.character(ao.df$chrs)])
   ao.df$chr <- paste0("chr", ao.df$chrA)
   ao.df$chrN <- unlist(cs$chrom2chr[ao.df$chr])
-  # ao.df <- ao.df[order(ao.df$chrN, ao.df$pos, rownames(ao.df)),]
   ao.df <- ao.df[order(ao.df$chrN, ao.df$pos, ao.df$ProbeSetName),]
   ao.df <- ao.df[!(is.na(ao.df$L2R) & is.na(ao.df$BAF)),]
-  # ao.df$L2R.ori <- ao.df$L2R
-  
+
+  ## Adding specific data for FACETS
+  rcmat <- round(cbind(ao.df$BAF * (ao.df$ASignal + ao.df$BSignal), (1-ao.df$BAF)*(ao.df$ASignal + ao.df$BSignal)))
+  ao.df$LOR <- log(rcmat[,1]+1/6) - log(rcmat[,2]+1/6)
+  ao.df$LORvar <- 1/(rcmat[,1]+1/6) + 1/(rcmat[,2]+1/6)
+  rm(rcmat)
+  gc()
   
   ## L2R renormalizations
   smo <- round(nrow(ao.df) / 550)
@@ -264,7 +260,8 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
       samples = samplename,
       gender = as.vector(meta.b$predicted.gender),
       sexchromosomes = sex.chr,
-      failedarrays = NULL
+      failedarrays = NULL,
+      additional = data.frame(RD.test = ao.df$ASignal, RD.ref = ao.df$BSignal, LOR = ao.df$AD, LORvar = ao.df$LORvar, stringsAsFactors = FALSE)
     ),
     meta = list(
       basic = meta.b,
