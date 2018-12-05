@@ -97,7 +97,8 @@ It consists in a series of R packages that perform such type of analysis, from r
   ``` r
   ## try using http:// if https:// URLs are not supported
   source("https://bioconductor.org/biocLite.R")
-  biocLite(c("affxparser", "Biostrings", "aroma.light", "BSgenome", "copynumber", "GenomicRanges", "limma", "rhdf5", "sequenza"))
+  biocLite(c("affxparser", "Biostrings", "aroma.light", "BSgenome", "copynumber",\
+  "GenomicRanges", "limma", "rhdf5", "sequenza"))
   ```
 
 - Then install **_EaCoN_** from github !
