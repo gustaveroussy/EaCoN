@@ -110,7 +110,7 @@ devtools::install_github("gustaveroussy/EaCoN")
 
 While the current EaCoN package is the core of the process and will straitfully work for WES data, multiple other packages are needed to properly handle Affymetrix microarray : APT (affymetrix power tools), designs and corresponding annotations (genome build, Affymetrix annotation databases) ; others are required for the (re)normalization, especially pre-computed GC% or Wavetracks.
 
-#### **AFFYMETRIX MICROARRAYS**
+#### **ALL AFFYMETRIX MICROARRAYS**
 
 - The **_affy.CN.norm_** package provides pre-computed GC% and wave-effect (re)normalization datasets for all compatible Affymetrix designs, for both NA33/NA35 (hg19) and NA36 (hg38) human genome builds. Install from remote URL :
 
@@ -118,7 +118,7 @@ While the current EaCoN package is the core of the process and will straitfully 
 install.packages("https://drive.google.com/uc?export=download&id=1zeTbjQ-N2TowgGFj9hPje1V0hABPvONN", repos = NULL, type = "source")
 ```
 
-##### **OncoScan family (OncoScan / OncoScan_CNV)**
+#### **ONCOSCAN FAMILY (OncoScan / OncoScan_CNV)**
 
 - First, install embedded APT tool from github :
  
@@ -153,7 +153,7 @@ devtools::install_github("gustaveroussy/apt.oncoscan.2.4.0")
       install.packages( "https://drive.google.com/uc?export=download&id=1rgSsTXgTJHsp1dzO1HZNR6kJexormJ2J", repos = NULL, type = "source")
       ```
 
-##### **CytoScan family (CytoScan 750k / CytoScan HD)**
+#### **CYTOSCAN FAMILY (CytoScan 750k / CytoScan HD)**
 
 - First, install embedded APT tool from github :
  
@@ -192,7 +192,7 @@ devtools::install_github("gustaveroussy/apt.cytoscan.2.4.0")
 install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtxCPii-ukuR2tF8pikrgx", repos = NULL, type = "source")
 ```
 
-##### **Genomwide snp6.0**
+#### **GENOMEWIDE SNP6**
 
 - First, install embedded APT tool from github :
  
@@ -206,7 +206,7 @@ devtools::install_github("gustaveroussy/apt.snp6.1.20.0")
 install.packages("https://drive.google.com/uc?export=download&id=1AFmU9eROmrQZpNz-3GptCF1OSZWlyvCP", repos = NULL, type = "source")
 ```
 
-- Lastly, install the **_rcnorm_** package to perform BAF normalization for SNP6 arrays **(if not already installed at the CytoScan step!) :
+- Lastly, install the **_rcnorm_** package to perform BAF normalization for SNP6 arrays **(if not already installed at the CytoScan step!)** :
 
 ``` r
 install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtxCPii-ukuR2tF8pikrgx", repos = NULL, type = "source")
@@ -239,7 +239,7 @@ biocLite("BSgenome.Hsapiens.UCSC.hg19")
 biocLite("BSgenome.Hsapiens.UCSC.hg38")
 ```
 
-- For TCGA WES data, you will need the **hs37d5** genome (a variation of the hg19 build used in the 1000 Genomes project)
+- For TCGA WES data, you will need the **hs37d5** genome _(a variation of the hg19 build used in the 1000 Genomes project)_
 
 ``` r
 ## try using http:// if https:// URLs are not supported
@@ -252,7 +252,7 @@ biocLite("BSgenome.Hsapiens.1000genomes.hs37d5")
   - Simply download locally any public genome package (by example [BSgenome.Hsapiens.UCSC.hg19](https://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg19/)) 
   - Uncompress it locally (MS Windows users can use [7-zip](https://www.7-zip.org/))
   - Rename the decompressed folder to your genome name
-  - Edit all possible files (DESCRIPTION, NAMESPACE, R/zzz.R, man/package.Rd) to insert all required informations relative to your own genome
+  - Edit all possible files (DESCRIPTION, NAMESPACE, R/zzz.R, man/package.Rd) to insert all required information relative to your own genome
   - Replace the _inst/extdata/single_sequenes.2bit_ file by your genome sequence in the [2bit](http://genome.ucsc.edu/FAQ/FAQformat.html#format7) format (which can be converted to from a regular fasta file thanks to converters developed by the [UCSC](https://genome.ucsc.edu/goldenpath/help/twoBit.html))
   - Re-compress the modified and renamed directory to a .tar.gz (Windows users : 7-zip can do that, too)
   - Install !
@@ -279,9 +279,9 @@ EaCoN allows different ways to perform the full workflow : considering the analy
 
 ### **Step by step mode**
 
-- First, under R, load EaCoN and choose a directory in which results will be written, by exemple : **/home/project/EaCoN_results**
+First, under R, load EaCoN and choose a directory in which results will be written, by exemple : **/home/project/EaCoN_results**
 
-```R
+```r
 require(EaCoN)
 setwd("/home/project/EaCoN_results")
 ```
@@ -292,9 +292,9 @@ setwd("/home/project/EaCoN_results")
 
 - Let's say we have a pair of OncoScan_CNV CEL files to analyse in a **/home/project/CEL/** directory (Affymetrix OncoScan experiments have 2 arrays for a single experiment, thus a pair) :
 
-```R
-OS.Process(ATChannelCel = "/home/project/CEL/S1_OncoScan_CNV_A.CEL", GCChannelCel = "/home/project/CEL/S1_OncoScan_CNV_C.CEL", samplename = "S1_OS")
-```
+  ```r
+  OS.Process(ATChannelCel = "/home/project/CEL/S1_OncoScan_CNV_A.CEL", GCChannelCel = "/home/project/CEL/S1_OncoScan_CNV_C.CEL", samplename = "S1_OS")
+  ```
 
 - This will perform the normalization step, create a **/home/project/EaCoN_results/S1_OS/** subdirectory and write 5 files in it :
   - _**S1_OS_OncoScan_CNV_hg19_processed.RDS**_ : contains the normalized data which will be provided to the next step
@@ -307,18 +307,18 @@ OS.Process(ATChannelCel = "/home/project/CEL/S1_OncoScan_CNV_A.CEL", GCChannelCe
 
 - This is identical to OncoScan, except that we have a single CEL file, and we just have to change the function name :
 
-```R
-CS.Process(CEL = "/home/project/CEL/S2_CytoScanHD.CEL", samplename = "S2_CSHD")
-```
+  ```r
+  CS.Process(CEL = "/home/project/CEL/S2_CytoScanHD.CEL", samplename = "S2_CSHD")
+  ```
 - The same output files will be generated (except for the "paircheck" file, obviously)
 
 ##### **Affymetrix GenomeWide SNP6**
 
 - Here again, this is identical to OncoScan, except that we have a single CEL file, and we just have to change the function name :
 
-```R
-SNP6.Process(CEL = "/home/project/CEL/S3_GenomeWide_snp.6.CEL", samplename = "S3_SNP6")
-```
+  ```r
+  SNP6.Process(CEL = "/home/project/CEL/S3_GenomeWide_snp.6.CEL", samplename = "S3_SNP6")
+  ```
 - Again, the same output files will be generated (except for the "paircheck" file, obviously)
 
 ##### **WES data**
@@ -326,22 +326,23 @@ SNP6.Process(CEL = "/home/project/CEL/S3_GenomeWide_snp.6.CEL", samplename = "S3
 - This time it is quite different : the processing will be performed in three steps :
   - **First**, we will use the capture BED (A text file containing the positions of the captured regions, usualy provided by the capture kit manufacturer), choose a genome version corresponding to our aligned BAM files, and choose a window size for the future binning of the data. Thses will be used to generate what we call a "BINpack", a set of pre-computed tracks containing the bins position and corresponding GC% values. Several tracks will be computed corresponding to different levels of elongation of the bin positions. In the example below, we used the BED corresponding to Agilent SureSelect v5 capture kit, a bin size of 50 nt, and chose the human hg19 genome build.
 
-```R
-BINpack.Maker(bed.file = "/home/project/WES/SureSelect_v5.bed", bin.size = 50, genome.pkg =
+    ```R
+    BINpack.Maker(bed.file = "/home/project/WES/SureSelect_v5.bed", bin.size = 50, genome.pkg =
 "BSgenome.Hsapiens.UCSC.hg19")
-```
+    ```
 
-  - This will generate a "BINpack" (with a ".rda" extension) that will be used in the next normalization steps : **/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda**
-  - **PLEASE NOTE THAT THIS STEP IS SAMPLE-INDEPENDENT, THUS NEEDS TO BE PERFORMED AGAIN ONLY IF YOU CHANGE EITHER THE CAPTURE BED, THE BIN SIZE OR THE GENOME BUILD.** Thus, the generated BINpack can be used for any other sample in the same conditions.
+    - This will generate a "BINpack" (with a ".rda" extension) that will be used in the next normalization steps : **/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda**
+  
+    - **PLEASE NOTE THAT THIS STEP IS SAMPLE-INDEPENDENT, THUS NEEDS TO BE PERFORMED AGAIN ONLY IF YOU CHANGE EITHER THE CAPTURE BED, THE BIN SIZE OR THE GENOME BUILD.** Thus, the generated BINpack can be used for any other sample in the same conditions.
 
   - **Second**, the WES data will be binned using the generated BINpack. We need three files as input : 
     - The aligned reads for the test sample (usualy in cancer, the patient tumor), in BAM format
     - The aligned reads for the reference sample (patient normal), in BAM format too
     - The BINpack itself
 
-```R
-WES.Bin(testBAM = "/home/project/WES/S4_WES_hg19_Tumor.BAM", refBAM = "/home/project/WES/S4_WES_hg19_Tumor.BAM", BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda", samplename = "S4_WES")
-```
+      ```R
+      WES.Bin(testBAM = "/home/project/WES/S4_WES_hg19_Tumor.BAM", refBAM = "/home/project/WES/S4_WES_hg19_Tumor.BAM", BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda", samplename = "S4_WES")
+      ```
 
   - This will generate a **/home/project/EaCoN_results/S4_WES/** subdirectory which contains :
     - _**S4_WES_hg19_b50_binned.RDS**_ : contains the binned data which will be provided to the next step
@@ -350,28 +351,28 @@ WES.Bin(testBAM = "/home/project/WES/S4_WES_hg19_Tumor.BAM", refBAM = "/home/pro
 
   - **Third**, now that the data have been binned, the normalization step can be performed :
 
-```R
-WES.Normalize.ff(BIN.RDS.file = "/home/project/EaCoN_results/S4_WES/S4_WES_hg19_b50_binned.RDS", BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda")
-```
+    ```r
+    WES.Normalize.ff(BIN.RDS.file = "/home/project/EaCoN_results/S4_WES/S4_WES_hg19_b50_binned.RDS", BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda")
+    ```
 
-  - Analogously to what was described for Affymetrix microarrays, a **/home/project/EaCoN_results/S4_WES/ASCAT/L2R/** subdirectory will be created, containing the same type of files described earlierly.
+    - Analogously to what was described for Affymetrix microarrays, a **/home/project/EaCoN_results/S4_WES/ASCAT/L2R/** subdirectory will be created, containing the same type of files described earlierly.
 
 
 #### **L2R & BAF Segmentation**
 
 - Now that we described the normalization process specific to each type of source data, we can segment it. The good news is that it's the very same step for each source type, one just have to pass the **\_processed.RDS** normalized file. Here is an example with the one obtained for OncoScan data, using the **ASCAT** segmenter :
 
-```R
-Segment.ff(RDS.file = "/home/me/my_project/EaCoN_results/SAMPLE1/S1_OncoScan_CNV_hg19_processed.RDS", segmenter = "ASCAT")
-```
+  ```
+  Segment.ff(RDS.file = "/home/me/my_project/EaCoN_results/SAMPLE1/S1_OncoScan_CNV_hg19_processed.RDS", segmenter = "ASCAT")
+  ```
 
-- This will perform the segmentation, centralization and calling steps, create a **/home/project/EaCoN_results/S1/ASCAT/L2R/** subdirectory and write multiple files in it :
-  - _**S1.SEG.ASCAT.RDS**_ : contains the segmented data which will be provided to the optional next step(s)
-  - _**S1.SEG.ASCAT.png**_ : shows a graphical representation of the segmented, centered and called L2R and BAF data
-  - _**S1.Rorschach.png**_ : shows a graphical representation of BAF vs L2R of probes, by chromosome
-  - _**S1.Cut.cbs**_ : contains the L2R segmentation results in the standard CBS format. "Cut" means that L2R value for the segments called as normal were set to a value of 0.0
-  - _**S1.NoCut.cbs**_ : Same as above, but the segments considered as normal have their L2R value intact
-  - _**S1.SegmentedBAF.txt**_ : contains the BAF segmentation results
+  - This will perform the segmentation, centralization and calling steps, create a **/home/project/EaCoN_results/S1/ASCAT/L2R/** subdirectory and write multiple files in it :
+    - _**S1.SEG.ASCAT.RDS**_ : contains the segmented data which will be provided to the optional next step(s)
+    - _**S1.SEG.ASCAT.png**_ : shows a graphical representation of the segmented, centered and called L2R and BAF data
+    - _**S1.Rorschach.png**_ : shows a graphical representation of BAF vs L2R of probes, by chromosome
+    - _**S1.Cut.cbs**_ : contains the L2R segmentation results in the standard CBS format. "Cut" means that L2R value for the segments called as normal were set to a value of 0.0
+    - _**S1.NoCut.cbs**_ : Same as above, but the segments considered as normal have their L2R value intact
+    - _**S1.SegmentedBAF.txt**_ : contains the BAF segmentation results
 
 - To perform the same using the **FACETS** segmenter, just change the value of the _segmenter_ parameter !
 
@@ -381,18 +382,18 @@ Segment.ff(RDS.file = "/home/me/my_project/EaCoN_results/SAMPLE1/S1_OncoScan_CNV
 
 - Then an estimation of the total and allele-specific copy-number profiles, as well as global ploidy and sample cellularity can be estimated. Here is an example using the **ASCAT** ASCN estimation, from a RDS generated by the Segment.ASCAT() function :
 
-```R
-ASCN.ff(RDS.file = "/home/me/my_project/EaCoN_results/SAMPLE1/ASCAT/L2R/SAMPLE1.ASCAT.RDS")
-```
+  ```r
+  ASCN.ff(RDS.file = "/home/me/my_project/EaCoN_results/SAMPLE1/ASCAT/L2R/SAMPLE1.ASCAT.RDS")
+  ```
 
-- This will perform these estimations for a range of values (default os 0.35 to 0.95, with a step of 0.05) of the "gamma" parameters (see more details in the **ASCAT** R package help pages), create a **/home/project/EaCoN_results/S1/ASCAT/ASCN/** subdirectory, in which other subdirectories will be created, one for each gamma value **/home/project/EaCoN_results/S1/ASCAT/ASCN/gamma_0.xx/**. In each of those will be written :
-  - _**S1_ascat.ASCN.RDS**_ : contains the TCN and ASCN segmentations, and cellularity and ploidy data
-  - _**S1_ASCATprofile.png**_ : shows a graphical representation of the final segmented TCN and ASCN profiles
-  - _**S1_rawprofile.png**_ : shows a graphical representation of the raw (uncorrected) segmented TCN and ASCN profiles
-  - _**S1_Rorschach.clown.png**_ : shows a graphical representation of BAF vs L2R of probes, by chromosome, with a coloration corresponding to CN levels.
-  - _**S1_TCNvsL2R.png**_ : shows a graphical representation of the comparison of the TCN and L2R values of each segment, clustered by TCN level. This is usefull to identify some mistakes in the TCN modelization.
-  - _**S1_gamma0.xx.cn**_ : contains the TCN and ASCN segmentation results in a non-standard format derived the CBS format
-  - _**S1_gamma0.xx_model.txt**_ : Contains the ploidy, cellularity and model statistics
+  - This will perform these estimations for a range of values (default os 0.35 to 0.95, with a step of 0.05) of the "gamma" parameters (see more details in the **ASCAT** R package help pages), create a **/home/project/EaCoN_results/S1/ASCAT/ASCN/** subdirectory, in which other subdirectories will be created, one for each gamma value **/home/project/EaCoN_results/S1/ASCAT/ASCN/gamma_0.xx/**. In each of those will be written :
+    - _**S1_ascat.ASCN.RDS**_ : contains the TCN and ASCN segmentations, and cellularity and ploidy data
+    - _**S1_ASCATprofile.png**_ : shows a graphical representation of the final segmented TCN and ASCN profiles
+    - _**S1_rawprofile.png**_ : shows a graphical representation of the raw (uncorrected) segmented TCN and ASCN profiles
+    - _**S1_Rorschach.clown.png**_ : shows a graphical representation of BAF vs L2R of probes, by chromosome, with a coloration corresponding to CN levels.
+    - _**S1_TCNvsL2R.png**_ : shows a graphical representation of the comparison of the TCN and L2R values of each segment, clustered by TCN level. This is usefull to identify some mistakes in the TCN modelization.
+    - _**S1_gamma0.xx.cn**_ : contains the TCN and ASCN segmentation results in a non-standard format derived the CBS format
+    - _**S1_gamma0.xx_model.txt**_ : Contains the ploidy, cellularity and model statistics
 
 - To perform the same using the **FACETS** or **SEQUENZA** estimator, just use a RDS generated with Segment.FACETS() or Segment.SEQUENZA(), respectively (or their ".ff" equivalent).
 
@@ -400,11 +401,11 @@ ASCN.ff(RDS.file = "/home/me/my_project/EaCoN_results/SAMPLE1/ASCAT/L2R/SAMPLE1.
 
 - Endly, an annotated HTML report can be rendered with :
 
-```R
-Annotate.ff(RDS.file = "/home/project/EaCoN_results/S1/ASCAT/L2R/S1.EaCoN.ASPCF.RDS", author.name = "Me!")
-```
+  ```r
+  Annotate.ff(RDS.file = "/home/project/EaCoN_results/S1/ASCAT/L2R/S1.EaCoN.ASPCF.RDS", author.name = "Me!")
+  ```
 
-- This will write the HTML report in **/home/project/EaCoN_results/S1/ASCAT/L2R/**.
+  - This will write the HTML report in **/home/project/EaCoN_results/S1/ASCAT/L2R/**.
 
 ### **Batch mode (with multithreadng)**
 
@@ -433,9 +434,9 @@ ATChannelCel | GCChannelCEL | SampleName
 
 - The command line (using 2 threads)
 
-```R
-OS.Process.Batch(pairs.file = "/home/project/CEL/OS_pairs.txt", nthread = 2)
-```
+  ```r
+  OS.Process.Batch(pairs.file = "/home/project/CEL/OS_pairs.txt", nthread = 2)
+  ```
 
 ##### **Affymetrix CytoScan 750k / CytoScan HD**
 
@@ -455,9 +456,9 @@ CEL | SampleName
 
 - The command line (using 2 threads)
 
-```R
-CS.Process.Batch(pairs.file = "/home/project/CEL/CSHD_list.txt", nthread = 2)
-```
+  ```r
+  CS.Process.Batch(pairs.file = "/home/project/CEL/CSHD_list.txt", nthread = 2)
+  ```
 
 ##### **Affymetrix GenomeWide SNP6**
 
@@ -481,10 +482,11 @@ testBAM | refBAM | SampleName
 /home/project/WES/S14_WES_hg19_Tumor.BAM | /home/project/WES/S14_WES_hg19_Normal.BAM | S14_WES
 
 - The binning, then normalization command lines (using 2 threads)
-```R
-WES.Bin.Batch(BAM.list.file = "/home/project/WES/BAM_list.txt", BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda", nthread = 2)
-WES.Normalize.ff.Batch(BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda", nthread = 2)
-```
+
+  ```r
+  WES.Bin.Batch(BAM.list.file = "/home/project/WES/BAM_list.txt", BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda", nthread = 2)
+  WES.Normalize.ff.Batch(BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda", nthread = 2)
+  ```
 
 You can notice that here we did not specify any RDS or list file to **WES.Normalize.ff.Batch**. This is because this fonction needs as its first argument _BIN.RDS.files_, a **list** of _"\_binned.RDS"_ files (generated at the former command line), and by default it will recursively search downwards the current working directory for any of these RDS files. You can of course design your own list of RDS files to process, if you know a bit of R.
 
@@ -494,9 +496,9 @@ As for the **WES.Normalize.ff.Batch** function, the **Segment.ff.Batch** functio
 
 Here is a synthetic example that will segment our CytoScan HD samples (as defined by the _pattern_ below) using ASCAT :
 
-```R
-Segment.ff.Batch(RDS.files = list.files(path = getwd(), pattern = ".*_processed.RDS$", full.names = TRUE, recursive = TRUE), segmenter = "ASCAT", smooth.k = 5, SER.pen = 20, nrf = 1.0, nthread = 2)
-```
+  ```r
+  Segment.ff.Batch(RDS.files = list.files(path = getwd(), pattern = ".*_processed.RDS$", full.names = TRUE, recursive = TRUE), segmenter = "ASCAT", smooth.k = 5, SER.pen = 20, nrf = 1.0, nthread = 2)
+  ```
 
 - To perform the same using the **FACETS** segmenter, just change the value of the _segmenter_ parameter.
 
@@ -514,16 +516,16 @@ ASCN.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\..*\\.RDS$"
 
 And here again with the **Annotate.ff.Batch** :
 
-```R
-Annotate.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\..*\\.RDS$", full.names = TRUE, recursive = TRUE), author.name = "Me!")
-```
+  ```r
+  Annotate.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\..*\\.RDS$", full.names = TRUE, recursive = TRUE), author.name = "Me!")
+  ```
 
 ### **Piped**
 
 EaCoN has been implemented in a way that one can also choose to launch the full workflow in a single command line for a single sample, using pipes from the [magrittr](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html) package. However, this is not recommended as default use : even though EaCoN is provided with recommandations that should fit most case, the user may have to deal with particular profiles that would require parameter tweaking, which is not possible in piped mode...
 Here is an example using ASCAT :
 
-```R
+```r
 samplename <- "SAMPLE1_OS"
 workdir <- "/home/me/my_project/EaCoN_results"
 setwd(workdir)
@@ -564,12 +566,14 @@ WES | `2` to `10` | `5` | `0.5` *(default)* to `1` | `0.75` *(default)*
 - All the functions depicted above have other parameters not described here. As the above recommandations should do the trick in most cases, they certainly won't fit all. To adjust parameters more finely, I suggest to refer to the R help pages for corresponding functions.
 
 - FACETS segmenter CAN NOT be used on SNP6 microarrays results (due to missing data types)
+
 - SEQUENZA segmenter SHOULD NOT be used in SNP6 microarrays (it theoretically can, but requires huge amounts of RAM, ie more than 32 GB). This may halt / swap your computer !
 
 
 ---
 
 ## **AUTHORS & CONTACT**
+
  - Bastien Job (bastien.job@inserm.fr, bastien.job@gustaveroussy.fr) : developer and maintainer
  - Thibault Dayris (thibault.dayris@gustaveroussy.fr) : tester, user
 
