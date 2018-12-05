@@ -88,7 +88,7 @@ It consists in a series of R packages that perform such type of analysis, from r
 - Then install **_ASCAT_** and **_FACETS_** from github :
 
   ``` r
-  devtools::install_github("Crick-CancerGenomics/ascat")
+  devtools::install_github("Crick-CancerGenomics/ascat/ASCAT")
   devtools::install_github("mskcc/facets")
   ```
 
