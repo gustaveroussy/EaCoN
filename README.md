@@ -235,7 +235,7 @@ While the current EaCoN package is the core of the process and will straitfully 
   ## To support NA33 / NA35 annotations (hg19)
   biocLite("BSgenome.Hsapiens.UCSC.hg19")
   
-  ## To support NA36 annotations (hg18)
+  ## To support NA36 annotations (hg38)
   biocLite("BSgenome.Hsapiens.UCSC.hg38")
   ```
 
@@ -273,7 +273,11 @@ While the current EaCoN package is the core of the process and will straitfully 
 
 The full workflow is decomposed in a few different functions, which roughly correspond to these steps :  
 
-> normalization -> segmentation -> reporting |-> copy-number estimation  
+```
+normalization -> segmentation +-> reporting
+                              |
+                              +-> copy-number estimation
+```
 
 EaCoN allows different ways to perform the full workflow : considering the analysis of a single sample, you can either perform each step independently and write, then load the intermediate results, or you can _**pipe**_ all steps in a single line of code. You can also perform the step-by-step approach on multiple samples in a row, even possibly at the same time using multithreading, using a batch mode.
 
