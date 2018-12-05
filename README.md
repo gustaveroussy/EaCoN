@@ -43,6 +43,11 @@ It consists in a series of R packages that perform such type of analysis, from r
 
 ## **QUICK NEWS**
 
+### **2018-12-03 : v0.3.4-1 _(PostRoscovite)_ is out !**
+- CORR : SNP6.Process(), CSHD.Process() : Edited code to handle changes in the rcnorm package, to discard the "chromosomes" package dependency.
+- MOD : Removed some dependencies (already called by other dependencies, like copynumber from sequenza)
+- MOD : Edited the README.md (rewrote the INSTALL section)
+
 ### **2018-10-30 : v0.3.4 _(Papy60)_ is out !**
 
 - Now FACETS can be used on OncoScan, OncoScan_CNV, CytoScan750k and CytoScanHD arrays (still not on SNP6, though).
@@ -69,26 +74,25 @@ It consists in a series of R packages that perform such type of analysis, from r
 - Now EaCoN supports [**FACETS**](https://www.ncbi.nlm.nih.gov/pubmed/27270079) segmenter and copy number estimator ! This segmenter extends the famous **CBS** _(Circular Binary Segmentation)_ algorithm by making it compatible with bi-variate segmentation (using both the L2R and BAF signals). However, please note that **FACETS is only avaiable for WES data**.
 - Few bugs solved.
 
-
 ---
 
 ## **INSTALLATION**
 
 ### **CORE**
- -  Please first install the **_devtools_** package that will allow installing packages from _github_ :
+-  Please first install the **_devtools_** package that will allow installing packages from _github_ :
 
 ``` r
 install.packages("devtools")
 ```
 
- - Then install **_ASCAT_** and **_FACETS_** from github :
+- Then install **_ASCAT_** and **_FACETS_** from github :
 
 ``` r
 devtools::install_github("Crick-CancerGenomics/ascat")
 devtools::install_github("mskcc/facets")
 ```
 
- - Then install required _BioConductor_ packages :
+- Then install required **_BioConductor_** packages :
  
 ``` r
 ## try using http:// if https:// URLs are not supported
@@ -96,7 +100,7 @@ source("https://bioconductor.org/biocLite.R")
 biocLite(c("affxparser", "Biostrings", "aroma.light", "BSgenome", "copynumber", "GenomicRanges", "limma", "rhdf5", "sequenza"))
 ```
 
- - Then install **_EaCoN_** from github !
+- Then install **_EaCoN_** from github !
 
 ``` r
 devtools::install_github("gustaveroussy/EaCoN")
@@ -108,7 +112,7 @@ While the current EaCoN package is the core of the process and will straitfully 
 
 #### **AFFYMETRIX MICROARRAYS**
 
- - The **_affy.CN.norm_** package provides pre-computed GC% and wave-effect (re)normalization datasets for all compatible Affymetrix designs, for both NA33/NA35 (hg19) and NA36 (hg38) human genome builds. Install from remote URL :
+- The **_affy.CN.norm_** package provides pre-computed GC% and wave-effect (re)normalization datasets for all compatible Affymetrix designs, for both NA33/NA35 (hg19) and NA36 (hg38) human genome builds. Install from remote URL :
 
 ``` r
 install.packages("https://drive.google.com/uc?export=download&id=1zeTbjQ-N2TowgGFj9hPje1V0hABPvONN", repos = NULL, type = "source")
@@ -116,75 +120,73 @@ install.packages("https://drive.google.com/uc?export=download&id=1zeTbjQ-N2TowgG
 
 ##### **OncoScan family (OncoScan / OncoScan_CNV)**
 
- - First, install embedded APT tool from github :
+- First, install embedded APT tool from github :
  
 ``` r
 devtools::install_github("gustaveroussy/apt.oncoscan.2.4.0")
 ```
 
- - Then install annotations from remote URL :
-   - For the **NA33 (hg19)** build :
-     - For the **OncoScan** design :
-
-``` r
-install.packages("https://drive.google.com/uc?export=download&id=1v-nU6bloLlBMQa5WOT0X_jj4uRQ6kNk2", repos = NULL, type = "source")
-```
-
+- Then install annotations from remote URL :
+  - For the **NA33 (hg19)** build :
+    - For the **OncoScan** design :
+    
+      ``` r
+      install.packages("https://drive.google.com/uc?export=download&id=1v-nU6bloLlBMQa5WOT0X_jj4uRQ6kNk2", repos = NULL, type = "source")
+      ```
+      
     - For the **OncoScan_CNV** design :
-
-``` r
-install.packages("https://drive.google.com/uc?export=download&id=19Ml_EjsRpVJ7XkUZ2xfGh8OWPLF5GZD7", repos = NULL, type = "source")
-```
-
-   - For the **NA36 (hg38)** build :
-     - For the **OncoScan** design :
-
-``` r
-install.packages("https://drive.google.com/uc?export=download&id=1qTkuZR55GDtKA3Gy89fr_mmCiVKSja32", repos = NULL, type = "source")
-```
-
-     - For the **OncoScan_CNV** design :
-
-``` r
-install.packages( "https://drive.google.com/uc?export=download&id=1rgSsTXgTJHsp1dzO1HZNR6kJexormJ2J", repos = NULL, type = "source")
-```
+    
+      ``` r
+      install.packages("https://drive.google.com/uc?export=download&id=19Ml_EjsRpVJ7XkUZ2xfGh8OWPLF5GZD7", repos = NULL, type = "source")
+      ```
+      
+  - For the **NA36 (hg38)** build :
+    - For the **OncoScan** design :
+    
+      ``` r
+      install.packages("https://drive.google.com/uc?export=download&id=1qTkuZR55GDtKA3Gy89fr_mmCiVKSja32", repos = NULL, type = "source")
+      ```
+      
+    - For the **OncoScan_CNV** design :
+    
+      ``` r
+      install.packages( "https://drive.google.com/uc?export=download&id=1rgSsTXgTJHsp1dzO1HZNR6kJexormJ2J", repos = NULL, type = "source")
+      ```
 
 ##### **CytoScan family (CytoScan 750k / CytoScan HD)**
 
- - First, install embedded APT tool from github :
+- First, install embedded APT tool from github :
  
 ``` r
 devtools::install_github("gustaveroussy/apt.cytoscan.2.4.0")
 ```
 
- - Then install annotations from remote URL :
-   - For the **NA33 (hg19)** build :
-     - For the **CytoScan 750k** design :
+- Then install annotations from remote URL :
+  - For the **NA33 (hg19)** build :
+    - For the **CytoScan 750k** design :
 
-``` r
-install.packages("https://drive.google.com/uc?export=download&id=1FT_7sZiWMLngJzHCYQKW8DObVRBp-Gm5", repos = NULL, type = "source")
-```
+      ``` r
+      install.packages("https://drive.google.com/uc?export=download&id=1FT_7sZiWMLngJzHCYQKW8DObVRBp-Gm5", repos = NULL, type = "source")
+      ```
+    - For the **CytoScan HD** design :
 
-     - For the **CytoScan HD** design :
+      ``` r
+      install.packages( "https://drive.google.com/uc?export=download&id=1IE6ihdESltknOCPsNQBKW8AuRAmuwlWT", repos = NULL, type = "source")
+      ```
 
-``` r
-install.packages( "https://drive.google.com/uc?export=download&id=1IE6ihdESltknOCPsNQBKW8AuRAmuwlWT", repos = NULL, type = "source")
-```
+  - For the **NA36 (hg38)** build :
+    - For the **CytoScan 750k** design :
 
-   - For the **NA36 (hg38)** build :
-     - For the **CytoScan 750k** design :
+      ``` r
+      install.packages("https://drive.google.com/uc?export=download&id=1AFmU9eROmrQZpNz-3GptCF1OSZWlyvCP", repos = NULL, type = "source")
+      ```
+    - For the **CytoScan HD** design :
 
-``` r
-install.packages("https://drive.google.com/uc?export=download&id=1AFmU9eROmrQZpNz-3GptCF1OSZWlyvCP", repos = NULL, type = "source")
-```
+      ``` r
+      install.packages( "https://drive.google.com/uc?export=download&id=1k-yRpMI6AktZf0py6WFrnbTAsMZkKtTD", repos = NULL, type = "source")
+      ```
 
-     - For the **CytoScan HD** design :
-
-``` r
-install.packages( "https://drive.google.com/uc?export=download&id=1k-yRpMI6AktZf0py6WFrnbTAsMZkKtTD", repos = NULL, type = "source")
-```
-
- - Lastly, install the **_rcnorm_** package to perform BAF normalization for CytoScan family of arrays :
+- Lastly, install the **_rcnorm_** package to perform BAF normalization for CytoScan family of arrays :
 
 ``` r
 install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtxCPii-ukuR2tF8pikrgx", repos = NULL, type = "source")
@@ -192,19 +194,19 @@ install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtx
 
 ##### **Genomwide snp6.0**
 
- - First, install embedded APT tool from github :
+- First, install embedded APT tool from github :
  
 ``` r
 devtools::install_github("gustaveroussy/apt.snp6.1.20.0")
 ```
 
- - Then install annotations from remote URL (There is no other build available than **NA35 (hg19)**) :
+- Then install annotations from remote URL (There is no other build available than **NA35 (hg19)**) :
 
 ``` r
 install.packages("https://drive.google.com/uc?export=download&id=1AFmU9eROmrQZpNz-3GptCF1OSZWlyvCP", repos = NULL, type = "source")
 ```
 
- - Lastly, install the **_rcnorm_** package to perform BAF normalization for SNP6 arrays **(if not already installed at the CytoScan step!) :
+- Lastly, install the **_rcnorm_** package to perform BAF normalization for SNP6 arrays **(if not already installed at the CytoScan step!) :
 
 ``` r
 install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtxCPii-ukuR2tF8pikrgx", repos = NULL, type = "source")
@@ -212,19 +214,19 @@ install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtx
 
 ### **GENOMES**
 
- - EaCoN requires a genome as available thanks to the [BSgenome](https://bioconductor.org/packages/release/bioc/html/BSgenome.html) package, available at BioConductor. To check which genomes are publicly availabe at BioConductor :
+- EaCoN requires a genome as available thanks to the [BSgenome](https://bioconductor.org/packages/release/bioc/html/BSgenome.html) package, available at BioConductor. To check which genomes are publicly availabe at BioConductor :
 
 ``` r
 BSgenome::available.genomes()
 ```
 
- - To check genome(s) installed in your R library :
+- To check genome(s) installed in your R library :
 
 ``` r
 BSgenome::installed.genomes()
 ```
 
- - For Affymetrix microarrays, you need to install these human genomes depending on which annotation package you want to use :
+- For Affymetrix microarrays, you need to install these human genomes depending on which annotation package you want to use :
 
 ``` r
 ## try using http:// if https:// URLs are not supported
@@ -237,7 +239,7 @@ biocLite("BSgenome.Hsapiens.UCSC.hg19")
 biocLite("BSgenome.Hsapiens.UCSC.hg38")
 ```
 
- - For TCGA WES data, you will need the **hs37d5** genome (a variation of the hg19 build used in the 1000 Genomes project)
+- For TCGA WES data, you will need the **hs37d5** genome (a variation of the hg19 build used in the 1000 Genomes project)
 
 ``` r
 ## try using http:// if https:// URLs are not supported
@@ -246,14 +248,14 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("BSgenome.Hsapiens.1000genomes.hs37d5")
 ```
 
- - If your favorite genome is not available, **it is possible to build your own** !
-   - Simply download locally any public genome package (by example [BSgenome.Hsapiens.UCSC.hg19](https://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg19/)) 
-   - Uncompress it locally (MS Windows users can use [7-zip](https://www.7-zip.org/))
-   - Rename the decompressed folder to your genome name
-   - Edit all possible files (DESCRIPTION, NAMESPACE, R/zzz.R, man/package.Rd) to insert all required informations relative to your own genome
-   - Replace the _inst/extdata/single_sequenes.2bit_ file by your genome sequence in the [2bit](http://genome.ucsc.edu/FAQ/FAQformat.html#format7) format (which can be converted to from a regular fasta file thanks to converters developed by the [UCSC](https://genome.ucsc.edu/goldenpath/help/twoBit.html))
-   - Re-compress the modified and renamed directory to a .tar.gz (Windows users : 7-zip can do that, too)
-   - Install !
+- If your favorite genome is not available, **it is possible to build your own** !
+  - Simply download locally any public genome package (by example [BSgenome.Hsapiens.UCSC.hg19](https://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg19/)) 
+  - Uncompress it locally (MS Windows users can use [7-zip](https://www.7-zip.org/))
+  - Rename the decompressed folder to your genome name
+  - Edit all possible files (DESCRIPTION, NAMESPACE, R/zzz.R, man/package.Rd) to insert all required informations relative to your own genome
+  - Replace the _inst/extdata/single_sequenes.2bit_ file by your genome sequence in the [2bit](http://genome.ucsc.edu/FAQ/FAQformat.html#format7) format (which can be converted to from a regular fasta file thanks to converters developed by the [UCSC](https://genome.ucsc.edu/goldenpath/help/twoBit.html))
+  - Re-compress the modified and renamed directory to a .tar.gz (Windows users : 7-zip can do that, too)
+  - Install !
 
 ---
 
