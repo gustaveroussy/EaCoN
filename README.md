@@ -122,9 +122,9 @@ install.packages("https://drive.google.com/uc?export=download&id=1zeTbjQ-N2TowgG
 
 - First, install embedded APT tool from github :
  
-``` r
-devtools::install_github("gustaveroussy/apt.oncoscan.2.4.0")
-```
+  ``` r
+  devtools::install_github("gustaveroussy/apt.oncoscan.2.4.0")
+  ```
 
 - Then install annotations from remote URL :
   - For the **NA33 (hg19)** build :
@@ -157,9 +157,9 @@ devtools::install_github("gustaveroussy/apt.oncoscan.2.4.0")
 
 - First, install embedded APT tool from github :
  
-``` r
-devtools::install_github("gustaveroussy/apt.cytoscan.2.4.0")
-```
+  ``` r
+  devtools::install_github("gustaveroussy/apt.cytoscan.2.4.0")
+  ```
 
 - Then install annotations from remote URL :
   - For the **NA33 (hg19)** build :
@@ -188,65 +188,65 @@ devtools::install_github("gustaveroussy/apt.cytoscan.2.4.0")
 
 - Lastly, install the **_rcnorm_** package to perform BAF normalization for CytoScan family of arrays :
 
-``` r
-install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtxCPii-ukuR2tF8pikrgx", repos = NULL, type = "source")
-```
+  ``` r
+  install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtxCPii-ukuR2tF8pikrgx", repos = NULL, type = "source")
+  ```
 
 #### **GENOMEWIDE SNP6**
 
 - First, install embedded APT tool from github :
  
-``` r
-devtools::install_github("gustaveroussy/apt.snp6.1.20.0")
-```
+  ``` r
+  devtools::install_github("gustaveroussy/apt.snp6.1.20.0")
+  ```
 
 - Then install annotations from remote URL (There is no other build available than **NA35 (hg19)**) :
 
-``` r
-install.packages("https://drive.google.com/uc?export=download&id=1AFmU9eROmrQZpNz-3GptCF1OSZWlyvCP", repos = NULL, type = "source")
-```
+  ``` r
+  install.packages("https://drive.google.com/uc?export=download&id=1AFmU9eROmrQZpNz-3GptCF1OSZWlyvCP", repos = NULL, type = "source")
+  ```
 
 - Lastly, install the **_rcnorm_** package to perform BAF normalization for SNP6 arrays **(if not already installed at the CytoScan step!)** :
 
-``` r
-install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtxCPii-ukuR2tF8pikrgx", repos = NULL, type = "source")
-```
+  ``` r
+  install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtxCPii-ukuR2tF8pikrgx", repos = NULL, type = "source")
+  ```
 
 ### **GENOMES**
 
 - EaCoN requires a genome as available thanks to the [BSgenome](https://bioconductor.org/packages/release/bioc/html/BSgenome.html) package, available at BioConductor. To check which genomes are publicly availabe at BioConductor :
 
-``` r
-BSgenome::available.genomes()
-```
+  ``` r
+  BSgenome::available.genomes()
+  ```
 
 - To check genome(s) installed in your R library :
 
-``` r
-BSgenome::installed.genomes()
-```
+  ``` r
+  BSgenome::installed.genomes()
+  ```
 
 - For Affymetrix microarrays, you need to install these human genomes depending on which annotation package you want to use :
 
-``` r
-## try using http:// if https:// URLs are not supported
-source("https://bioconductor.org/biocLite.R")
-
-## To support NA33 / NA35 annotations (hg19)
-biocLite("BSgenome.Hsapiens.UCSC.hg19")
-
-## To support NA36 annotations (hg18)
-biocLite("BSgenome.Hsapiens.UCSC.hg38")
-```
+  ``` r
+  ## try using http:// if https:// URLs are not supported
+  source("https://bioconductor.org/biocLite.R")
+  
+  ## To support NA33 / NA35 annotations (hg19)
+  biocLite("BSgenome.Hsapiens.UCSC.hg19")
+  
+  ## To support NA36 annotations (hg18)
+  biocLite("BSgenome.Hsapiens.UCSC.hg38")
+  ```
 
 - For TCGA WES data, you will need the **hs37d5** genome _(a variation of the hg19 build used in the 1000 Genomes project)_
 
-``` r
-## try using http:// if https:// URLs are not supported
-source("https://bioconductor.org/biocLite.R")
-
-biocLite("BSgenome.Hsapiens.1000genomes.hs37d5")
-```
+  ``` r
+  ## try using http:// if https:// URLs are not supported
+  source("https://bioconductor.org/biocLite.R")
+  
+  biocLite("BSgenome.Hsapiens.1000genomes.hs37d5")
+  ```
 
 - If your favorite genome is not available, **it is possible to build your own** !
   - Simply download locally any public genome package (by example [BSgenome.Hsapiens.UCSC.hg19](https://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg19/)) 
@@ -281,10 +281,10 @@ EaCoN allows different ways to perform the full workflow : considering the analy
 
 First, under R, load EaCoN and choose a directory in which results will be written, by exemple : **/home/project/EaCoN_results**
 
-```r
-require(EaCoN)
-setwd("/home/project/EaCoN_results")
-```
+  ``` r
+  require(EaCoN)
+  setwd("/home/project/EaCoN_results")
+  ```
 
 #### **Raw data processing**
 
@@ -292,7 +292,7 @@ setwd("/home/project/EaCoN_results")
 
 - Let's say we have a pair of OncoScan_CNV CEL files to analyse in a **/home/project/CEL/** directory (Affymetrix OncoScan experiments have 2 arrays for a single experiment, thus a pair) :
 
-  ```r
+  ``` r
   OS.Process(ATChannelCel = "/home/project/CEL/S1_OncoScan_CNV_A.CEL", GCChannelCel = "/home/project/CEL/S1_OncoScan_CNV_C.CEL", samplename = "S1_OS")
   ```
 
@@ -307,7 +307,7 @@ setwd("/home/project/EaCoN_results")
 
 - This is identical to OncoScan, except that we have a single CEL file, and we just have to change the function name :
 
-  ```r
+  ``` r
   CS.Process(CEL = "/home/project/CEL/S2_CytoScanHD.CEL", samplename = "S2_CSHD")
   ```
 - The same output files will be generated (except for the "paircheck" file, obviously)
@@ -326,7 +326,7 @@ setwd("/home/project/EaCoN_results")
 - This time it is quite different : the processing will be performed in three steps :
   - **First**, we will use the capture BED (A text file containing the positions of the captured regions, usualy provided by the capture kit manufacturer), choose a genome version corresponding to our aligned BAM files, and choose a window size for the future binning of the data. Thses will be used to generate what we call a "BINpack", a set of pre-computed tracks containing the bins position and corresponding GC% values. Several tracks will be computed corresponding to different levels of elongation of the bin positions. In the example below, we used the BED corresponding to Agilent SureSelect v5 capture kit, a bin size of 50 nt, and chose the human hg19 genome build.
 
-    ```R
+    ``` r
     BINpack.Maker(bed.file = "/home/project/WES/SureSelect_v5.bed", bin.size = 50, genome.pkg =
 "BSgenome.Hsapiens.UCSC.hg19")
     ```
@@ -340,7 +340,7 @@ setwd("/home/project/EaCoN_results")
     - The aligned reads for the reference sample (patient normal), in BAM format too
     - The BINpack itself
 
-      ```R
+      ``` r
       WES.Bin(testBAM = "/home/project/WES/S4_WES_hg19_Tumor.BAM", refBAM = "/home/project/WES/S4_WES_hg19_Tumor.BAM", BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda", samplename = "S4_WES")
       ```
 
@@ -351,7 +351,7 @@ setwd("/home/project/EaCoN_results")
 
   - **Third**, now that the data have been binned, the normalization step can be performed :
 
-    ```r
+    ``` r
     WES.Normalize.ff(BIN.RDS.file = "/home/project/EaCoN_results/S4_WES/S4_WES_hg19_b50_binned.RDS", BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda")
     ```
 
@@ -362,7 +362,7 @@ setwd("/home/project/EaCoN_results")
 
 - Now that we described the normalization process specific to each type of source data, we can segment it. The good news is that it's the very same step for each source type, one just have to pass the **\_processed.RDS** normalized file. Here is an example with the one obtained for OncoScan data, using the **ASCAT** segmenter :
 
-  ```
+  ``` r
   Segment.ff(RDS.file = "/home/me/my_project/EaCoN_results/SAMPLE1/S1_OncoScan_CNV_hg19_processed.RDS", segmenter = "ASCAT")
   ```
 
@@ -382,7 +382,7 @@ setwd("/home/project/EaCoN_results")
 
 - Then an estimation of the total and allele-specific copy-number profiles, as well as global ploidy and sample cellularity can be estimated. Here is an example using the **ASCAT** ASCN estimation, from a RDS generated by the Segment.ASCAT() function :
 
-  ```r
+  ``` r
   ASCN.ff(RDS.file = "/home/me/my_project/EaCoN_results/SAMPLE1/ASCAT/L2R/SAMPLE1.ASCAT.RDS")
   ```
 
@@ -401,7 +401,7 @@ setwd("/home/project/EaCoN_results")
 
 - Endly, an annotated HTML report can be rendered with :
 
-  ```r
+  ``` r
   Annotate.ff(RDS.file = "/home/project/EaCoN_results/S1/ASCAT/L2R/S1.EaCoN.ASPCF.RDS", author.name = "Me!")
   ```
 
@@ -434,7 +434,7 @@ ATChannelCel | GCChannelCEL | SampleName
 
 - The command line (using 2 threads)
 
-  ```r
+  ``` r
   OS.Process.Batch(pairs.file = "/home/project/CEL/OS_pairs.txt", nthread = 2)
   ```
 
@@ -456,7 +456,7 @@ CEL | SampleName
 
 - The command line (using 2 threads)
 
-  ```r
+  ``` r
   CS.Process.Batch(pairs.file = "/home/project/CEL/CSHD_list.txt", nthread = 2)
   ```
 
@@ -483,7 +483,7 @@ testBAM | refBAM | SampleName
 
 - The binning, then normalization command lines (using 2 threads)
 
-  ```r
+  ``` r
   WES.Bin.Batch(BAM.list.file = "/home/project/WES/BAM_list.txt", BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda", nthread = 2)
   WES.Normalize.ff.Batch(BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda", nthread = 2)
   ```
@@ -508,15 +508,15 @@ Here is a synthetic example that will segment our CytoScan HD samples (as define
 
 Still the same, with the **ASCN.ff.Batch** :
 
-```R
-ASCN.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\..*\\.RDS$", full.names = TRUE, recursive = TRUE), nthread = 2)
-```
+  ``` r
+  ASCN.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\..*\\.RDS$", full.names = TRUE, recursive = TRUE), nthread = 2)
+  ```
 
 #### **HTML reporting**
 
 And here again with the **Annotate.ff.Batch** :
 
-  ```r
+  ``` r
   Annotate.ff.Batch(RDS.files = list.files(path = getwd(), pattern = "SEG\\..*\\.RDS$", full.names = TRUE, recursive = TRUE), author.name = "Me!")
   ```
 
@@ -525,15 +525,15 @@ And here again with the **Annotate.ff.Batch** :
 EaCoN has been implemented in a way that one can also choose to launch the full workflow in a single command line for a single sample, using pipes from the [magrittr](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html) package. However, this is not recommended as default use : even though EaCoN is provided with recommandations that should fit most case, the user may have to deal with particular profiles that would require parameter tweaking, which is not possible in piped mode...
 Here is an example using ASCAT :
 
-```r
-samplename <- "SAMPLE1_OS"
-workdir <- "/home/me/my_project/EaCoN_results"
-setwd(workdir)
-require(EaCoN)
-require(magrittr)
-
-OS.Process(ATChannelCel = "/home/me/my_project/CEL/SAMPLE1_OncoScan_CNV_A.CEL", GCChannelCel = "/home/me/my_project/CEL/SAMPLE1_OncoScan_CNV_C.CEL", samplename = samplename, return.data = TRUE) %>% Segment(out.dir = paste0(workdir, "/", samplename), segmenter = "ASCAT", return.data = TRUE) %T>% Annotate(out.dir = paste0(workdir, "/", samplename, "/ASCAT/L2R")) %>% ASCN.ASCAT(out.dir = paste0(workdir, "/", samplename))
-```
+  ```r
+  samplename <- "SAMPLE1_OS"
+  workdir <- "/home/me/my_project/EaCoN_results"
+  setwd(workdir)
+  require(EaCoN)
+  require(magrittr)
+  
+  OS.Process(ATChannelCel = "/home/me/my_project/CEL/SAMPLE1_OncoScan_CNV_A.CEL", GCChannelCel = "/home/me/my_project/CEL/SAMPLE1_OncoScan_CNV_C.CEL", samplename = samplename, return.data = TRUE) %>% Segment(out.dir = paste0(workdir, "/", samplename), segmenter = "ASCAT", return.data = TRUE) %T>% Annotate(out.dir = paste0(workdir, "/", samplename, "/ASCAT/L2R")) %>% ASCN.ASCAT(out.dir = paste0(workdir, "/", samplename))
+  ```
 
 ### **Conclusion on usage**
 
