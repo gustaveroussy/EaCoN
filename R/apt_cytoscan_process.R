@@ -129,7 +129,7 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   
   ## Normalizing SNPs
   tmsg("Normalizing SNP data (using rcnorm) ...")
-  baf.df <- rcnorm::rcnorm.snp(myCEL = CEL, genome = genome, allSNPs = FALSE)
+  baf.df <- rcnorm::rcnorm.snp(myCEL = CEL, genome.pkg = genome.pkg, allSNPs = FALSE)
   baf.df$chr <- paste0("chr", baf.df$chrs)
   baf.df$chrN <- unlist(cs$chrom2chr[baf.df$chr])
   baf.df <- baf.df[order(baf.df$chrN, baf.df$pos),]

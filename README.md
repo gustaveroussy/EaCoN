@@ -11,36 +11,6 @@ It consists in a series of R packages that perform such type of analysis, from r
 
 ---
 
-## **QUICK NEWS**
-
-### **2018-10-30 : v0.3.4 _(Papy60)_ is out !**
-
-- Now FACETS can be used on OncoScan, OncoScan_CNV, CytoScan750k and CytoScanHD arrays (still not on SNP6, though).
-- Some bugs corrected, too.
-- Sequenza CN output fixed.
-- Changed the formula for the "most width" ploidy version, so that a value of 0 can't be returned.
-- Paving the way to handle non-canonical genomes in the report (not active yet, though).
-- Small code changes to adapt to "non-completely covered" genomes (ie, few chromosomes for toy datasets, by example).
-- Harmonized the penalty parameter for all segmenters (now just "penalty" rather than "ASCAT.pen", "SEQUENZA.pen" or "FACETS.pen")
-- Officially dropping support for sequenza with SNP6 arrays as it leads to a huge RAM consumption by copynumber::aspcf, due to the few probes covering both L2R and BAF.
-- Included chromosomes objects in package for hs, mm and rn, to avaoid dependency to another non-public sourceable package.
-
-### **2018-10-02 : v0.3.3-1 _(LittleWomanNoCry)_ is out !**
-
-- Multiple little bugs correction, tweaks.
-
-### **2018-09-12 : v0.3.3 _(Trinity)_ is out !**
-
-- Now EaCoN supports [**SEQUENZA**](https://www.ncbi.nlm.nih.gov/pubmed/25319062) segmenter and copy number estimator ! This makes 3 different segmenters available for quick. Sequenza uses the same segmentation algorithm than ASCAT, _(PCF : piecewise constant curve fitting)_, but the two have different implementations of it (sequenza relies on the _copynumber_ package, ASCAT has its own implementation built-in), so expect similar but not identical results !
-- Few bugs solved.
-
-### **2018-08-08 : v0.3.2 _(PapeMamiePichine)_ is out !**
-
-- Now EaCoN supports [**FACETS**](https://www.ncbi.nlm.nih.gov/pubmed/27270079) segmenter and copy number estimator ! This segmenter extends the famous **CBS** _(Circular Binary Segmentation)_ algorithm by making it compatible with bi-variate segmentation using both the L2R and BAF signals. However, please note that **FACETS is only avaiable for WES data**.
-- Few bugs solved.
-
----
-
 ## **FEATURES**
 
 - Full R (no OS-, language-, nor shell-specific dependencies)
@@ -71,62 +41,226 @@ It consists in a series of R packages that perform such type of analysis, from r
 
 ---
 
-## **REQUIREMENTS**
+## **QUICK NEWS**
 
-While the current EaCoN package is the core of the process, multiple others are needed, depending on the type of the source (WES, Affymetrix microarray design) and corresponding annotations (genome build, Affymetrix annotation databases). Others are required for the normalization, especially pre-computed GC% tracks.
+### **2018-10-30 : v0.3.4 _(Papy60)_ is out !**
 
-- R > 3.0
-- Public R dependencies
-  - [@ CRAN](https://cran.r-project.org/) _Install under R using : **install.packages("packagename")**_ :
-    - [bedr](https://cran.r-project.org/web/packages/bedr/index.html) _to handle capture bed_
-    - [changepoint](https://cran.r-project.org/web/packages/changepoint/index.html) _to perform small events rescue segmentation using PELT_
-    - [data.table](https://cran.r-project.org/web/packages/data.table/index.html) _for tab-files / tables / blocks processing_
-    - [devtools](https://cran.r-project.org/web/packages/devtools/index.html) _to install ASCAT_
-    - [dplyr](https://cran.r-project.org/web/packages/dplyr/index.html) _for tables / blocks processing_
-    - [doParallel](https://cran.r-project.org/web/packages/doParallel/index.html) _for multithreading_
-    - [DT](https://cran.r-project.org/web/packages/DT/index.html) _to generate nice tables in the HTML report_
-    - [foreach](https://cran.r-project.org/web/packages/foreach/index.html) _for loops & multithreading_
-    - [iotools](https://cran.r-project.org/web/packages/iotools/index.html) _for fast TSV writings_
-    - [matrixStats](https://cran.r-project.org/web/packages/matrixStats/index.html) _for column-wise statistics computing_
-    - [mclust](https://cran.r-project.org/web/packages/mclust/index.html) _for BAF regions clustering_
-    - [rmarkdown](https://cran.r-project.org/web/packages/rmarkdown/index.html) _to generate the HTML report_
-    - [sequenza](https://cran.r-project.org/web/packages/sequenza/index.html) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
-  - [@ BioConductor](https://www.bioconductor.org/) _Install under R using : **source("https://bioconductor.org/biocLite.R"); biocLite("packagename")**_ :
-    - [affxparser](https://bioconductor.org/packages/release/bioc/html/affxparser.html) _to read CEL files_
-    - [aroma.light](https://bioconductor.org/packages/release/bioc/html/aroma.light.html) _to perform optional BAF TumorBoost normalization_
-    - [BSgenome](https://bioconductor.org/packages/release/bioc/html/BSgenome.html) _to handle the reference genome and its sequences_
-    - [BSgenome.Hsapiens.UCSC.hg19](https://bioconductor.org/packages/release/bioc/html/BSgenome.Hsapiens.UCSC.hg19.html) _as default genome_
-    - [copynumber](https://bioconductor.org/packages/release/bioc/html/copynumber.html) _to perform PCF segmentation_
-    - [GenomeInfoDb](https://bioconductor.org/packages/release/bioc/html/GenomeInfoDb.html) _to use genome annotations_
-    - [GenomicRanges](https://bioconductor.org/packages/release/bioc/html/GenomicRanges.html) _to handle genomic intervals_
-    - [limma](https://bioconductor.org/packages/release/bioc/html/limma.html) _to perform lowess normalization_
-    - [rhdf5](https://bioconductor.org/packages/release/bioc/html/rhdf5.html) _to read HDF5 file format_
-    - [Rsamtools](https://bioconductor.org/packages/release/bioc/html/Rsamtools.html) _to compute counts and variants from BAM files_
-  - [@ GitHub](https://github.com) _Install using **devtools::install_github("github_url")** (without the "https://github.com/" part)_ :
-    - [ASCAT](https://github.com/Crick-CancerGenomics/ascat) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
-    - [facets](https://github.com/mskcc/facets) _to perform the L2R & BAF bivariate segmentation, and absolute and allele-specific copy number estimation_
-- Elements of the EaCoN workflow :
-  - [@ GitHub](https://github.com/gustaveroussy) _Install using **devtools::install_github("github_url")** (without the "https://github.com/" part)_ :
-    - [apt.cytoscan.2.4.0](https://github.com/gustaveroussy/apt.cytoscan.2.4.0) _to perform the normalization of CytoScan (750k, HD) arrays using Affymetrix Power Tools_
-    - [apt.oncoscan.2.4.0](https://github.com/gustaveroussy/apt.oncoscan.2.4.0) _to perform the normalization of OncoScan / OncoScan\_CNV arrays using Affymetrix Power Tools_
-    - [apt.snp6.1.20.0](https://github.com/gustaveroussy/apt.snp6.1.20.0) _to perform the normalization of GenomeWide SNP6 arrays using Affymetrix Power Tools_
-  - [@ Google Drive](http://bit.ly/EaCoNpackages) : _Containing numerous data, these packages could not fit on GitHub. Download, then Install using **install.packages("path/to/the/downloaded/package.tar.gz")**_ :
-    - Affymetrix design annotations :
-      - [CytoScanHD.Array.na33.r4](http://bit.ly/CSHDna33) _Affymetrix design annotations for the CytoScan HD array (build na33.r4 / hg19)_
-      - [CytoScanHD.Array.na36.r1](http://bit.ly/CSHDna36) _Affymetrix design annotations for the CytoScan HD array (build na36.r1 / hg38)_
-      - [CytoScan750K.Array.na33.r4](http://bit.ly/CS750na33) _Affymetrix design annotations for the CytoScan 750K array (build na33.r4 / hg19)_
-      - [CytoScan750K.Array.na36.r1](http://bit.ly/CS750na36) _Affymetrix design annotations for the CytoScan 750K array (build na36.r1 / hg38)_
-      - [OncoScan.na33.r4](http://bit.ly/OSna33r4) _Affymetrix design annotations for the OncoScan array (build na33.r4 / hg19)_
-      - [OncoScan.na36.r1](http://bit.ly/OSna36r1) _Affymetrix design annotations for the OncoScan array (build na36.r1 / hg38)_
-      - [OncoScanCNV.na33.r2](http://bit.ly/OSCNVna33) _Affymetrix design annotations for the OncoScan\_CNV array (build na33.r2 / hg19)_
-      - [OncoScanCNV.na36.r1](http://bit.ly/OSCNVna36) _Affymetrix design annotations for the OncoScan\_CNV array (build na36.r1 / hg38)_
-      - [GenomeWideSNP.6.na35.r1](http://bit.ly/SNP6na35) _Affymetrix design annotations for the GenomeWide\_SNP.6 array (build na35.r1 / hg19)_
-    - Re-normalization :
-      - GC% & wave-effect normalization :
-        - [affy.CN.norm.data](http://bit.ly/AffyCNnorm) _Pre-computed tracks for all supported Affmetrix designs (both hg19 and hg38)_
-        - [rcnorm](http://bit.ly/rcnorm) _Code and tracks to re-normalize BAF for the CytoScan family of designs and SNP6, using *rawcopy*_
+- Now FACETS can be used on OncoScan, OncoScan_CNV, CytoScan750k and CytoScanHD arrays (still not on SNP6, though).
+- Some bugs corrected, too.
+- Sequenza CN output fixed.
+- Changed the formula for the "most width" ploidy version, so that a value of 0 can't be returned.
+- Paving the way to handle non-canonical genomes in the report (not active yet, though).
+- Small code changes to adapt to "non-completely covered" genomes (ie, few chromosomes for toy datasets, by example).
+- Harmonized the penalty parameter for all segmenters (now just "penalty" rather than "ASCAT.pen", "SEQUENZA.pen" or "FACETS.pen")
+- Officially dropping support for sequenza with SNP6 arrays as it leads to a huge RAM consumption by copynumber::aspcf, due to the few probes covering both L2R and BAF.
+- Included chromosomes objects in package for hs, mm and rn, to avaoid dependency to another non-public sourceable package.
+
+### **2018-10-02 : v0.3.3-1 _(LittleWomanNoCry)_ is out !**
+
+- Multiple little bugs correction, tweaks.
+
+### **2018-09-12 : v0.3.3 _(Trinity)_ is out !**
+
+- Now EaCoN supports [**SEQUENZA**](https://www.ncbi.nlm.nih.gov/pubmed/25319062) segmenter and copy number estimator _(except for Affymatrix SNP6)_ ! This makes 3 different segmenters available for quick. Sequenza uses the same bivariate segmentation algorithm as ASCAT, _(PCF : piecewise constant curve fitting)_, but in a different implementation (sequenza relies on the _copynumber_ package, ASCAT has its own implementation built-in), so expect similar but not identical results !
+- Few bugs solved.
+
+### **2018-08-08 : v0.3.2 _(PapeMamiePichine)_ is out !**
+
+- Now EaCoN supports [**FACETS**](https://www.ncbi.nlm.nih.gov/pubmed/27270079) segmenter and copy number estimator ! This segmenter extends the famous **CBS** _(Circular Binary Segmentation)_ algorithm by making it compatible with bi-variate segmentation (using both the L2R and BAF signals). However, please note that **FACETS is only avaiable for WES data**.
+- Few bugs solved.
+
+
+---
+
+## **INSTALLATION**
+
+### **CORE**
+ -  Please first install the **_devtools_** package that will allow installing packages from _github_ :
+
+``` r
+install.packages("devtools")
+```
+
+ - Then install **_ASCAT_** and **_FACETS_** from github :
+
+``` r
+devtools::install_github("Crick-CancerGenomics/ascat")
+devtools::install_github("mskcc/facets")
+```
+
+ - Then install required _BioConductor_ packages :
+ 
+``` r
+## try using http:// if https:// URLs are not supported
+source("https://bioconductor.org/biocLite.R")
+biocLite(c("affxparser", "Biostrings", "aroma.light", "BSgenome", "copynumber", "GenomicRanges", "limma", "rhdf5", "sequenza"))
+```
+
+ - Then install **_EaCoN_** from github !
+
+``` r
+devtools::install_github("gustaveroussy/EaCoN")
+```
+
+### **MICROARRAY-SPECIFIC**
+
+While the current EaCoN package is the core of the process and will straitfully work for WES data, multiple other packages are needed to properly handle Affymetrix microarray : APT (affymetrix power tools), designs and corresponding annotations (genome build, Affymetrix annotation databases) ; others are required for the (re)normalization, especially pre-computed GC% or Wavetracks.
+
+#### **AFFYMETRIX MICROARRAYS**
+
+ - The **_affy.CN.norm_** package provides pre-computed GC% and wave-effect (re)normalization datasets for all compatible Affymetrix designs, for both NA33/NA35 (hg19) and NA36 (hg38) human genome builds. Install from remote URL :
+
+``` r
+install.packages("https://drive.google.com/uc?export=download&id=1zeTbjQ-N2TowgGFj9hPje1V0hABPvONN", repos = NULL, type = "source")
+```
+
+##### **OncoScan family (OncoScan / OncoScan_CNV)**
+
+ - First, install embedded APT tool from github :
+ 
+``` r
+devtools::install_github("gustaveroussy/apt.oncoscan.2.4.0")
+```
+
+ - Then install annotations from remote URL :
+   - For the **NA33 (hg19)** build :
+     - For the **OncoScan** design :
+
+``` r
+install.packages("https://drive.google.com/uc?export=download&id=1v-nU6bloLlBMQa5WOT0X_jj4uRQ6kNk2", repos = NULL, type = "source")
+```
+
+    - For the **OncoScan_CNV** design :
+
+``` r
+install.packages("https://drive.google.com/uc?export=download&id=19Ml_EjsRpVJ7XkUZ2xfGh8OWPLF5GZD7", repos = NULL, type = "source")
+```
+
+   - For the **NA36 (hg38)** build :
+     - For the **OncoScan** design :
+
+``` r
+install.packages("https://drive.google.com/uc?export=download&id=1qTkuZR55GDtKA3Gy89fr_mmCiVKSja32", repos = NULL, type = "source")
+```
+
+     - For the **OncoScan_CNV** design :
+
+``` r
+install.packages( "https://drive.google.com/uc?export=download&id=1rgSsTXgTJHsp1dzO1HZNR6kJexormJ2J", repos = NULL, type = "source")
+```
+
+##### **CytoScan family (CytoScan 750k / CytoScan HD)**
+
+ - First, install embedded APT tool from github :
+ 
+``` r
+devtools::install_github("gustaveroussy/apt.cytoscan.2.4.0")
+```
+
+ - Then install annotations from remote URL :
+   - For the **NA33 (hg19)** build :
+     - For the **CytoScan 750k** design :
+
+``` r
+install.packages("https://drive.google.com/uc?export=download&id=1FT_7sZiWMLngJzHCYQKW8DObVRBp-Gm5", repos = NULL, type = "source")
+```
+
+     - For the **CytoScan HD** design :
+
+``` r
+install.packages( "https://drive.google.com/uc?export=download&id=1IE6ihdESltknOCPsNQBKW8AuRAmuwlWT", repos = NULL, type = "source")
+```
+
+   - For the **NA36 (hg38)** build :
+     - For the **CytoScan 750k** design :
+
+``` r
+install.packages("https://drive.google.com/uc?export=download&id=1AFmU9eROmrQZpNz-3GptCF1OSZWlyvCP", repos = NULL, type = "source")
+```
+
+     - For the **CytoScan HD** design :
+
+``` r
+install.packages( "https://drive.google.com/uc?export=download&id=1k-yRpMI6AktZf0py6WFrnbTAsMZkKtTD", repos = NULL, type = "source")
+```
+
+ - Lastly, install the **_rcnorm_** package to perform BAF normalization for CytoScan family of arrays :
+
+``` r
+install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtxCPii-ukuR2tF8pikrgx", repos = NULL, type = "source")
+```
+
+##### **Genomwide snp6.0**
+
+ - First, install embedded APT tool from github :
+ 
+``` r
+devtools::install_github("gustaveroussy/apt.snp6.1.20.0")
+```
+
+ - Then install annotations from remote URL (There is no other build available than **NA35 (hg19)**) :
+
+``` r
+install.packages("https://drive.google.com/uc?export=download&id=1AFmU9eROmrQZpNz-3GptCF1OSZWlyvCP", repos = NULL, type = "source")
+```
+
+ - Lastly, install the **_rcnorm_** package to perform BAF normalization for SNP6 arrays **(if not already installed at the CytoScan step!) :
+
+``` r
+install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtxCPii-ukuR2tF8pikrgx", repos = NULL, type = "source")
+```
+
+### **GENOMES**
+
+ - EaCoN requires a genome as available thanks to the [BSgenome](https://bioconductor.org/packages/release/bioc/html/BSgenome.html) package, available at BioConductor. To check which genomes are publicly availabe at BioConductor :
+
+``` r
+BSgenome::available.genomes()
+```
+
+ - To check genome(s) installed in your R library :
+
+``` r
+BSgenome::installed.genomes()
+```
+
+ - For Affymetrix microarrays, you need to install these human genomes depending on which annotation package you want to use :
+
+``` r
+## try using http:// if https:// URLs are not supported
+source("https://bioconductor.org/biocLite.R")
+
+## To support NA33 / NA35 annotations (hg19)
+biocLite("BSgenome.Hsapiens.UCSC.hg19")
+
+## To support NA36 annotations (hg18)
+biocLite("BSgenome.Hsapiens.UCSC.hg38")
+```
+
+ - For TCGA WES data, you will need the **hs37d5** genome (a variation of the hg19 build used in the 1000 Genomes project)
+
+``` r
+## try using http:// if https:// URLs are not supported
+source("https://bioconductor.org/biocLite.R")
+
+biocLite("BSgenome.Hsapiens.1000genomes.hs37d5")
+```
+
+ - If your favorite genome is not available, **it is possible to build your own** !
+   - Simply download locally any public genome package (by example [BSgenome.Hsapiens.UCSC.hg19](https://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg19/)) 
+   - Uncompress it locally (MS Windows users can use [7-zip](https://www.7-zip.org/))
+   - Rename the decompressed folder to your genome name
+   - Edit all possible files (DESCRIPTION, NAMESPACE, R/zzz.R, man/package.Rd) to insert all required informations relative to your own genome
+   - Replace the _inst/extdata/single_sequenes.2bit_ file by your genome sequence in the [2bit](http://genome.ucsc.edu/FAQ/FAQformat.html#format7) format (which can be converted to from a regular fasta file thanks to converters developed by the [UCSC](https://genome.ucsc.edu/goldenpath/help/twoBit.html))
+   - Re-compress the modified and renamed directory to a .tar.gz (Windows users : 7-zip can do that, too)
+   - Install !
+
+---
+
+## **INPUT**
+
 - Raw data :
-  - For Affymetrix microarrays : the **CEL** files, fresh out of the Affymetrix Scanner
+  - For Affymetrix microarrays : the **CEL** file(s), fresh out of the Affymetrix Scanner
   - For WES data :
     - The aligned reads of the test and reference samples, in two different **BAM** files
     - The **capture BED** file (the file containing the genomic regions targeted by the exome capture kit used in the wet experiment)
@@ -137,7 +271,7 @@ While the current EaCoN package is the core of the process, multiple others are 
 
 The full workflow is decomposed in a few different functions, which roughly correspond to these steps :  
 
-> normalization -> segmentation |-> reporting |-> copy-number estimation  
+> normalization -> segmentation -> reporting |-> copy-number estimation  
 
 EaCoN allows different ways to perform the full workflow : considering the analysis of a single sample, you can either perform each step independently and write, then load the intermediate results, or you can _**pipe**_ all steps in a single line of code. You can also perform the step-by-step approach on multiple samples in a row, even possibly at the same time using multithreading, using a batch mode.
 
