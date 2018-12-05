@@ -81,30 +81,30 @@ It consists in a series of R packages that perform such type of analysis, from r
 ### **CORE**
 -  Please first install the **_devtools_** package that will allow installing packages from _github_ :
 
-``` r
-install.packages("devtools")
-```
+  ``` r
+  install.packages("devtools")
+  ```
 
 - Then install **_ASCAT_** and **_FACETS_** from github :
 
-``` r
-devtools::install_github("Crick-CancerGenomics/ascat")
-devtools::install_github("mskcc/facets")
-```
+  ``` r
+  devtools::install_github("Crick-CancerGenomics/ascat")
+  devtools::install_github("mskcc/facets")
+  ```
 
 - Then install required **_BioConductor_** packages :
  
-``` r
-## try using http:// if https:// URLs are not supported
-source("https://bioconductor.org/biocLite.R")
-biocLite(c("affxparser", "Biostrings", "aroma.light", "BSgenome", "copynumber", "GenomicRanges", "limma", "rhdf5", "sequenza"))
-```
+  ``` r
+  ## try using http:// if https:// URLs are not supported
+  source("https://bioconductor.org/biocLite.R")
+  biocLite(c("affxparser", "Biostrings", "aroma.light", "BSgenome", "copynumber", "GenomicRanges", "limma", "rhdf5", "sequenza"))
+  ```
 
 - Then install **_EaCoN_** from github !
 
-``` r
-devtools::install_github("gustaveroussy/EaCoN")
-```
+  ``` r
+  devtools::install_github("gustaveroussy/EaCoN")
+  ```
 
 ### **MICROARRAY-SPECIFIC**
 
@@ -114,9 +114,9 @@ While the current EaCoN package is the core of the process and will straitfully 
 
 - The **_affy.CN.norm_** package provides pre-computed GC% and wave-effect (re)normalization datasets for all compatible Affymetrix designs, for both NA33/NA35 (hg19) and NA36 (hg38) human genome builds. Install from remote URL :
 
-``` r
-install.packages("https://drive.google.com/uc?export=download&id=1zeTbjQ-N2TowgGFj9hPje1V0hABPvONN", repos = NULL, type = "source")
-```
+  ``` r
+  install.packages("https://drive.google.com/uc?export=download&id=1zeTbjQ-N2TowgGFj9hPje1V0hABPvONN", repos = NULL, type = "source")
+  ```
 
 #### **ONCOSCAN FAMILY (OncoScan / OncoScan_CNV)**
 
