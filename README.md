@@ -115,7 +115,7 @@ While the current EaCoN package is the core of the process and will straitfully 
 - The **_affy.CN.norm_** package provides pre-computed GC% and wave-effect (re)normalization datasets for all compatible Affymetrix designs, for both NA33/NA35 (hg19) and NA36 (hg38) human genome builds. Install from remote URL :
 
   ``` r
-  install.packages("https://drive.google.com/uc?export=download&id=1zeTbjQ-N2TowgGFj9hPje1V0hABPvONN", repos = NULL, type = "source")
+  install.packages("https://partage.gustaveroussy.fr/pydio_public/083305?dl=true&file=/affy.CN.norm.data_0.1.2.tar.gz", repos = NULL, type = "source")
   ```
 
 #### **ONCOSCAN FAMILY (OncoScan / OncoScan_CNV)**
@@ -131,26 +131,26 @@ While the current EaCoN package is the core of the process and will straitfully 
     - For the **OncoScan** design :
     
       ``` r
-      install.packages("https://drive.google.com/uc?export=download&id=1v-nU6bloLlBMQa5WOT0X_jj4uRQ6kNk2", repos = NULL, type = "source")
+      install.packages("https://partage.gustaveroussy.fr/pydio_public/b88fb8?dl=true&file=/OncoScan.na33.r4_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
-      
+
     - For the **OncoScan_CNV** design :
     
       ``` r
-      install.packages("https://drive.google.com/uc?export=download&id=19Ml_EjsRpVJ7XkUZ2xfGh8OWPLF5GZD7", repos = NULL, type = "source")
+      install.packages("https://partage.gustaveroussy.fr/pydio_public/cd59c8?dl=true&file=/OncoScanCNV.na33.r2_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
       
   - For the **NA36 (hg38)** build :
     - For the **OncoScan** design :
     
       ``` r
-      install.packages("https://drive.google.com/uc?export=download&id=1qTkuZR55GDtKA3Gy89fr_mmCiVKSja32", repos = NULL, type = "source")
+      install.packages("https://partage.gustaveroussy.fr/pydio_public/582a03?dl=true&file=/OncoScan.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
       
     - For the **OncoScan_CNV** design :
     
       ``` r
-      install.packages( "https://drive.google.com/uc?export=download&id=1rgSsTXgTJHsp1dzO1HZNR6kJexormJ2J", repos = NULL, type = "source")
+      install.packages( "https://partage.gustaveroussy.fr/pydio_public/41d8af?dl=true&file=/OncoScanCNV.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
 
 #### **CYTOSCAN FAMILY (CytoScan 750k / CytoScan HD)**
@@ -166,30 +166,30 @@ While the current EaCoN package is the core of the process and will straitfully 
     - For the **CytoScan 750k** design :
 
       ``` r
-      install.packages("https://drive.google.com/uc?export=download&id=1FT_7sZiWMLngJzHCYQKW8DObVRBp-Gm5", repos = NULL, type = "source")
+      install.packages("https://partage.gustaveroussy.fr/pydio_public/74d4cf?dl=true&file=/CytoScan750K.Array.na33.r4_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
     - For the **CytoScan HD** design :
 
       ``` r
-      install.packages( "https://drive.google.com/uc?export=download&id=1IE6ihdESltknOCPsNQBKW8AuRAmuwlWT", repos = NULL, type = "source")
+      install.packages( "https://partage.gustaveroussy.fr/pydio_public/bc4b54?dl=true&file=/CytoScanHD.Array.na33.r4_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
 
   - For the **NA36 (hg38)** build :
     - For the **CytoScan 750k** design :
 
       ``` r
-      install.packages("https://drive.google.com/uc?export=download&id=1AFmU9eROmrQZpNz-3GptCF1OSZWlyvCP", repos = NULL, type = "source")
+      install.packages("https://partage.gustaveroussy.fr/pydio_public/656d13?dl=true&file=/CytoScan750K.Array.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
     - For the **CytoScan HD** design :
 
       ``` r
-      install.packages( "https://drive.google.com/uc?export=download&id=1k-yRpMI6AktZf0py6WFrnbTAsMZkKtTD", repos = NULL, type = "source")
+      install.packages( "https://partage.gustaveroussy.fr/pydio_public/24b026?dl=true&file=/CytoScanHD.Array.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
 
 - Lastly, install the **_rcnorm_** package to perform BAF normalization for CytoScan family of arrays :
 
   ``` r
-  install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtxCPii-ukuR2tF8pikrgx", repos = NULL, type = "source")
+  install.packages( "https://partage.gustaveroussy.fr/pydio_public/e6fe22?dl=true&file=/rcnorm_0.1.5.tar.gz", repos = NULL, type = "source")
   ```
 
 #### **GENOMEWIDE SNP6**
@@ -203,13 +203,13 @@ While the current EaCoN package is the core of the process and will straitfully 
 - Then install annotations from remote URL (There is no other build available than **NA35 (hg19)**) :
 
   ``` r
-  install.packages("https://drive.google.com/uc?export=download&id=1AFmU9eROmrQZpNz-3GptCF1OSZWlyvCP", repos = NULL, type = "source")
+  install.packages("https://partage.gustaveroussy.fr/pydio_public/152397?dl=true&file=/GenomeWideSNP.6.na35.r1_0.1.0.tar.gz", repos = NULL, type = "source")
   ```
 
 - Lastly, install the **_rcnorm_** package to perform BAF normalization for SNP6 arrays **(if not already installed at the CytoScan step!)** :
 
   ``` r
-  install.packages( "https://drive.google.com/uc?export=download&id=1r5Qq0-l7FsTtxCPii-ukuR2tF8pikrgx", repos = NULL, type = "source")
+  install.packages( "https://partage.gustaveroussy.fr/pydio_public/e6fe22?dl=true&file=/rcnorm_0.1.5.tar.gz", repos = NULL, type = "source")
   ```
 
 ### **GENOMES**
