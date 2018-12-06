@@ -103,7 +103,11 @@ It consists in a series of R packages that perform such type of analysis, from r
 - Then install **_EaCoN_** from github !
 
   ``` r
+  ## Install the most recent STABLE version (@master)
   devtools::install_github("gustaveroussy/EaCoN")
+  
+  ## ... or try your luck with the most recent DEVELOPMENT version (@dev)
+  devtools::install_github("gustaveroussy/EaCoN", ref = "dev")
   ```
 
 ### **MICROARRAY-SPECIFIC**
@@ -252,8 +256,8 @@ While the current EaCoN package is the core of the process and will straitfully 
   - Simply download locally any public genome package (by example [BSgenome.Hsapiens.UCSC.hg19](https://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg19/)) 
   - Uncompress it locally (MS Windows users can use [7-zip](https://www.7-zip.org/))
   - Rename the decompressed folder to your genome name
-  - Edit all possible files (DESCRIPTION, NAMESPACE, R/zzz.R, man/package.Rd) to insert all required information relative to your own genome
-  - Replace the _inst/extdata/single_sequenes.2bit_ file by your genome sequence in the [2bit](http://genome.ucsc.edu/FAQ/FAQformat.html#format7) format (which can be converted to from a regular fasta file thanks to converters developed by the [UCSC](https://genome.ucsc.edu/goldenpath/help/twoBit.html))
+  - Edit all possible files (**_DESCRIPTION_**, **_NAMESPACE_**, **_R/zzz.R_**, **_man/package.Rd_**) to insert all required information relative to your own genome
+  - Replace the **_inst/extdata/single_sequenes.2bit_** file by your genome sequence in the [2bit](http://genome.ucsc.edu/FAQ/FAQformat.html#format7) format (which can be converted to from a regular fasta file thanks to converters developed by the [UCSC](https://genome.ucsc.edu/goldenpath/help/twoBit.html))
   - Re-compress the modified and renamed directory to a .tar.gz (Windows users : 7-zip can do that, too)
   - Install !
 

@@ -241,11 +241,11 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
     # cluster.type = "PSOCK"
 
     #### Indexing BAM if needed
-    if (!file.exists(paste0(testBAM, ".bai"))) {
+    if (!(file.exists(paste0(testBAM, ".bai")) || file.exists(sub(pattern = "\\.bam", replacement = ".bai", x = testBAM, ignore.case = TRUE)))) {
       tmsg("Indexing Test BAM ...")
       Rsamtools::indexBam(testBAM) 
     } else tmsg("Test BAM is already indexed.")
-    if (!file.exists(paste0(refBAM, ".bai"))) {
+    if (!(file.exists(paste0(refBAM, ".bai")) || file.exists(sub(pattern = "\\.bam", replacement = ".bai", x = refBAM, ignore.case = TRUE)))) {
       tmsg("Indexing Ref BAM ...")
       Rsamtools::indexBam(refBAM)
     } else tmsg("Ref BAM is already indexed.")
