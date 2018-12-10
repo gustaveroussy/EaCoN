@@ -26,23 +26,23 @@ SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", gc
 
 
   ## Early checks
-  if (is.null(CEL)) stop(tmsg("A CEL file is required !"))
-  if (is.null(samplename)) stop(tmsg("A samplename is required !"))
-  if (!file.exists(CEL)) stop(tmsg(paste0("Could not find CEL file ", CEL, " !")))
-  if (gc.renorm) { if (!is.null(gc.rda)) { if (!file.exists(gc.rda)) stop(tmsg(paste0("Could not find gc.rda file ", gc.rda))) } }
-  if (wave.renorm) { if (!is.null(wave.rda)) { if (!file.exists(wave.rda)) stop(tmsg(paste0("Could not find wave.rda file ", wave.rda))) } }
-  if (is.null(genome.pkg)) stop(tmsg("A BSgenome package name is required !"))
+  if (is.null(CEL)) stop(tmsg("A CEL file is required !"), call. = FALSE)
+  if (is.null(samplename)) stop(tmsg("A samplename is required !"), call. = FALSE)
+  if (!file.exists(CEL)) stop(tmsg(paste0("Could not find CEL file ", CEL, " !")), call. = FALSE)
+  if (gc.renorm) { if (!is.null(gc.rda)) { if (!file.exists(gc.rda)) stop(tmsg(paste0("Could not find gc.rda file ", gc.rda)), call. = FALSE) } }
+  if (wave.renorm) { if (!is.null(wave.rda)) { if (!file.exists(wave.rda)) stop(tmsg(paste0("Could not find wave.rda file ", wave.rda)), call. = FALSE) } }
+  if (is.null(genome.pkg)) stop(tmsg("A BSgenome package name is required !"), call. = FALSE)
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
-  if (dir.exists(samplename)) { if (!force) stop(tmsg(paste0("A [", samplename, '] dir already exists !'))) else unlink(samplename, recursive = TRUE, force = FALSE) }
+  if (dir.exists(samplename)) { if (!force) stop(tmsg(paste0("A [", samplename, '] dir already exists !')), call. = FALSE) else unlink(samplename, recursive = TRUE, force = FALSE) }
   
   l2r.lev.conv <- list("normal" = "Log2Ratio", "weighted" = "SmoothSignal")
-  if (!(l2r.level %in% names(l2r.lev.conv))) stop(tmsg("Option 'l2r.level' should be 'normal' or 'weighted' !"))
+  if (!(l2r.level %in% names(l2r.lev.conv))) stop(tmsg("Option 'l2r.level' should be 'normal' or 'weighted' !"), call. = FALSE)
   
   ## Handling compressed files
   CEL <- compressed_handler(CEL)
@@ -50,7 +50,7 @@ SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", gc
   ## Secondary checks
   sup.array <- c("GenomeWideSNP_6")
   arraytype.cel = affxparser::readCelHeader(filename = CEL)$chiptype
-  if (!arraytype.cel %in% sup.array) stop(tmsg(paste0("Identified array type '", arraytype.cel, "' is not supported by this function !")))
+  if (!arraytype.cel %in% sup.array) stop(tmsg(paste0("Identified array type '", arraytype.cel, "' is not supported by this function !")), call. = FALSE)
 
   ## Checking APT version compatibility
   valid.apt.versions <- c("1.20.0")
@@ -62,7 +62,7 @@ SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", gc
 
   ## Checking apt-copynumber-cyto-ssa package loc
   apt.snp6.pkg.name <- paste0("apt.snp6.", apt.version)
-  if (!(apt.snp6.pkg.name %in% installed.packages())) stop(tmsg(paste0("Package ", apt.snp6.pkg.name, " not found !")))
+  if (!(apt.snp6.pkg.name %in% installed.packages())) stop(tmsg(paste0("Package ", apt.snp6.pkg.name, " not found !")), call. = FALSE)
   suppressPackageStartupMessages(require(package = apt.snp6.pkg.name, character.only = TRUE))
 
   ## Processing CEL to an OSCHP file
@@ -86,7 +86,7 @@ SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", gc
   
   ### Getting basic meta
   genome <- getmeta("affymetrix-algorithm-param-genome-version", my.oschp$Meta$analysis)
-  if (genome != genome2) stop(tmsg(paste0("Genome build name given with BSgenome package '", genome.pkg, "', (", genome2, ") is different from the genome build specified by provided APT build version '", apt.build, "' (", genome, ") !")))
+  if (genome != genome2) stop(tmsg(paste0("Genome build name given with BSgenome package '", genome.pkg, "', (", genome2, ") is different from the genome build specified by provided APT build version '", apt.build, "' (", genome, ") !")), call. = FALSE)
   arraytype <- getmeta("affymetrix-array-type", my.oschp$Meta$analysis)
   manufacturer <- getmeta("program-company", my.oschp$Meta$analysis)
   species <- getmeta("affymetrix-algorithm-param-genome-species", my.oschp$Meta$analysis)
@@ -95,7 +95,7 @@ SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", gc
   gender.conv <- list("female" = "XX", "male" = "XY", "NA" = "NA")
   pgender <- gender.conv[[snp6.conv[[as.character(as.numeric(getmeta("affymetrix-chipsummary-Gender", my.oschp$Meta$analysis)))]]]]
 
-  if (!(arraytype %in% sup.array)) stop(paste0("Unsupported array : '", arraytype, "' !"))
+  if (!(arraytype %in% sup.array)) stop(paste0("Unsupported array : '", arraytype, "' !"), call. = FALSE)
 
   ## Reconstructing missing meta
   if (!"CEL1" %in% names(my.oschp$Meta)) {
@@ -491,8 +491,8 @@ SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", gc
 
 SNP6.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.type = "PSOCK", ...) {
   ## Checking the CEL.list.file
-  if (is.null(CEL.list.file)) stop("A CEL.list.file is required !")
-  if (!file.exists(CEL.list.file)) stop("Could not find CEL.list.file !")
+  if (is.null(CEL.list.file)) stop("A CEL.list.file is required !", call. = FALSE)
+  if (!file.exists(CEL.list.file)) stop("Could not find CEL.list.file !", call. = FALSE)
   message("Reading and checking CEL.list.file ...")
   myCELs <- read.table(file = CEL.list.file, header = TRUE, sep="\t", check.names = FALSE, as.is = TRUE)
   head.ok <- c("cel_files", "SampleName")
@@ -501,17 +501,17 @@ SNP6.Process.Batch <- function(CEL.list.file = NULL, nthread = 1, cluster.type =
     message("Invalid header in CEL.list.file !")
     message(paste0("EXPECTED : ", head.ok))
     message(paste0("FOUND : ", colnames(myCELs)))
-    stop("Invalid header.")
+    stop("Invalid header.", call. = FALSE)
   }
   sn.chk <- duplicated(myCELs$SampleName)
   if (any(sn.chk)) {
     message("CEL.list.file contains duplicated SampleNames !")
     message(myCELs$SampleName[which(duplicated(myCELs$SampleName))])
-    stop("Duplicated SampleNames.")
+    stop("Duplicated SampleNames.", call. = FALSE)
   }
   fecheck <- !vapply(myCELs$cel_files, file.exists, TRUE)
   fecheck.pos <- which(fecheck)
-  if (length(fecheck.pos) > 0) stop(paste0("\n", "CEL file could not be found : ", myCELs$cel_files[fecheck.pos], collapse = ""))
+  if (length(fecheck.pos) > 0) stop(paste0("\n", "CEL file could not be found : ", myCELs$cel_files[fecheck.pos], collapse = ""), call. = FALSE)
 
   message(paste0("Found ", nrow(myCELs), " samples to process."))
 

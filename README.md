@@ -44,9 +44,11 @@ It consists in a series of R packages that perform such type of analysis, from r
 ## **QUICK NEWS**
 
 ### **2018-12-03 : v0.3.4-1 _(PostRoscovite)_ is out !**
-- CORR : SNP6.Process(), CSHD.Process() : Edited code to handle changes in the rcnorm package, to discard the "chromosomes" package dependency.
-- MOD : Removed some dependencies (already called by other dependencies, like copynumber from sequenza)
-- MOD : Edited the README.md (rewrote the INSTALL section)
+* CORR : SNP6.Process(), CSHD.Process() : Edited code to handle changes in the rcnorm package, to discard the "chromosomes" package dependency.
+* MOD : Removed some dependencies (already called by other dependencies, like 'copynumber' from 'sequenza') to make installation easier and more convenient.
+* MOD : Edited the README.md (rewrote the INSTALL section)
+* MOD : WES.Bin() : Added support for BAI files that have the exact same rootname as BAM files (instead of rootname.bam.bai only)
+* MOD : Added "call. = FALSE" top all stop() calls
 
 ### **2018-10-30 : v0.3.4 _(Papy60)_ is out !**
 
@@ -335,8 +337,7 @@ First, under R, load EaCoN and choose a directory in which results will be writt
   - **First**, we will use the capture BED (A text file containing the positions of the captured regions, usualy provided by the capture kit manufacturer), choose a genome version corresponding to our aligned BAM files, and choose a window size for the future binning of the data. Thses will be used to generate what we call a "BINpack", a set of pre-computed tracks containing the bins position and corresponding GC% values. Several tracks will be computed corresponding to different levels of elongation of the bin positions. In the example below, we used the BED corresponding to Agilent SureSelect v5 capture kit, a bin size of 50 nt, and chose the human hg19 genome build.
 
     ``` r
-    BINpack.Maker(bed.file = "/home/project/WES/SureSelect_v5.bed", bin.size = 50, genome.pkg =
-"BSgenome.Hsapiens.UCSC.hg19")
+    BINpack.Maker(bed.file = "/home/project/WES/SureSelect_v5.bed", bin.size = 50, genome.pkg = "BSgenome.Hsapiens.UCSC.hg19")
     ```
 
     - This will generate a "BINpack" (with a ".rda" extension) that will be used in the next normalization steps : **/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda**

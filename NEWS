@@ -1,12 +1,14 @@
 EaCoN
 -----
 
-v0.3.4-1 (20181203) *PostRoscovite*
+v0.3.4-1 (20181210) *PostRoscovite*
 -----------------
 * CORR : SNP6.Process(), CSHD.Process() : Edited code to handle changes in the rcnorm package, to discard the "chromosomes" package dependency.
-* MOD : Removed some dependencies (already called by other dependencies, like copynumber from sequenza)
+* MOD : Removed some dependencies (already called by other dependencies, like 'copynumber' from 'sequenza') to make installation easier and more convenient.
 * MOD : Edited the README.md (rewrote the INSTALL section)
 * MOD : WES.Bin() : Added support for BAI files that have the exact same rootname as BAM files (instead of rootname.bam.bai only)
+* MOD : Added "call. = FALSE" top all stop() calls
+* ADD : WES.Bin() : Added raw read depth plots (to control putative TEST / REF inversion of sex mismatch)
 
 v0.3.4 (20181030) *Papy60*
 -----------------

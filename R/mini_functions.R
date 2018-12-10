@@ -67,8 +67,8 @@ meta.df2list <- function(meta.df = NULL) {
 list.depth <- function(this) ifelse(is.list(this), 1L + max(sapply(this, list.depth)), 0L)
 
 oschp.load <- function(file = NULL) {
-  if (is.null(file)) stop(tmsg("Please provide an OSCHP file !"))
-  if (!file.exists(file)) stop(tmsg("Provided OSCHP file does not exist !"))
+  if (is.null(file)) stop(tmsg("Please provide an OSCHP file !"), call. = FALSE)
+  if (!file.exists(file)) stop(tmsg("Provided OSCHP file does not exist !"), call. = FALSE)
   h5.data <- rhdf5::h5read(file = file, name = "/")
   h5.mlist <- h5.data$Dset_IO_HDF5_Gdh
   if(length(h5.mlist) > 1) {
@@ -140,7 +140,7 @@ EaCoN.set.bitmapType <- function(type = "cairo") {
 
 ## Create a chromosomes-like object from a BSgenome object
 chromobjector <- function(BSg = NULL) {
-  if (is.null(BSg)) stop("NULL object !")
+  if (is.null(BSg)) stop("NULL object !", call. = FALSE)
   chromobj <- list(species = GenomeInfoDb::organism(BSg), genomebuild = BSgenome::providerVersion(BSg))
   chromdf <- data.frame(chrom = BSgenome::seqnames(BSg), chrN = seq_along(BSgenome::seqnames(BSg)), chr.length = GenomeInfoDb::seqlengths(BSg), stringsAsFactors = FALSE)
   chromdf$chr.length.sum <- cumsum(as.numeric(chromdf$chr.length))
@@ -172,11 +172,11 @@ compressed_handler <- function(CELz = NULL) {
       CEL <- uncomp_file
     } else if (tolower(tools::file_ext(CEL)) == "zip") {
       zlist <- utils::unzip(CEL, list = TRUE)
-      if (length(grep(zlist$Name, pattern = "\\.CEL", ignore.case = TRUE)) != 1) stop(tmsg(paste0(CEL, "archive file does not contain a single and unique CEL file !")))
+      if (length(grep(zlist$Name, pattern = "\\.CEL", ignore.case = TRUE)) != 1) stop(tmsg(paste0(CEL, "archive file does not contain a single and unique CEL file !")), call. = FALSE)
       zname <- zlist$Name[1]
       utils::unzip(zipfile = CEL, files = zname, exdir = tempdir(), overwrite = TRUE)
       CEL <- file.path(tempdir(), zname)
-    } else if (tolower(tools::file_ext(CEL)) != "cel") stop(tmsg(paste0("File ", CEL, " is not recognized as raw nor compressed (gz, bz2, zip) CEL file !")))
+    } else if (tolower(tools::file_ext(CEL)) != "cel") stop(tmsg(paste0("File ", CEL, " is not recognized as raw nor compressed (gz, bz2, zip) CEL file !")), call. = FALSE)
     return(CEL)
   }
   return(CELz2)
