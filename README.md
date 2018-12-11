@@ -43,12 +43,13 @@ It consists in a series of R packages that perform such type of analysis, from r
 
 ## **QUICK NEWS**
 
-### **2018-12-03 : v0.3.4-1 _(PostRoscovite)_ is out !**
+### **2018-12-10 : v0.3.4-1 _(PostRoscovite)_ is out !**
 * CORR : SNP6.Process(), CSHD.Process() : Edited code to handle changes in the rcnorm package, to discard the "chromosomes" package dependency.
 * MOD : Removed some dependencies (already called by other dependencies, like 'copynumber' from 'sequenza') to make installation easier and more convenient.
 * MOD : Edited the README.md (rewrote the INSTALL section)
 * MOD : WES.Bin() : Added support for BAI files that have the exact same rootname as BAM files (instead of rootname.bam.bai only)
 * MOD : Added "call. = FALSE" top all stop() calls
+* ADD : WES.Bin() : Added raw read depth plots (to control putative TEST / REF inversion of sex mismatch)
 
 ### **2018-10-30 : v0.3.4 _(Papy60)_ is out !**
 
