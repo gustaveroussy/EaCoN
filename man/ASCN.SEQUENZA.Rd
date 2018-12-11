@@ -6,7 +6,7 @@
   seg.min.size = 1E+06, out.dir = getwd(), force = FALSE)
 }
 \arguments{
-  \item{data}{Data object contained in a RDS file generated with \code{Segment.FACETS()} (or corresponding wrappers \code{Segment.ff()} and \code{Segment.ff.Batch()}, using the "FACETS" segmenter.}
+  \item{data}{Data object contained in a RDS file generated with \code{Segment.SEQUENZA()} (or corresponding wrappers \code{Segment.ff()} and \code{Segment.ff.Batch()}, using the "FACETS" segmenter.}
   \item{max.ploidy}{Maximal median ploidy value to evaluate.}
   \item{ploidy.step}{Step for the ploidy value to evaluate in loop.}
   \item{seg.min.size}{Minimal size (in nt) of a segment to be used in the model fit.}

@@ -2,14 +2,49 @@ Encoding: UTF-8
 Package: EaCoN
 Type: Package
 Title: EaCoN : Easy Copy Number !
-Version: 0.3.4
-Date: 2018-10-30
+Version: 0.3.4-1
+Date: 2018-12-10
 Author: Bastien Job
-Maintainer: Bastien JOB <bastien.job@inserm.fr>
+Authors@R: person("Bastien", "Job", email = "bastien.job@inserm.fr", role = c("aut", "cre"))
 Depends: R(>= 3.1.0)
-Imports: affxparser, ASCAT, Biostrings, aroma.light, BSgenome, changepoint, copynumber, data.table, doParallel, dplyr, DT, facets, foreach, GenomeInfoDb, GenomicRanges, iotools, IRanges, limma, mclust, parallel, rhdf5, R.utils, seqinr, sequenza
-Suggests: BSgenome.Hsapiens.UCSC.hg18, BSgenome.Hsapiens.UCSC.hg19, BSgenome.Hsapiens.UCSC.hg38, Rsamtools, affy.CN.norm.data, apt.cytoscan.2.4.0, apt.oncoscan.2.4.0, apt.snp6.1.20.0, knitr, rcnorm, rmarkdown
+Imports:
+  affxparser,
+  aroma.light,
+  ASCAT,
+  Biostrings,
+  BSgenome,
+  changepoint,
+  data.table,
+  doParallel,
+  dplyr,
+  DT,
+  facets,
+  foreach,
+  GenomeInfoDb,
+  GenomicRanges,
+  iotools,
+  IRanges,
+  limma,
+  mclust,
+  R.utils,
+  rhdf5,
+  seqinr,
+  sequenza
+Suggests:
+  BSgenome.Hsapiens.UCSC.hg18,
+  BSgenome.Hsapiens.UCSC.hg19,
+  BSgenome.Hsapiens.UCSC.hg38,
+  BSgenome.Hsapiens.1000genomes.hs37d5,
+  Rsamtools,
+  affy.CN.norm.data,
+  apt.cytoscan.2.4.0,
+  apt.oncoscan.2.4.0,
+  apt.snp6.1.20.0,
+  rcnorm,
+  rmarkdown
+biocViews: Software
+BugReports: https://github.com/gustaveroussy/EaCoN/issues
 Description: Easy copy-number analysis for Affymetrix microarrays (snp6.0, CytoScanHD, CytoScan750K & OncoScan) and whole exome sequencing data.
 License: MIT + file LICENSE
-LazyData: FALSE
+LazyData: false
 Byte-Compile: yes

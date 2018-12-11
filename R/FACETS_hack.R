@@ -1,12 +1,12 @@
 ## Hacked from facets package (0.5.14) to handle any genome which X chromosome can be obtained from the data$data$sexchromosomes.
 procSample.hacked <- function(x, cval=150, min.nhet=15, dipLogR=NULL, chromlevels=c(1:22, "X", "Y")) {
   # ensure availability of seg.tree
-  if (is.null(x$seg.tree)) stop("seg.tree is not available")
+  if (is.null(x$seg.tree)) stop("seg.tree is not available", call. = FALSE)
   # get the numeric value of chromosome X
   nX <- x$nX
   # make sure that original cval is smaller than current one
   cval.fit <- attr(x$seg.tree, "cval")
-  if (cval.fit > cval) stop("original fit used cval = ", cval.fit)
+  if (cval.fit > cval) stop("original fit used cval = ", cval.fit, call. = FALSE)
   # jointseg etc
   jseg <- x$jointseg
   jseg <- jseg[is.finite(jseg$cnlr),]

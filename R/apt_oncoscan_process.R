@@ -31,25 +31,25 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   
   
   ## Early checks
-  if (is.null(ATChannelCel)) stop(tmsg("An ATChannel CEL file is required !"))
-  if (is.null(GCChannelCel)) stop(tmsg("A GCChannel CEL file is required !"))
-  if (is.null(samplename)) stop(tmsg("A samplename is required !"))
-  if (gc.renorm) { if (!is.null(gc.rda)) { if (!file.exists(gc.rda)) stop(tmsg(paste0("Could not find gc.rda file ", gc.rda))) } }
-  if (wave.renorm) { if (!is.null(wave.rda)) { if (!file.exists(wave.rda)) stop(tmsg(paste0("Could not find wave.rda file ", wave.rda))) } }
-  if(!file.exists(ATChannelCel)) stop(tmsg(paste0("Could not find ATChannelCel file ", ATChannelCel, " !")))
-  if(!file.exists(GCChannelCel)) stop(paste0("Could not find GCChannelCel file ", GCChannelCel, " !"))
-  if (ATChannelCel == GCChannelCel) stop(tmsg("ATChannelCel and GCChannelCel files are identical !"))
+  if (is.null(ATChannelCel)) stop(tmsg("An ATChannel CEL file is required !"), call. = FALSE)
+  if (is.null(GCChannelCel)) stop(tmsg("A GCChannel CEL file is required !"), call. = FALSE)
+  if (is.null(samplename)) stop(tmsg("A samplename is required !"), call. = FALSE)
+  if (gc.renorm) { if (!is.null(gc.rda)) { if (!file.exists(gc.rda)) stop(tmsg(paste0("Could not find gc.rda file ", gc.rda)), call. = FALSE) } }
+  if (wave.renorm) { if (!is.null(wave.rda)) { if (!file.exists(wave.rda)) stop(tmsg(paste0("Could not find wave.rda file ", wave.rda)), call. = FALSE) } }
+  if(!file.exists(ATChannelCel)) stop(tmsg(paste0("Could not find ATChannelCel file ", ATChannelCel, " !")), call. = FALSE)
+  if(!file.exists(GCChannelCel)) stop(paste0("Could not find GCChannelCel file ", GCChannelCel, " !"), call. = FALSE)
+  if (ATChannelCel == GCChannelCel) stop(tmsg("ATChannelCel and GCChannelCel files are identical !"), call. = FALSE)
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
-  if (dir.exists(samplename)) { if (!force) stop(tmsg(paste0("A [", samplename, '] dir already exists !'))) else unlink(samplename, recursive = TRUE, force = FALSE) }
+  if (dir.exists(samplename)) { if (!force) stop(tmsg(paste0("A [", samplename, '] dir already exists !')), call. = FALSE) else unlink(samplename, recursive = TRUE, force = FALSE) }
   
   l2r.lev.conv <- list("normal" = "Log2Ratio", "weighted" = "WeightedLog2Ratio")
-  if (!(l2r.level %in% names(l2r.lev.conv))) stop(tmsg("Option 'l2r.level' should be 'normal' or 'weighted' !"))
+  if (!(l2r.level %in% names(l2r.lev.conv))) stop(tmsg("Option 'l2r.level' should be 'normal' or 'weighted' !"), call. = FALSE)
   
   ## Handling compressed files
   CEL.OS <- compressed_handler(c(ATChannelCel, GCChannelCel))
@@ -60,9 +60,9 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   sup.array <- c("OncoScan", "OncoScan_CNV")
   arraytype.celA = affxparser::readCelHeader(filename = ATChannelCel)$chiptype
   arraytype.celC = affxparser::readCelHeader(filename = GCChannelCel)$chiptype
-  if (!arraytype.celA %in% sup.array) stop(tmsg(paste0("Identified array type for ATChannelCel file '", arraytype.celA, "' is not supported by this function !")))
-  if (!arraytype.celC %in% sup.array) stop(tmsg(paste0("Identified array type for GCChannelCel file '", arraytype.celC, "' is not supported by this function !")))
-  if (arraytype.celA != arraytype.celC) stop(tmsg(paste0("ATChannelCel and GCChannelCel files are not of the same design : ", arraytype.celA, " != ", arraytype.celC, " !")))
+  if (!arraytype.celA %in% sup.array) stop(tmsg(paste0("Identified array type for ATChannelCel file '", arraytype.celA, "' is not supported by this function !")), call. = FALSE)
+  if (!arraytype.celC %in% sup.array) stop(tmsg(paste0("Identified array type for GCChannelCel file '", arraytype.celC, "' is not supported by this function !")), call. = FALSE)
+  if (arraytype.celA != arraytype.celC) stop(tmsg(paste0("ATChannelCel and GCChannelCel files are not of the same design : ", arraytype.celA, " != ", arraytype.celC, " !")), call. = FALSE)
   
   ## Checking APT version compatibility
   valid.apt.versions <- c("2.4.0")
@@ -74,7 +74,7 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   
   ## Checking apt-copynumber-onco-ssa package loc
   apt.onco.pkg.name <- paste0("apt.oncoscan.", apt.version)
-  if (!(apt.onco.pkg.name %in% installed.packages())) stop(tmsg(paste0("Package ", apt.onco.pkg.name, " not found !")))
+  if (!(apt.onco.pkg.name %in% installed.packages())) stop(tmsg(paste0("Package ", apt.onco.pkg.name, " not found !")), call. = FALSE)
   suppressPackageStartupMessages(require(package = apt.onco.pkg.name, character.only = TRUE))
   
   ## Processing CELs to an OSCHP file
@@ -98,7 +98,7 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   
   ### Getting basic meta
   genome <- getmeta("affymetrix-algorithm-param-genome-version", my.oschp$Meta$analysis)
-  if (genome != genome2) stop(tmsg(paste0("Genome build name given with BSgenome package '", genome.pkg, "', (", genome2, ") is different from the genome build specified by provided APT build version '", apt.build, "' (", genome, ") !")))
+  if (genome != genome2) stop(tmsg(paste0("Genome build name given with BSgenome package '", genome.pkg, "', (", genome2, ") is different from the genome build specified by provided APT build version '", apt.build, "' (", genome, ") !")), call. = FALSE)
   arraytype <- getmeta("affymetrix-array-type", my.oschp$Meta$analysis)
   manufacturer <- getmeta("program-company", my.oschp$Meta$analysis)
   species <- getmeta("affymetrix-algorithm-param-genome-species", my.oschp$Meta$analysis)
@@ -106,7 +106,7 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   gender.conv <- list("female" = "XX", "male" = "XY", "NA" = "NA")
   pgender <- gender.conv[[(getmeta("affymetrix-chipsummary-Y-gender-call", my.oschp$Meta$analysis))]]
   
-  if (!(arraytype %in% sup.array)) stop(tmsg(paste0("Unsupported array : '", arraytype, "' !")))
+  if (!(arraytype %in% sup.array)) stop(tmsg(paste0("Unsupported array : '", arraytype, "' !")), call. = FALSE)
   
   meta.b <- list(
     samplename = samplename,
@@ -352,7 +352,7 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
 ## Same in batch mode
 OS.Process.Batch <- function(pairs.file = NULL, nthread = 1, cluster.type = "PSOCK", ...) {
   ## Checking the pairs.file
-  if (!file.exists(pairs.file)) stop("Could not find pairs.file !")
+  if (!file.exists(pairs.file)) stop("Could not find pairs.file !", call. = FALSE)
   message("Reading and checking pairs.file ...")
   mypairs <- read.table(file = pairs.file, header = TRUE, sep="\t", check.names = FALSE, as.is = TRUE)
   head.ok <- c("ATChannelCel", "GCChannelCel", "SampleName")
@@ -361,7 +361,7 @@ OS.Process.Batch <- function(pairs.file = NULL, nthread = 1, cluster.type = "PSO
     message("Invalid header in pairs.file !")
     message(paste0("EXPECTED : ", head.ok))
     message(paste0("FOUND : ", colnames(mypairs)))
-    stop("Invalid header.")
+    stop("Invalid header.", call. = FALSE)
   }
   
   at.chk <- file.exists(mypairs$ATChannelCel)
@@ -373,17 +373,17 @@ OS.Process.Batch <- function(pairs.file = NULL, nthread = 1, cluster.type = "PSO
     message(paste0(mypairs$ATChannelCel[which(!at.chk)], collapse = ", "))
     message("Missing GC CEL files :")
     message(paste0(mypairs$GCChannelCel[which(!gc.chk)], collapse = ", "))
-    stop("Missing CEL.")
+    stop("Missing CEL.", call. = FALSE)
   }
   sn.chk <- duplicated(mypairs$SampleName)
   if (any(sn.chk)) {
     message("pairs.file contains duplicated SampleNames !")
     message(mypairs$SampleName[which(duplicated(mypairs$SampleName))])
-    stop("Duplicated SampleNames.")
+    stop("Duplicated SampleNames.", call. = FALSE)
   }
   if(any(mypairs$ATChannelCel == mypairs$GCChannelCel)) {
     message("Some ATChannelCel and GCChannelCel are the same for at least one sample !")
-    stop("Identical CEL files for AT and GC.")
+    stop("Identical CEL files for AT and GC.", call. = FALSE)
   }
   
   message(paste0("Found ", nrow(mypairs), " samples to process."))

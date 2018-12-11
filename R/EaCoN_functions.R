@@ -23,11 +23,11 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   
   calling.method <- tolower(calling.method)
   
-  if (!is.list(data)) stop(tmsg("data should be a list !"))
-  if (!dir.exists(out.dir)) stop(tmsg(paste0("Output directory [", out.dir, "] does not exist !")))
-  if (!(calling.method %in% c("mad", "density"))) stop(tmsg("calling.method should be 'MAD' or 'density' !"))
-  if (calling.method == "mad" & is.null(nrf)) stop(tmsg("If calling.method is set to 'MAD', nrf is required !"))
-  if (!is.null(SER.pen)) if (!is.character(SER.pen)) if (SER.pen <= 0) stop(tmsg("SER.pen should be NULL, a character or an integer/float > 0 !"))
+  if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
+  if (!dir.exists(out.dir)) stop(tmsg(paste0("Output directory [", out.dir, "] does not exist !")), call. = FALSE)
+  if (!(calling.method %in% c("mad", "density"))) stop(tmsg("calling.method should be 'MAD' or 'density' !"), call. = FALSE)
+  if (calling.method == "mad" & is.null(nrf)) stop(tmsg("If calling.method is set to 'MAD', nrf is required !"), call. = FALSE)
+  if (!is.null(SER.pen)) if (!is.character(SER.pen)) if (SER.pen <= 0) stop(tmsg("SER.pen should be NULL, a character or an integer/float > 0 !"), call. = FALSE)
   
   
   ## Extract samplename
@@ -39,9 +39,9 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   genome.pkg <- data$meta$basic$genome.pkg
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
   tmsg(paste0("Loading ", genome.pkg, " ..."))
@@ -60,7 +60,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
       if (force) {
         unlink(odir, recursive = TRUE, force = FALSE)
         dir.create(path = odir, recursive = TRUE, showWarnings = FALSE)
-      } else stop(tmsg(paste0("A [", odir, "] dir already exists !")))
+      } else stop(tmsg(paste0("A [", odir, "] dir already exists !")), call. = FALSE)
     } else dir.create(path = odir, recursive = TRUE, showWarnings = FALSE)
   } else odir <- out.dir
   
@@ -197,7 +197,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
     data$meta$eacon[["recenter-value"]] <- shifter
   } else if (is.null(recenter)) {
     tmsg("No recentering.")
-  } else stop(tmsg("Invalid recentering method called !"))
+  } else stop(tmsg("Invalid recentering method called !"), call. = FALSE)
   
   ## Winsorization (for aesthetics)
   tmsg("Smoothing L2R (for plots)...")
@@ -226,7 +226,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
         SER.pen <- sum(abs(diff(runmed(mydf$l2r[!is.na(mydf$l2r)], smo)))) / SER.pen
         seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = 'Manual', pen.value = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = 5)@cpts))
       }
-    } else stop(tmsg("SER.pen should be a character or a numeric !"))
+    } else stop(tmsg("SER.pen should be a character or a numeric !"), call. = FALSE)
     if (is.character(seg.end)) {
       tmsg(" PELT segmentation failed with this combination of SER.pen and segmentLength options !")
       data$meta$eacon[["small.events.rescue.PELT.penalty"]] <- "ERROR"
@@ -419,15 +419,14 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   
   calling.method <- tolower(calling.method)
   
-  if (!is.list(data)) stop(tmsg("data should be a list !"))
-  if (!dir.exists(out.dir)) stop(tmsg(paste0("Output directory [", out.dir, "] does not exist !")))
-  if (!(calling.method %in% c("mad", "density"))) stop(tmsg("calling.method should be 'MAD' or 'density' !"))
-  if (calling.method == "mad" & is.null(nrf)) stop(tmsg("If calling.method is set to 'MAD', nrf is required !"))
-  if (!is.null(SER.pen)) if (!is.character(SER.pen)) if (SER.pen <= 0) stop(tmsg("SER.pen should be NULL, a character or an integer/float > 0 !"))
+  if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
+  if (!dir.exists(out.dir)) stop(tmsg(paste0("Output directory [", out.dir, "] does not exist !")), call. = FALSE)
+  if (!(calling.method %in% c("mad", "density"))) stop(tmsg("calling.method should be 'MAD' or 'density' !"), call. = FALSE)
+  if (calling.method == "mad" & is.null(nrf)) stop(tmsg("If calling.method is set to 'MAD', nrf is required !"), call. = FALSE)
+  if (!is.null(SER.pen)) if (!is.character(SER.pen)) if (SER.pen <= 0) stop(tmsg("SER.pen should be NULL, a character or an integer/float > 0 !"), call. = FALSE)
   
   # valid.types <- c("WES", "WGS", "OncoScan_CNV")
-  # if(!(data$meta$basic$type %in% valid.types)) stop(tmsg("FACETS is only available for WES data !"))
-  if(!("additional" %in% names(data$data))) stop(tmsg("FACETS is not available for this data source !"))
+  if(!("additional" %in% names(data$data))) stop(tmsg("FACETS is not available for this data source !"), call. = FALSE)
   
   ## Extract samplename
   samplename <- data$meta$basic$samplename
@@ -438,9 +437,9 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   genome.pkg <- data$meta$basic$genome.pkg
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
   tmsg(paste0("Loading ", genome.pkg, " ..."))
@@ -458,7 +457,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
       if (force) {
         unlink(odir, recursive = TRUE, force = FALSE)
         dir.create(path = odir, recursive = TRUE, showWarnings = FALSE)
-      } else stop(tmsg(paste0("A [", odir, "] dir already exists !")))
+      } else stop(tmsg(paste0("A [", odir, "] dir already exists !")), call. = FALSE)
     } else dir.create(path = odir, recursive = TRUE, showWarnings = FALSE)
   } else odir <- out.dir
   
@@ -623,7 +622,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
     data$meta$eacon[["recenter-value"]] <- shifter
   } else if (is.null(recenter)) {
     tmsg("No recentering.")
-  } else stop(tmsg("Invalid recentering method called !"))
+  } else stop(tmsg("Invalid recentering method called !"), call. = FALSE)
   
   ## Winsorization
   tmsg("Smoothing L2R (for plots)...")
@@ -652,7 +651,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
         SER.pen <- sum(abs(diff(runmed(mydf$l2r[!is.na(mydf$l2r)], smo)))) / SER.pen
         seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = 'Manual', pen.value = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = 5)@cpts))
       }
-    } else stop(tmsg("SER.pen should be a character or a numeric !"))
+    } else stop(tmsg("SER.pen should be a character or a numeric !"), call. = FALSE)
     if (is.character(seg.end)) {
       tmsg(" PELT segmentation failed with this combination of SER.pen and segmentLength options !")
       data$meta$eacon[["small.events.rescue.PELT.penalty"]] <- "ERROR"
@@ -845,11 +844,11 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
 
   calling.method <- tolower(calling.method)
   
-  if (!is.list(data)) stop(tmsg("data should be a list !"))
-  if (!dir.exists(out.dir)) stop(tmsg(paste0("Output directory [", out.dir, "] does not exist !")))
-  if (!(calling.method %in% c("mad", "density"))) stop(tmsg("calling.method should be 'MAD' or 'density' !"))
-  if (calling.method == "mad" & is.null(nrf)) stop(tmsg("If calling.method is set to 'MAD', nrf is required !"))
-  if (!is.null(SER.pen)) if (!is.character(SER.pen)) if (SER.pen <= 0) stop(tmsg("SER.pen should be NULL, a character or an integer/float > 0 !"))
+  if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
+  if (!dir.exists(out.dir)) stop(tmsg(paste0("Output directory [", out.dir, "] does not exist !")), call. = FALSE)
+  if (!(calling.method %in% c("mad", "density"))) stop(tmsg("calling.method should be 'MAD' or 'density' !"), call. = FALSE)
+  if (calling.method == "mad" & is.null(nrf)) stop(tmsg("If calling.method is set to 'MAD', nrf is required !"), call. = FALSE)
+  if (!is.null(SER.pen)) if (!is.character(SER.pen)) if (SER.pen <= 0) stop(tmsg("SER.pen should be NULL, a character or an integer/float > 0 !"), call. = FALSE)
   
   ## Extract samplename
   samplename <- data$meta$basic$samplename
@@ -860,9 +859,9 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   genome.pkg <- data$meta$basic$genome.pkg
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
   tmsg(paste0("Loading ", genome.pkg, " ..."))
@@ -880,7 +879,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
       if (force) {
         unlink(odir, recursive = TRUE, force = FALSE)
         dir.create(path = odir, recursive = TRUE, showWarnings = FALSE)
-      } else stop(tmsg(paste0("A [", odir, "] dir already exists !")))
+      } else stop(tmsg(paste0("A [", odir, "] dir already exists !")), call. = FALSE)
     } else dir.create(path = odir, recursive = TRUE, showWarnings = FALSE)
   } else odir <- out.dir
   
@@ -1058,7 +1057,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
     data$meta$eacon[["recenter-value"]] <- shifter
   } else if (is.null(recenter)) {
     tmsg("No recentering.")
-  } else stop(tmsg("Invalid recentering method called !"))
+  } else stop(tmsg("Invalid recentering method called !"), call. = FALSE)
   
   ## Winsorization
   tmsg("Smoothing L2R (for plots)...")
@@ -1087,7 +1086,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
         SER.pen <- sum(abs(diff(runmed(mydf$l2r[!is.na(mydf$l2r)], smo)))) / SER.pen
         seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = 'Manual', pen.value = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = 5)@cpts))
       }
-    } else stop(tmsg("SER.pen should be a character or a numeric !"))
+    } else stop(tmsg("SER.pen should be a character or a numeric !"), call. = FALSE)
     if (is.character(seg.end)) {
       tmsg(" PELT segmentation failed with this combination of SER.pen and segmentLength options !")
       data$meta$eacon[["small.events.rescue.PELT.penalty"]] <- "ERROR"
@@ -1259,10 +1258,10 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
 
 ## Run segmentation, from a file
 Segment.ff <- function(RDS.file = NULL, segmenter = "ASCAT", ...) {
-  if (is.null(RDS.file)) stop(tmsg("A RDS file is needed !"))
+  if (is.null(RDS.file)) stop(tmsg("A RDS file is needed !"), call. = FALSE)
   valid.segmenters <- c("ASCAT", "FACETS", "SEQUENZA")
-  if (!(toupper(segmenter) %in% valid.segmenters)) stop(tmsg(paste0("Segmenter should be one of : ", paste0(valid.segmenters, collapse = ", "))))
-  if (!file.exists(RDS.file)) stop(tmsg(paste0("Could not find RDS file ", RDS.file, " !")))
+  if (!(toupper(segmenter) %in% valid.segmenters)) stop(tmsg(paste0("Segmenter should be one of : ", paste0(valid.segmenters, collapse = ", "))), call. = FALSE)
+  if (!file.exists(RDS.file)) stop(tmsg(paste0("Could not find RDS file ", RDS.file, " !")), call. = FALSE)
 
   ## Data loading
   tmsg(paste0("Loading data from ", RDS.file, " ..."))
@@ -1273,7 +1272,7 @@ Segment.ff <- function(RDS.file = NULL, segmenter = "ASCAT", ...) {
 
 ## Run Segment.ff() in batch mode
 Segment.ff.Batch <- function (RDS.files = list.files(path = getwd(), pattern = "_processed.RDS$", full.names = TRUE, recursive = TRUE, ignore.case = TRUE, include.dirs = FALSE), segmenter = "ASCAT", nthread = 1, cluster.type = "PSOCK", ...) {
-  if (length(RDS.files) == 0) stop("A list of RDS files is required !")
+  if (length(RDS.files) == 0) stop("A list of RDS files is required !", call. = FALSE)
   message("Running EaCoN.Segment.ff() in batch mode ...")
   message(paste0(" Found ", length(RDS.files), " files to process."))
   current.bitmapType <- getOption("bitmapType")
@@ -1303,13 +1302,13 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
 
   
   ## CHECKS
-  if (!is.list(data)) stop(tmsg("data should be a list !"))
+  if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   odir <- paste0(out.dir, "/ASCAT/ASCN")
-  if (any(is.null(c(data$data$Tumor_LogR_segmented, data$data$Tumor_BAF_segmented)))) stop(tmsg("No segmentation data found in the provided RDS file !"))
+  if (any(is.null(c(data$data$Tumor_LogR_segmented, data$data$Tumor_BAF_segmented)))) stop(tmsg("No segmentation data found in the provided RDS file !"), call. = FALSE)
   if (dir.exists(odir)) {
     if (force) {
       unlink(odir, recursive = TRUE, force = FALSE)
-    } else stop(tmsg(paste0("Output directory [", out.dir, "] already exists !")))
+    } else stop(tmsg(paste0("Output directory [", out.dir, "] already exists !")), call. = FALSE)
   }
   
   samplename <- data$meta$basic$samplename
@@ -1318,9 +1317,9 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
   genome.pkg <- data$meta$basic$genome.pkg
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
   tmsg(paste0("Loading ", genome.pkg, " ..."))
@@ -1595,13 +1594,13 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
 
   
   ## CHECKS
-  if (!is.list(data)) stop(tmsg("data should be a list !"))
+  if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   odir <- paste0(out.dir, "/FACETS/ASCN")
-  if (any(is.null(c(data$data$Tumor_LogR_segmented, data$data$Tumor_BAF_segmented)))) stop(tmsg("No segmentation data found in the provided RDS file !"))
+  if (any(is.null(c(data$data$Tumor_LogR_segmented, data$data$Tumor_BAF_segmented)))) stop(tmsg("No segmentation data found in the provided RDS file !"), call. = FALSE)
   if (dir.exists(odir)) {
     if (force) {
       unlink(odir, recursive = TRUE, force = FALSE)
-    } else stop(tmsg(paste0("Output directory [", out.dir, "] already exists !")))
+    } else stop(tmsg(paste0("Output directory [", out.dir, "] already exists !")), call. = FALSE)
   }
   
   samplename <- data$meta$basic$samplename
@@ -1610,9 +1609,9 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
   genome.pkg <- data$meta$basic$genome.pkg
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
   tmsg(paste0("Loading ", genome.pkg, " ..."))
@@ -1775,17 +1774,17 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
   # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
   
   ## CHECKS
-  if (!is.list(data)) stop(tmsg("data should be a list !"))
+  if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   odir <- paste0(out.dir, "/SEQUENZA/ASCN")
-  if (any(is.null(c(data$data$Tumor_LogR_segmented, data$data$Tumor_BAF_segmented)))) stop(tmsg("No segmentation data found in the provided RDS file !"))
+  if (any(is.null(c(data$data$Tumor_LogR_segmented, data$data$Tumor_BAF_segmented)))) stop(tmsg("No segmentation data found in the provided RDS file !"), call. = FALSE)
   if (dir.exists(odir)) {
     if (force) {
       unlink(odir, recursive = TRUE, force = FALSE)
-    } else stop(tmsg(paste0("Output directory [", out.dir, "] already exists !")))
+    } else stop(tmsg(paste0("Output directory [", out.dir, "] already exists !")), call. = FALSE)
   }
   
-  if (!is.list(data)) stop(tmsg("data should be a list !"))
-  if (any(is.null(c(data$data$Tumor_LogR_segmented, data$data$Tumor_BAF_segmented)))) stop(tmsg("No segmentation data found in the provided RDS file !"))
+  if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
+  if (any(is.null(c(data$data$Tumor_LogR_segmented, data$data$Tumor_BAF_segmented)))) stop(tmsg("No segmentation data found in the provided RDS file !"), call. = FALSE)
   
   samplename <- data$meta$basic$samplename
   
@@ -1794,9 +1793,9 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
   genome.pkg <- data$meta$basic$genome.pkg
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
   tmsg(paste0("Loading ", genome.pkg, " ..."))
@@ -1843,7 +1842,6 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
   confint <- sequenza::get.ci(CP)
   ploidy   <- confint$max.ploidy
   cellularity <- confint$max.cellularity
-  # print(paste0("PLOIDY : ", ploidy, " ; CELLULARITY : ", cellularity))
   rm(CP)
   
   ## Modeling ASCN
@@ -1967,10 +1965,10 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
 
 ## Run ASCN segmentation, from a file
 ASCN.ff <- function(RDS.file = NULL, ...) {
-  if (is.null(RDS.file)) stop(tmsg("A RDS file is needed !"))
-  if (!file.exists(RDS.file)) stop(tmsg(paste0("Could not find RDS file ", RDS.file, " !")))
-  # if (!(toupper(segmenter) %in% valid.segmenters)) stop(tmsg(paste0("Segmenter should be one of : ", paste0(valid.segmenters, collapse = ", "))))
-  ## Data loading
+  if (is.null(RDS.file)) stop(tmsg("A RDS file is needed !"), call. = FALSE)
+  if (!file.exists(RDS.file)) stop(tmsg(paste0("Could not find RDS file ", RDS.file, " !")), call. = FALSE)
+
+    ## Data loading
   tmsg(paste0("Loading data from ", RDS.file, " ..."))
   my.data <- readRDS(RDS.file)
   segmenter <- toupper(my.data$meta$eacon$segmenter)
@@ -1984,7 +1982,7 @@ ASCN.ff <- function(RDS.file = NULL, ...) {
 
 ## Run ASCN.ff() in batch mode
 ASCN.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern = "\\.SEG\\..*\\.RDS$", full.names = TRUE, recursive = TRUE, ignore.case = TRUE, include.dirs = FALSE), nthread = 1, cluster.type = "PSOCK", ...) {
-  if (length(RDS.files) == 0) stop("A list of RDS files is required !")
+  if (length(RDS.files) == 0) stop("A list of RDS files is required !", call. = FALSE)
   message("Running EaCoN.ASCN.ff() in batch mode ...")
   message(paste0(" Found ", length(RDS.files), " files to process."))
   current.bitmapType <- getOption("bitmapType")
@@ -2017,7 +2015,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
   
   oridir <- getwd()
   
-  if (!is.list(data)) stop(tmsg("data should be a list !"))
+  if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   
   valid.genomes <- get.valid.genomes()
   my.ascat.seg <- data$data
@@ -2041,7 +2039,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     }
   } else if (!file.exists(refGene.table)) {
     ## A refGene was provided, but could not be found : stopping !
-    stop(tmsg(paste0("Could not open file ", refGene.table, " !")))
+    stop(tmsg(paste0("Could not open file ", refGene.table, " !")), call. = FALSE)
   } else {
     ## A refGene was provided and file exists : loading !
     rg.df <- read.table.fast(file = refGene.table)
@@ -2056,7 +2054,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     gen.df <- gen.df[order(gen.df$chrN, gen.df$start, gen.df$end),]
   }
   
-  if (!("cbs" %in% names(data))) stop(tmsg("CBS slot not found in RDS object ! Are you sure it is a valid one ?"))
+  if (!("cbs" %in% names(data))) stop(tmsg("CBS slot not found in RDS object ! Are you sure it is a valid one ?"), call. = FALSE)
   cbs.df <- foreach::foreach(seg = 1:nrow(data$cbs$cut), .combine = "rbind") %do% {
     ingenz <- if(exists("gen.df")) gen.df$symbol[gen.df$chrN == data$cbs$cut$Chr[seg] & gen.df$start <= data$cbs$cut$End[seg] & gen.df$end >= data$cbs$cut$Start[seg]] else ingenz <- "NA"
     ingenz.len <- if(exists("gen.df")) length(ingenz) else "NA"
@@ -2567,8 +2565,8 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
 
 ## Run EaCoN.Annotate(), from a file
 Annotate.ff <- function (RDS.file = NULL, ...) {
-  if (is.null(RDS.file)) stop(tmsg("A RDS file is needed !"))
-  if (!file.exists(RDS.file)) stop(tmsg(paste0("Could not find RDS file ", RDS.file, " !")))
+  if (is.null(RDS.file)) stop(tmsg("A RDS file is needed !"), call. = FALSE)
+  if (!file.exists(RDS.file)) stop(tmsg(paste0("Could not find RDS file ", RDS.file, " !")), call. = FALSE)
   ## Data loading
   tmsg(paste0("Loading data from ", RDS.file, " ..."))
   my.data <- readRDS(RDS.file)
@@ -2578,7 +2576,7 @@ Annotate.ff <- function (RDS.file = NULL, ...) {
 ## Run EaCoN.Annotate() in batch mode
 Annotate.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern = "\\.SEG\\..*\\.RDS$", full.names = TRUE, recursive = TRUE, ignore.case = TRUE, include.dirs = FALSE), nthread = 1, cluster.type = "PSOCK", ...) {
 
-  if (length(RDS.files) == 0) stop("A list of RDS files is required !")
+  if (length(RDS.files) == 0) stop("A list of RDS files is required !", call. = FALSE)
   message("Running Annotate.ff() in batch mode ...")
   message(paste0(" Found ", length(RDS.files), " files to process."))
   current.bitmapType <- getOption("bitmapType")
@@ -2595,11 +2593,8 @@ Annotate.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern = "
 }
 
 Annotate.solo <- function(cbs.file = NULL, genome = NULL, ldb = "/mnt/data_cigogne/bioinfo/") {
-  if (is.null(genome)) stop(tmsg("A genome is required !"))
-  # cbs.cut.file <- list.files(path = sample.dir, pattern = paste0(samplename, "\\.Cut\\.cbs$"), full.names = TRUE, recursive = FALSE)
-  # if (length(cbs.cut.file) == 0) stop(paste0("Could not find a valid Cut CBS file for ", sample.dir))
-  # if (length(cbs.cut.file) > 1) stop(paste0("Found multiple Cut CBS files for ", sample.dir))
-  if (!file.exists(cbs.file)) stop(tmsg(paste0("Could not find CBS file [", cbs.file, "] !")))
+  if (is.null(genome)) stop(tmsg("A genome is required !"), call. = FALSE)
+  if (!file.exists(cbs.file)) stop(tmsg(paste0("Could not find CBS file [", cbs.file, "] !")), call. = FALSE)
   cbs.df <- read.table.fast(cbs.file)
   self.pkg.name <- "EaCoN"
   data(list = genome, package = self.pkg.name, envir = environment())

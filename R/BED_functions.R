@@ -1,37 +1,37 @@
 BedGC.fasta <- function(binned.bed.file = NULL, genome = "hg19", fasta = NULL, na.to0 = TRUE, nt.add = c(0,50,100, 250, 500, 1000, 2500, 5000), out.dir = getwd(), return.data = FALSE, nthread = 1) {
 
-  print("WARNING ! On hg19, this function consumes 3 GB per thread (to add to your current R session) !")
-  print("When possible, prefer the BedGC.chr() function that performs the same task using sequences as single-chromosome FASTA files. This consumes only 0.3 GB of RAM per thread.")
-  if (is.null(binned.bed.file)) stop("A BED file is required !")
-  if (!file.exists(binned.bed.file)) stop("Could not find the BED file !")
-  if (is.null(fasta)) stop("A FASTA file is required !")
-  if (!file.exists(fasta)) stop("Could not find FASTA file !")
-  if (!all(is.numeric(nt.add))) stop("nt.add must be a numeric vector !")
-  if (is.null(out.dir)) print("NOTE : Checked / cleaned bed will be written in the same directory as source.")
-  if (!file.exists(out.dir)) stop("Could not find the output directory !")
-  if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !")
+  message("WARNING ! On hg19, this function consumes 3 GB per thread (to add to your current R session) !")
+  message("When possible, prefer the BedGC.chr() function that performs the same task using sequences as single-chromosome FASTA files. This consumes only 0.3 GB of RAM per thread.")
+  if (is.null(binned.bed.file)) stop("A BED file is required !", call. = FALSE)
+  if (!file.exists(binned.bed.file)) stop("Could not find the BED file !", call. = FALSE)
+  if (is.null(fasta)) stop("A FASTA file is required !", call. = FALSE)
+  if (!file.exists(fasta)) stop("Could not find FASTA file !", call. = FALSE)
+  if (!all(is.numeric(nt.add))) stop("nt.add must be a numeric vector !", call. = FALSE)
+  if (is.null(out.dir)) message("NOTE : Checked / cleaned bed will be written in the same directory as source.")
+  if (!file.exists(out.dir)) stop("Could not find the output directory !", call. = FALSE)
+  if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !", call. = FALSE)
 
-  print("Loading genome information ...")
+  message("Loading genome information ...")
   data(list = genome, package = "chromosomes", envir = environment())
 
-  print("Loading BED ...")
+  message("Loading BED ...")
   bed.data <- read.table(file = binned.bed.file, header = FALSE, sep = "\t", comment.char = "#", stringsAsFactors = FALSE)
-  if (ncol(bed.data) < 3) stop("BED file must contain at least 3 columns !")
+  if (ncol(bed.data) < 3) stop("BED file must contain at least 3 columns !", call. = FALSE)
   bed.data <- bed.data[,1:3]
   colnames(bed.data) <- c("chr", "start", "end")
-  if (!all(unique(bed.data$chr) %in% cs$chromosomes$chrom)) stop(paste0("BED file contains chromosome(s) not defined in the ", genome, " genome !"))
+  if (!all(unique(bed.data$chr) %in% cs$chromosomes$chrom)) stop(paste0("BED file contains chromosome(s) not defined in the ", genome, " genome !"), call. = FALSE)
 
   klen <- Biostrings::fasta.seqlengths(filepath = fasta)
   kdata <- Biostrings::readDNAStringSet(filepath = fasta, format = "fasta")
 
-  print("Starting cluster ...")
+  message("Starting cluster ...")
   cl <- parallel::makeCluster(spec = nthread, type = "PSOCK")
   doParallel::registerDoParallel(cl)
 
   `%dopar%` <- foreach::"%dopar%"
   a <- 0
   Agcpc <- foreach::foreach(a = nt.add, .combine = "cbind") %dopar% {
-    print(paste0("Computing GC for frame +", a, " bp"))
+    message(paste0("Computing GC for frame +", a, " bp"))
 
     querystart <- bed.data$start - a
     queryend <- bed.data$end + a
@@ -52,7 +52,7 @@ BedGC.fasta <- function(binned.bed.file = NULL, genome = "hg19", fasta = NULL, n
     return(gcpc)
   }
 
-  print("Stopping cluster ...")
+  message("Stopping cluster ...")
   parallel::stopCluster(cl)
 
   ## Building the output object
@@ -60,34 +60,34 @@ BedGC.fasta <- function(binned.bed.file = NULL, genome = "hg19", fasta = NULL, n
   out.df <- cbind(bed.data, Agcpc)
   outname <- paste0(out.dir, "/", sub(pattern = "\\.bed$", replacement = ".gc", x = basename(binned.bed.file), ignore.case = TRUE))
   write.table.fast(x = out.df, file = outname)
-  print("Done.")
+  message("Done.")
   if(return.data) return(out.df) else return(NULL)
 }
 
 BedGC.fasta.chr <- function(binned.bed.file = NULL, genome = "hg19", fasta.dir = NULL, na.to0 = TRUE, nt.add = c(0,50,100, 250, 500, 1000, 2500, 5000), out.dir = getwd(), return.data = FALSE, nthread = 2) {
 
-  if (is.null(binned.bed.file)) stop("A BED file is required !")
-  if (!file.exists(binned.bed.file)) stop("Could not find the BED file !")
-  if (is.null(fasta.dir)) stop("A directory containing indexed FASTA file(s) for each chromosome is required !")
-  if (!file.exists(fasta.dir)) stop("Could not find the FASTA directory !")
-  if (!file.info(fasta.dir)$isdir) stop("fasta.dir is not a directory !")
-  if (!all(is.numeric(nt.add))) stop("nt.add must be a numeric vector !")
-  if (is.null(out.dir)) stop("An output directory is required !")
-  if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !")
+  if (is.null(binned.bed.file)) stop("A BED file is required !", call. = FALSE)
+  if (!file.exists(binned.bed.file)) stop("Could not find the BED file !", call. = FALSE)
+  if (is.null(fasta.dir)) stop("A directory containing indexed FASTA file(s) for each chromosome is required !", call. = FALSE)
+  if (!file.exists(fasta.dir)) stop("Could not find the FASTA directory !", call. = FALSE)
+  if (!file.info(fasta.dir)$isdir) stop("fasta.dir is not a directory !", call. = FALSE)
+  if (!all(is.numeric(nt.add))) stop("nt.add must be a numeric vector !", call. = FALSE)
+  if (is.null(out.dir)) stop("An output directory is required !", call. = FALSE)
+  if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !", call. = FALSE)
 
-  print("Loading genome information ...")
+  message("Loading genome information ...")
   data(list = genome, package = "chromosomes", envir = environment())
 
-  print("Loading BED ...")
+  message("Loading BED ...")
   bed.data <- read.table(file = binned.bed.file, header = FALSE, sep = "\t", comment.char = "#", stringsAsFactors = FALSE)
-  if (ncol(bed.data) < 3) stop("BED file must contain at least 3 columns !")
+  if (ncol(bed.data) < 3) stop("BED file must contain at least 3 columns !", call. = FALSE)
   bed.data <- bed.data[,1:3]
   colnames(bed.data) <- c("chr", "start", "end")
-  if (!all(unique(bed.data$chr) %in% cs$chromosomes$chrom)) stop(paste0("BED file contains chromosome(s) not defined in the ", genome, " genome !"))
+  if (!all(unique(bed.data$chr) %in% cs$chromosomes$chrom)) stop(paste0("BED file contains chromosome(s) not defined in the ", genome, " genome !"), call. = FALSE)
 
   kcoords <- sapply(unique(bed.data$chr), function(k) { return(bed.data[bed.data$chr == k, ]) }, simplify = FALSE)
 
-  print("Starting cluster ...")
+  message("Starting cluster ...")
   # require(foreach)
   # require(doParallel)
   cl <- parallel::makeCluster(spec = nthread, type = "PSOCK")
@@ -98,13 +98,13 @@ BedGC.fasta.chr <- function(binned.bed.file = NULL, genome = "hg19", fasta.dir =
   `%dopar%` <- foreach::"%dopar%"
 
   Agcpc <- foreach(a=nt.add, .combine = "cbind") %do% {
-    print(paste0("Computing GC for frame +", a, " bp"))
+    message(paste0("Computing GC for frame +", a, " bp"))
 
     k <- 0
     gcpc <- foreach(k=kcoords, .combine = "c", .noexport = c("kcoords", "bed.data")) %dopar% {
       kchr <- unique(k$chr)
       kfafile <- paste0(fasta.dir, "/", kchr, ".fa")
-      if (!file.exists(kfafile)) stop(paste0("Could ont find : ", kfafile))
+      if (!file.exists(kfafile)) stop(paste0("Could ont find : ", kfafile), call. = FALSE)
       cat("Loading sequence for", kchr, "...\n")
       # require(Biostrings)
       klen <- Biostrings::fasta.seqlengths(filepath = kfafile)
@@ -127,7 +127,7 @@ BedGC.fasta.chr <- function(binned.bed.file = NULL, genome = "hg19", fasta.dir =
     if (na.to0) gcpc[is.na(gcpc)] <- 0
     return(gcpc)
   }
-  print("Stopping cluster ...")
+  message("Stopping cluster ...")
   parallel::stopCluster(cl)
   ## Building the output object
   # colnames(Agcpc) <- paste0("GC", nt.add, "b")
@@ -137,36 +137,34 @@ BedGC.fasta.chr <- function(binned.bed.file = NULL, genome = "hg19", fasta.dir =
   outname <- paste0(out.dir,  "/", sub(pattern = "\\.bed$", replacement = "_GC.RDS", x = basename(binned.bed.file), ignore.case = TRUE))
   saveRDS(out.df, file = outname, compress = "bzip2")
   if(return.data) return(out.df) else return(NULL)
-  print("Done.")
+  message("Done.")
   return(cbind(bed.data, Agcpc))
 }
 
 BedGC.R <- function(binned.bed.file = NULL, human.genome.build = "hg19", na.to0 = TRUE, nt.add = c(0,50,100, 250, 500, 1000, 2500, 5000), out.dir = getwd(), return.data = FALSE, nthread = 1) {
 
-  print("WARNING ! On hg19, this function consumes 3 GB per thread (to add to your current R session) !")
-  print("When possible, prefer the BedGC.chr() function that performs the same task using sequences as single-chromosome FASTA files. This consumes only 0.3 GB of RAM per thread.")
-  if (is.null(binned.bed.file)) stop("A BED file is required !")
-  if (is.null(human.genome.build)) stop("A genome name is required !")
-  if (!file.exists(binned.bed.file)) stop("Could not find the BED file !")
-  # if (is.null(fasta)) stop("A FASTA file is required !")
-  # if (!file.exists(fasta)) stop("Could not find FASTA file !")
-  if (!all(is.numeric(nt.add))) stop("nt.add must be a numeric vector !")
-  if (is.null(out.dir)) print("NOTE : Checked / cleaned bed will be written in the same directory as source.")
-  if (!file.exists(out.dir)) stop("Could not find the output directory !")
-  if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !")
+  message("WARNING ! On hg19, this function consumes 3 GB per thread (to add to your current R session) !")
+  message("When possible, prefer the BedGC.chr() function that performs the same task using sequences as single-chromosome FASTA files. This consumes only 0.3 GB of RAM per thread.")
+  if (is.null(binned.bed.file)) stop("A BED file is required !", call. = FALSE)
+  if (is.null(human.genome.build)) stop("A genome name is required !", call. = FALSE)
+  if (!file.exists(binned.bed.file)) stop("Could not find the BED file !", call. = FALSE)
+  if (!all(is.numeric(nt.add))) stop("nt.add must be a numeric vector !", call. = FALSE)
+  if (is.null(out.dir)) message("NOTE : Checked / cleaned bed will be written in the same directory as source.")
+  if (!file.exists(out.dir)) stop("Could not find the output directory !", call. = FALSE)
+  if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !", call. = FALSE)
 
-  print("Loading genome information ...")
+  message("Loading genome information ...")
   data(list = human.genome.build, package = "chromosomes", envir = environment())
 
   if (human.genome.build == "hg19") genome.package <- "BSgenome.Hsapiens.UCSC.hg19"
   if (human.genome.build == "hg38") genome.package <- "BSgenome.Hsapiens.UCSC.hg38"
 
-  print("Loading BED ...")
+  message("Loading BED ...")
   bed.data <- read.table(file = binned.bed.file, header = FALSE, sep = "\t", comment.char = "#", stringsAsFactors = FALSE)
-  if (ncol(bed.data) < 3) stop("BED file must contain at least 3 columns !")
+  if (ncol(bed.data) < 3) stop("BED file must contain at least 3 columns !", call. = FALSE)
   bed.data <- bed.data[,1:3]
   colnames(bed.data) <- c("chr", "start", "end")
-  if (!all(unique(bed.data$chr) %in% cs$chromosomes$chrom)) stop(paste0("BED file contains chromosome(s) not defined in the ", genome, " genome !"))
+  if (!all(unique(bed.data$chr) %in% cs$chromosomes$chrom)) stop(paste0("BED file contains chromosome(s) not defined in the ", genome, " genome !"), call. = FALSE)
 
   require(package = genome.package, character.only = TRUE)
   organisms <- ls(paste0("package:",genome.package))
@@ -174,14 +172,14 @@ BedGC.R <- function(binned.bed.file = NULL, human.genome.build = "hg19", na.to0 
 
   klen <- GenomeInfoDb::seqlengths(Hsapiens)
 
-  print("Starting cluster ...")
+  message("Starting cluster ...")
   cl <- parallel::makeCluster(spec = nthread, type = "PSOCK")
   doParallel::registerDoParallel(cl)
 
   `%dopar%` <- foreach::"%dopar%"
   a <- 0
   Agcpc <- foreach::foreach(a = nt.add, .combine = "cbind") %dopar% {
-    print(paste0("Computing GC for frame +", a, " bp"))
+    message(paste0("Computing GC for frame +", a, " bp"))
 
     Kgcpc <- foreach::foreach(k = unique(bed.data$chr), .combine = "rbind") %dopar% {
       kbed <- bed.data[bed.data$chr == k,]
@@ -206,7 +204,7 @@ BedGC.R <- function(binned.bed.file = NULL, human.genome.build = "hg19", na.to0 
     return(Kgcpc)
   }
 
-  print("Stopping cluster ...")
+  message("Stopping cluster ...")
   parallel::stopCluster(cl)
 
   ## Building the output object
@@ -214,17 +212,17 @@ BedGC.R <- function(binned.bed.file = NULL, human.genome.build = "hg19", na.to0 
   out.df <- cbind(bed.data, Agcpc)
   outname <- paste0(out.dir, "/", sub(pattern = "\\.bed$", replacement = ".gc", x = basename(binned.bed.file), ignore.case = TRUE))
   write.table.fast(x = out.df, file = outname)
-  print("Done.")
+  message("Done.")
   if(return.data) return(out.df) else return(NULL)
 }
 
 BedCheck <- function(bed.file = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", out.dir = getwd(), return.data = FALSE) {
 
-  if (is.null(bed.file)) stop("A BED file is required !")
-  if (!file.exists(bed.file)) stop("Could not find the BED file !")
-  if (is.null(out.dir)) print("NOTE : Checked / cleaned bed will be written in the same directory as source.") else {
-    if (!file.exists(out.dir)) stop("Could not find the output directory !")
-    if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !")
+  if (is.null(bed.file)) stop("A BED file is required !", call. = FALSE)
+  if (!file.exists(bed.file)) stop("Could not find the BED file !", call. = FALSE)
+  if (is.null(out.dir)) message("NOTE : Checked / cleaned bed will be written in the same directory as source.") else {
+    if (!file.exists(out.dir)) stop("Could not find the output directory !", call. = FALSE)
+    if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !", call. = FALSE)
   }
   message("Checking BED ...")
   # data(list = genome, package = "chromosomes", envir = environment())
@@ -234,12 +232,12 @@ BedCheck <- function(bed.file = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC.hg19"
   genome <- BSgenome::providerVersion(BSg.obj)
 
   bed.data <- read.table(file = bed.file, header = FALSE, sep = "\t", comment.char = "#", stringsAsFactors = TRUE)
-  if (ncol(bed.data) < 3) stop("BED file must contain at least 3 columns !")
+  if (ncol(bed.data) < 3) stop("BED file must contain at least 3 columns !", call. = FALSE)
   bed.data <- bed.data[,1:3]
 
   colnames(bed.data) <- c("chr", "start", "end")
 
-  if (!all(unique(bed.data$chr) %in% BSgenome::seqnames(BSg.obj))) stop(paste0("BED file contains chromosome(s) not defined in the ", genome.pkg, " genome !"))
+  if (!all(unique(bed.data$chr) %in% BSgenome::seqnames(BSg.obj))) stop(paste0("BED file contains chromosome(s) not defined in the ", genome.pkg, " genome !"), call. = FALSE)
 
   myGR <- GenomicRanges::GRanges(bed.data)
 

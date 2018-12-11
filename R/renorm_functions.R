@@ -69,12 +69,12 @@ renorm.go <- function(input.data = NULL, renorm.rda = NULL, track.type = "GC", s
     rn.arraytype <- renorm.data$info$value[renorm.data$info$key == "array_type"]
     rn.genome <- renorm.data$info$value[renorm.data$info$key == "genome-version"]
     rn.track.type <- renorm.data$info$value[renorm.data$info$key == "track_type"]
-    if ((rn.track.type != track.type) | (rn.arraytype != arraytype) | (rn.genome != genome)) stop(tmsg(paste0("Provided renormalization pack is not as intended ! Expected [", track.type, ", ", arraytype, ", ", genome, "], got [", rn.track.type, ", ", rn.arraytype, ", ", rn.genome, "] !")))
+    if ((rn.track.type != track.type) | (rn.arraytype != arraytype) | (rn.genome != genome)) stop(tmsg(paste0("Provided renormalization pack is not as intended ! Expected [", track.type, ", ", arraytype, ", ", genome, "], got [", rn.track.type, ", ", rn.arraytype, ", ", rn.genome, "] !")), call. = FALSE)
   } else {
     RN.pkg.name <- "affy.CN.norm.data"
-    if (!(RN.pkg.name %in% installed.packages())) stop(tmsg(paste0("Package ", RN.pkg.name, " not found !")))
+    if (!(RN.pkg.name %in% installed.packages())) stop(tmsg(paste0("Package ", RN.pkg.name, " not found !")), call. = FALSE)
     RN.file <- system.file(paste0("data/", arraytype, ".", genome, ".", track.type, ".rda"), package = RN.pkg.name)
-    if (RN.file == "") stop(tmsg(paste0("Could not find a ", track.type, " data package for [", arraytype, ", ", genome, "] in package '", RN.pkg.name, "' ! Please build your own Wave data pack with ", RN.pkg.name, "::affy.wave.compute() and submit it using the 'renorm.rda' option.")))
+    if (RN.file == "") stop(tmsg(paste0("Could not find a ", track.type, " data package for [", arraytype, ", ", genome, "] in package '", RN.pkg.name, "' ! Please build your own Wave data pack with ", RN.pkg.name, "::affy.wave.compute() and submit it using the 'renorm.rda' option.")), call. = FALSE)
     data(list = paste0(arraytype, ".", genome, ".", track.type), package = RN.pkg.name, envir = environment())
   }
   # print(str(RNdata))
@@ -82,7 +82,7 @@ renorm.go <- function(input.data = NULL, renorm.rda = NULL, track.type = "GC", s
   RNdata <- renorm.data$tracks[renorm.data$tracks$ProbeSetName %in% input.data$ProbeSetName,]
   input.data <- input.data[input.data$ProbeSetName %in% RNdata$ProbeSetName,]
   # print(str(input.data))
-  if (!all(unique(RNdata$ProbeSetName == input.data$ProbeSetName))) stop(tmsg(paste0(track.type, " data and L2R data are not synched, or ordered differently !")))
+  if (!all(unique(RNdata$ProbeSetName == input.data$ProbeSetName))) stop(tmsg(paste0(track.type, " data and L2R data are not synched, or ordered differently !")), call. = FALSE)
   # ndata <- data.frame(chr = paste0("chr", input.data$chrs), start = input.data$pos, end = input.data$pos, name = rownames(input.data), RNdata[,-c(1:4), drop = FALSE], stringsAsFactors = FALSE)
   ndata <- data.frame(chr = input.data$chr, start = input.data$pos, end = input.data$pos, name = input.data$ProbeSetName, RNdata[,-c(1:4), drop = FALSE], stringsAsFactors = FALSE)
   rm(RNdata, renorm.data)

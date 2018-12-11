@@ -16,18 +16,18 @@ BINpack.Maker <- function(bed.file = NULL, bin.size = 50, genome.pkg = "BSgenome
   # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
   
     ## Checks
-  if (is.null(bed.file)) stop("A BED file is required !")
-  if (!file.exists(bed.file)) stop("Could not find the BED file !")
+  if (is.null(bed.file)) stop("A BED file is required !", call. = FALSE)
+  if (!file.exists(bed.file)) stop("Could not find the BED file !", call. = FALSE)
   if (is.null(out.dir)) message("NOTE : Checked / cleaned bed will be written in the same directory as source.") else {
-    if (!file.exists(out.dir)) stop("Could not find the output directory !")
-    if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !")
+    if (!file.exists(out.dir)) stop("Could not find the output directory !", call. = FALSE)
+    if (!file.info(out.dir)$isdir) stop("out.dir is not a directory !", call. = FALSE)
   }
-  if (is.null(genome.pkg)) stop(tmsg("A BSgenome package name is required !"))
+  if (is.null(genome.pkg)) stop(tmsg("A BSgenome package name is required !"), call. = FALSE)
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
   
@@ -94,18 +94,18 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
   # require(magrittr)
   
   ## CHECKS (files/parameters)
-  if (is.null(BINpack)) stop(tmsg("A BINpack file is required !"))
-  if (!file.exists(BINpack)) stop(tmsg("Could not find the BINpack file !"))
-  if (is.null(refBAM)) stop(tmsg("A reference BAM file is required !"))
-  if (!file.exists(refBAM)) stop(tmsg("Could not find the refBAM file !"))
-  if (is.null(testBAM)) stop(tmsg("A test BAM file is required !"))
-  if (!file.exists(testBAM)) stop(tmsg("Could not find the testBAM file !"))
-  if (!is.numeric(Q)) stop(tmsg("Q must be numeric !"))
-  if (is.null(out.dir)) stop(tmsg("An output directory is required !"))
-  if (!file.exists(out.dir)) stop(tmsg("Could not find the output directory !"))
-  if (!file.info(out.dir)$isdir) stop(tmsg("out.dir is not a directory"))
-  if (!return.data & !write.data) stop(tmsg("Data should be returned and/or written on disk, but not none !"))
-  if (Q < 0) stop(tmsg("Q should be positive !"))
+  if (is.null(BINpack)) stop(tmsg("A BINpack file is required !"), call. = FALSE)
+  if (!file.exists(BINpack)) stop(tmsg("Could not find the BINpack file !"), call. = FALSE)
+  if (is.null(refBAM)) stop(tmsg("A reference BAM file is required !"), call. = FALSE)
+  if (!file.exists(refBAM)) stop(tmsg("Could not find the refBAM file !"), call. = FALSE)
+  if (is.null(testBAM)) stop(tmsg("A test BAM file is required !"), call. = FALSE)
+  if (!file.exists(testBAM)) stop(tmsg("Could not find the testBAM file !"), call. = FALSE)
+  if (!is.numeric(Q)) stop(tmsg("Q must be numeric !"), call. = FALSE)
+  if (is.null(out.dir)) stop(tmsg("An output directory is required !"), call. = FALSE)
+  if (!file.exists(out.dir)) stop(tmsg("Could not find the output directory !"), call. = FALSE)
+  if (!file.info(out.dir)$isdir) stop(tmsg("out.dir is not a directory"), call. = FALSE)
+  if (!return.data & !write.data) stop(tmsg("Data should be returned and/or written on disk, but not none !"), call. = FALSE)
+  if (Q < 0) stop(tmsg("Q should be positive !"), call. = FALSE)
   
   ## WARNINGS
   if (return.data) tmsg("Data will be returned.")
@@ -122,12 +122,12 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
   genome.pkg <- renorm.data$info$value[renorm.data$info$key == "genome-package"]
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
-  if (dir.exists(samplename)) { if (!force) stop(tmsg(paste0("A [", samplename, '] dir already exists !'))) else unlink(samplename, recursive = TRUE, force = FALSE) }
+  if (dir.exists(samplename)) { if (!force) stop(tmsg(paste0("A [", samplename, '] dir already exists !')), call. = FALSE) else unlink(samplename, recursive = TRUE, force = FALSE) }
   
   ### Loading genome
   tmsg(paste0("Loading ", genome.pkg, " ..."))
@@ -145,10 +145,10 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
   renorm.data$tracks <- NULL
   gc()
   
-  if (!all(names(refBAM.h[[1]]$targets) %in% names(testBAM.h[[1]]$targets))) stop(tmsg("Reference BAM and Test BAM are not compatible (different chr names) !"))
-  if (!all(bed.data$chr %in% names(refBAM.h[[1]]$targets))) stop(tmsg("Reference BAM and BED are not compatible (different chr names) !"))
-  if (!all(unique(bed.data$chr) %in% names(testBAM.h[[1]]$targets))) stop(tmsg("Test BAM and BED are not compatible (different chr names) !"))
-  if (!all(unique(bed.data$chr) %in% BSgenome::seqnames(BSg.obj))) stop(tmsg("BED and BSgenome are not compatible (different chr names) !"))
+  if (!all(names(refBAM.h[[1]]$targets) %in% names(testBAM.h[[1]]$targets))) stop(tmsg("Reference BAM and Test BAM are not compatible (different chr names) !"), call. = FALSE)
+  if (!all(bed.data$chr %in% names(refBAM.h[[1]]$targets))) stop(tmsg("Reference BAM and BED are not compatible (different chr names) !"), call. = FALSE)
+  if (!all(unique(bed.data$chr) %in% names(testBAM.h[[1]]$targets))) stop(tmsg("Test BAM and BED are not compatible (different chr names) !"), call. = FALSE)
+  if (!all(unique(bed.data$chr) %in% BSgenome::seqnames(BSg.obj))) stop(tmsg("BED and BSgenome are not compatible (different chr names) !"), call. = FALSE)
   
   ## Identifying the platform
   testBAM.h.unl <- unlist(testBAM.h)
@@ -211,8 +211,6 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
     merged <- suppressWarnings(dplyr::left_join(refblock, pres, by = c("chr", "pos", "nucleotide")))
     rm(pres, refblock)
     gc()
-    # bed.based <- dplyr::as.tbl(data.frame(chr = unique(bed.data$chr), pos = as.integer(unlist(seq.int2(from = bed.data$start, to = bed.data$end, by = 1))), which_label = rep(paste0(bed.data$chr, ":", bed.data$start, "-", bed.data$end), times = (bed.data$end - bed.data$start +1))))
-    # bed.based <- dplyr::as.tbl(data.frame(chr = unique(bed.data$chr), pos = as.integer(unlist(seq.int2(from = bed.data$start, to = bed.data$end, by = 1))), bin = rep(rownames(bed.data), times = (bed.data$end - bed.data$start +1))))
     bed.based <- dplyr::as.tbl(data.frame(chr = unique(bed.data$chr), pos = as.integer(unlist(seq.int2(from = bed.data$start, to = bed.data$end, by = 1))), bin = rep(bed.data$ProbeSetName, times = (bed.data$end - bed.data$start +1))))
     bed.joint <- suppressWarnings(dplyr::left_join(bed.based, merged, c("chr", "pos", "bin"))) ### yeah !
     rm(bed.based)
@@ -241,17 +239,14 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
     # cluster.type = "PSOCK"
 
     #### Indexing BAM if needed
-    if (!file.exists(paste0(testBAM, ".bai"))) {
+    if (!(file.exists(paste0(testBAM, ".bai")) || file.exists(sub(pattern = "\\.bam", replacement = ".bai", x = testBAM, ignore.case = TRUE)))) {
       tmsg("Indexing Test BAM ...")
       Rsamtools::indexBam(testBAM) 
     } else tmsg("Test BAM is already indexed.")
-    if (!file.exists(paste0(refBAM, ".bai"))) {
+    if (!(file.exists(paste0(refBAM, ".bai")) || file.exists(sub(pattern = "\\.bam", replacement = ".bai", x = refBAM, ignore.case = TRUE)))) {
       tmsg("Indexing Ref BAM ...")
       Rsamtools::indexBam(refBAM)
     } else tmsg("Ref BAM is already indexed.")
-    
-    #### Opening BAM connections
-    # openBAM <- Rsamtools::BamFileList(c(testBAM, refBAM))
     
     #### Launching cluster
     if (length(unique(bed.data$chr)) < nsubthread) nsubthread <- length(unique(bed.data$chr))
@@ -298,7 +293,6 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
       CN.table <- dplyr::arrange(CN.table, chr, start, end)
       # CN.table <- dplyr::select(CN.table, chr, start, end, bin, tot_count.test, tot_count.ref, GCPC)
       CN.table <- dplyr::select(CN.table, chr, start, end, bin, tot_count.test, tot_count.ref)
-      # SNP.table$nt <- NULL
       colnames(SNP.table) <- c("chr", "pos", "bin", "tot_count.test", "alt_count.test", "tot_count.ref", "alt_count.ref")
       
       gc()
@@ -373,6 +367,7 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
   
   ## QC : Plotting coverages
   if (plot) {
+    ### Coverage plot
     png(paste0(out.dir, "/", samplename, "/", samplename, "_WES_", genome, "_b", meta.w$bin.size, "_coverage.png"), 800, 640)
     plot(rd.cov$MinDepth, rd.cov$TestBAFCoverage, type = "b", col = 2, lty = 3, pch = 20, main = paste0(WESobj$meta$basic$samplename, "\nCoverage Plot"), xlab = "Minimum depth", ylab = "Coverage", ylim = c(0,1), xaxp = c(0,200,10))
     abline(v = rd.cov$MinDepth, lty = 2, col = "grey75")
@@ -382,6 +377,19 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
     lines(rd.cov$MinDepth, rd.cov$RefBINCoverage, type = "b", col = 1)
     abline(h = .5, lty = 2)
     legend("topright", legend = c("Test BAF", "Ref BAF", "Test CN", "Ref CN"), inset = .02, col = c(2,1,2,1), lty = c(3,3,1,1), pch = c(20,20,1,1))
+    dev.off()
+    
+    ### RD plots
+    png(paste0(out.dir, "/", samplename, "/", samplename, "_WES_", genome, "_b", meta.w$bin.size, "_rawdepth.png"), 1600, 1050)
+    par(mfrow = c(2,1))
+    test.l10 <- log10(WESobj$RD$tot_count.test +1)
+    plot(test.l10,  pch = ".", xaxs = "i", xlab = "Index", ylab = "log10(RD+1)", main = paste0(samplename, " TEST (", round(10^median(test.l10, na.rm = TRUE)), ")"))
+    abline(h = median(test.l10, na.rm = TRUE), lty = 2, col = "cyan")
+    lines(runmed(test.l10, 9999), col = 2)
+    ref.l10 <- log10(WESobj$RD$tot_count.ref +1)
+    plot(ref.l10,  pch = ".", xaxs = "i", xlab = "Index", ylab = "log10(RD+1)", main = paste0(samplename, " REF (", round(10^median(ref.l10, na.rm = TRUE)), ")"))
+    abline(h = median(ref.l10, na.rm = TRUE), lty = 2, col = "cyan")
+    lines(runmed(ref.l10, 9999), col = 2)
     dev.off()
   }
   rm(rd.cov)
@@ -397,7 +405,7 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
 ## Performs the binning of BAMs using a BINpack, batch mode
 WES.Bin.Batch <- function(BAM.list.file = NULL, BINpack = NULL, nthread = 1, cluster.type = "PSOCK", ...) {
 
-  if (!file.exists(BAM.list.file)) stop("Could not find BAM.list.file !")
+  if (!file.exists(BAM.list.file)) stop("Could not find BAM.list.file !", call. = FALSE)
   message("Reading and checking BAM.list.file ...")
   myBAMs <- read.table(file = BAM.list.file, header = TRUE, sep="\t", check.names = FALSE, as.is = TRUE)
   head.ok <- c("testBAM", "refBAM", "SampleName")
@@ -406,7 +414,7 @@ WES.Bin.Batch <- function(BAM.list.file = NULL, BINpack = NULL, nthread = 1, clu
     message("Invalid header in BAM.list.file !")
     message(paste0("EXPECTED : ", head.ok))
     message(paste0("FOUND : ", colnames(myBAMs)))
-    stop("Invalid header.")
+    stop("Invalid header.", call. = FALSE)
   }
 
   tb.chk <- file.exists(myBAMs$testBAM)
@@ -418,17 +426,17 @@ WES.Bin.Batch <- function(BAM.list.file = NULL, BINpack = NULL, nthread = 1, clu
     message(myBAMs$testBAM[which(!tb.chk)])
     message("Missing refBAM file(s) :")
     message(myBAMs$refBAM[which(!rb.chk)])
-    stop("Missing BAM file(s).")
+    stop("Missing BAM file(s).", call. = FALSE)
   }
   sn.chk <- duplicated(myBAMs$SampleName)
   if (any(sn.chk)) {
     message("BAM.list.file contains duplicated samplenames !")
     message(myBAMs$SampleName[which(duplicated(myBAMs$SampleName))])
-    stop("Duplicated samplenames")
+    stop("Duplicated samplenames.", call. = FALSE)
   }
   if(any(myBAMs$testBAM == myBAMs$refBAM)) {
     message("Some testBAM and refBAM are identical for at least one sample !")
-    stop("Identical BAM files for Test and Ref.")
+    stop("Identical BAM files for Test and Ref.", call. = FALSE)
   }
 
   ## Adjusting cores/threads
@@ -453,19 +461,11 @@ WES.Bin.Batch <- function(BAM.list.file = NULL, BINpack = NULL, nthread = 1, clu
 WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.renorm = FALSE, wave.rda = NULL, RD.tot.min = 20, RD.alt.min = 3, BAF.hetmin = .33, sex.chr = c("chrX", "chrY"), TumorBoost = FALSE, out.dir = getwd(), return.data = FALSE, write.data = TRUE, plot = TRUE) {
 
   # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta2/WES/TCGA-A7-A0CE-01A_vs_10A")
-  # setwd("/home/job/WORKSPACE/EaCoN_tests/WES/AlexandreLefranc")
-  # # data <- readRDS("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta2/WES/TCGA-A7-A0CE-01A_vs_10A/TCGA-A7-A0CE-01A_vs_10A_hs37d5_b_binned.RDS")
-  # # # # # # data <- readRDS("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_DEV/TCGA_A0CE_01.10/TCGA_A0CE_01.10_hs37d5_b50_binned.RDS")
-  # # # # # # # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_hs37d5_b50.rda"
-  # # # # # # # BINpack <- "/mnt/data_cigogne/job/OS2006/WES/RESOURCES/SureSelect_ClinicalResearchExome.padded_hg19_b50.rda"
-  # # # data <- readRDS("TCGA-AC-A2BK-01A_vs_11A_hs37d5_b_binned.RDS")
   # data <- readRDS("Sample_PHEO_AG_HS_048_DNA_hg38_b50_binned.RDS")
-  # # BINpack <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_GRCh37-lite_merged_sorted_hs37d5_b50.GC.rda"
   # BINpack <- "V4-UTRs.hg38.fragment_targets_minimal_sorted_longChr_hg38_b50.GC.rda"
   # gc.renorm <- TRUE
   # wave.renorm <- FALSE
   # # wave.rda <- "/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/RESOURCES/SureSelect_ClinicalResearchExome.padded_GRCh37-lite_merged_sorted_hs37d5_b50.Wave.rda"
-  # wave.rds <- NULL
   # RD.tot.min = 20
   # RD.alt.min = 3
   # TumorBoost = FALSE
@@ -484,12 +484,12 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
   
   
   ## CHECKS
-  if (!is.list(data)) stop(tmsg("data should be a list !"))
-  if (is.null(BINpack)) stop(tmsg("A BINpack file is required !"))
-  if (!file.exists(BINpack)) stop(tmsg("Could not find the BINpack file !"))
-  if (wave.renorm) { if (!is.null(wave.rda)) { if (!file.exists(wave.rda)) stop(tmsg(paste0("Could not find wave.rda file ", wave.rda))) } }
-  if (RD.tot.min < 0) stop(tmsg("RD.tot.min must be >= 0 !"))
-  if (RD.alt.min <= 0) stop(tmsg("RD.alt.min must be > 0 !"))
+  if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
+  if (is.null(BINpack)) stop(tmsg("A BINpack file is required !"), call. = FALSE)
+  if (!file.exists(BINpack)) stop(tmsg("Could not find the BINpack file !"), call. = FALSE)
+  if (wave.renorm) { if (!is.null(wave.rda)) { if (!file.exists(wave.rda)) stop(tmsg(paste0("Could not find wave.rda file ", wave.rda)), call. = FALSE) } }
+  if (RD.tot.min < 0) stop(tmsg("RD.tot.min must be >= 0 !"), call. = FALSE)
+  if (RD.alt.min <= 0) stop(tmsg("RD.alt.min must be > 0 !"), call. = FALSE)
 
   ## TAGS
   data$meta$WES$TumorBoost <- as.character(TumorBoost)
@@ -505,9 +505,9 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
   genome.pkg <- renorm.data$info$value[renorm.data$info$key == "genome-package"]
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
 
@@ -532,12 +532,12 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
   rd.ori <- nrow(data$SNP)
   #### 1) Filtering for low ref or test depth
   RDlow <- data$SNP$tot_count.test < RD.tot.min | data$SNP$tot_count.ref < RD.tot.min
-  if (length(which(RDlow)) == nrow(data$SNP)) stop("All SNP positions were discarded for their low read count ! You may consider lowering the BAF.tot.min value.")
+  if (length(which(RDlow)) == nrow(data$SNP)) stop(tmsg("All SNP positions were discarded for their low read count ! You may consider lowering the BAF.tot.min value."), call. = FALSE)
   tmsg(paste0("Removed ", length(which(RDlow)), " (", round(length(which(RDlow)) / rd.ori * 100, digits = 2), "%) SNP positions with low depth (<", RD.tot.min, ")"))
   data$SNP <- data$SNP[!RDlow,]
   #### 2) Filtering for low alt test depth
   BRDlow <- data$SNP$alt_count.test < RD.alt.min
-  if (length(which(BRDlow)) == nrow(data$SNP)) stop("All SNP positions were discarded for their low alternative allele count ! You may consider lowering the RD.alt.min value.")
+  if (length(which(BRDlow)) == nrow(data$SNP)) stop(tmsg("All SNP positions were discarded for their low alternative allele count ! You may consider lowering the RD.alt.min value."), call. = FALSE)
   tmsg(paste0("Removed ", length(which(BRDlow)), " (", round(length(which(BRDlow)) / rd.ori * 100, digits = 2), "%) SNP positions with low alt RD (<", RD.alt.min, ")"))
   data$SNP <- data$SNP[!BRDlow,]
   gc()
@@ -569,7 +569,7 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
 
   ### Getting heterozygous probes from Ref
   Ref.hetero <- data$SNP$mBAF.ref >= BAF.hetmin
-  if (!any(Ref.hetero)) stop(tmsg("All SNP positions were tagged as homozygous in Ref : there may be a problem with your reference BAM ploidy !"))
+  if (!any(Ref.hetero)) stop(tmsg("All SNP positions were tagged as homozygous in Ref : there may be a problem with your reference BAM ploidy !"), call. = FALSE)
 
   ### Keeping hetero positions
   data$SNP <- data$SNP[Ref.hetero,]
@@ -599,13 +599,13 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
   rd.ori <- nrow(data$RD)
   RDlow <- data$RD$tot_count.test < RD.tot.min | data$RD$tot_count.ref < RD.tot.min
   data$meta$WES$Imputed.lowdepth.bins <- length(which(RDlow))
-  if (length(which(RDlow)) == nrow(data$RD)) stop("All RD bins were flagged for their low read count ! You may consider lowering the BAF.tot.min value.")
+  if (length(which(RDlow)) == nrow(data$RD)) stop(tmsg("All RD bins were flagged for their low read count ! You may consider lowering the BAF.tot.min value."), call. = FALSE)
   tmsg(paste0("Flagged ", length(which(RDlow)), " (", round(length(which(RDlow)) / rd.ori * 100, digits = 2), "%) RD bins with low depth (<", RD.tot.min, ")"))
 
   #### 2) GC% outliers
   GCOL <- renorm.data$tracks[,5] < 200 | renorm.data$tracks[,5] > 800
   data$meta$WES$Imputed.GCoutlier.bins <- length(which(GCOL))
-  if (length(which(GCOL)) == nrow(data$RD)) stop("All RD bins were flagged as GC% outliers  ! There may be something wrong with your reference genome and/or capture BED.")
+  if (length(which(GCOL)) == nrow(data$RD)) stop(tmsg("All RD bins were flagged as GC% outliers  ! There may be something wrong with your reference genome and/or capture BED."), call. = FALSE)
   tmsg(paste0("Flagged ", length(which(GCOL)), " (", round(length(which(GCOL)) / rd.ori * 100, digits = 2), "%) RD bins as GC% outliers."))
 
   ### Pooling and imputing
@@ -763,7 +763,6 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
     meta = data$meta,
     germline = list(germlinegenotypes = matrix(is.na(data$RD$BAF), ncol = 1, dimnames = list(data$RD$bin, samplename)), failedarrays = NULL)
   )
-  # colnames(my.ascat.obj$data$Tumor_LogR) <- colnames(my.ascat.obj$data$Tumor_LogR.ori) <- colnames(my.ascat.obj$data$Tumor_BAF) <- colnames(my.ascat.obj$data$Tumor_LOR) <- samplename
   colnames(my.ascat.obj$data$Tumor_LogR) <- colnames(my.ascat.obj$data$Tumor_LogR.ori) <- colnames(my.ascat.obj$data$Tumor_BAF) <- samplename
   # rm(my.ch, data)
   gc()
@@ -827,11 +826,9 @@ WES.Normalize <- function(data = NULL, BINpack = NULL, gc.renorm = TRUE, wave.re
 WES.Normalize.ff <- function(BIN.RDS.file = NULL, ...) {
   
   ## CHECKS
-  if (is.null(BIN.RDS.file)) stop(tmsg("An RDS file from EaCoN::EaCoN.WES.Bin is required !"))
-  if (!file.exists(BIN.RDS.file)) stop(tmsg(paste0("Could not find ", BIN.RDS.file, " .")))
-  # if (is.null(BINpack)) stop(tmsg("A BINpack file is required !"))
-  # if (!file.exists(BINpack)) stop(tmsg("Could not find the BINpack file !"))
-  
+  if (is.null(BIN.RDS.file)) stop(tmsg("An RDS file from EaCoN::EaCoN.WES.Bin is required !"), call. = FALSE)
+  if (!file.exists(BIN.RDS.file)) stop(tmsg(paste0("Could not find ", BIN.RDS.file, " .")), call. = FALSE)
+
   tmsg("Loading binned WES data ...")
   my.data <- readRDS(BIN.RDS.file)
   WES.Normalize(data = my.data, out.dir = dirname(BIN.RDS.file), ...)
@@ -839,7 +836,7 @@ WES.Normalize.ff <- function(BIN.RDS.file = NULL, ...) {
 
 ## Runs WES.Normalize.ff, batch mode
 WES.Normalize.ff.Batch <- function(BIN.RDS.files = list.files(path = getwd(), pattern = "_binned.RDS$", all.files = FALSE, full.names = TRUE, recursive = TRUE, ignore.case = FALSE, include.dirs = FALSE), nthread = 1, cluster.type = "PSOCK", ...) {
-  if (length(BIN.RDS.files) == 0) stop("No file found to process !")
+  if (length(BIN.RDS.files) == 0) stop("No file found to process !", call. = FALSE)
   message("Running EaCoN.WES.Normalize.ff() in batch mode ...")
   message(paste0("Found ", length(BIN.RDS.files), " samples to process ..."))
   current.bitmapType <- getOption("bitmapType")
@@ -911,19 +908,19 @@ bedBinner <- function(bed = NULL, bin.size = 50, nthread = 1) {
 
 ## Compute letter composition of nucleotidic sequences from a (chr, start, end) dataframe, with possible extension.
 loc.nt.count.hs <- function(loc.df = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", extend = 0, blocksize = 1E+04, nthread = 5) {
-  if (is.null(loc.df)) stop("loc.df is required !")
+  if (is.null(loc.df)) stop("loc.df is required !", call. = FALSE)
   
-  if (extend < 0) stop("extend should be >= 0")
-  if (blocksize <= 0) stop("blocksize should be > 0")
-  if (!all(is.character(loc.df$chr) | is.factor(loc.df$chr))) stop("chr should be character !")
-  if (!all(is.numeric(loc.df$start))) stop("start should be numeric !")
-  if (!all(is.numeric(loc.df$end))) stop("end should be numeric !")
+  if (extend < 0) stop("extend should be >= 0", call. = FALSE)
+  if (blocksize <= 0) stop("blocksize should be > 0", call. = FALSE)
+  if (!all(is.character(loc.df$chr) | is.factor(loc.df$chr))) stop("chr should be character !", call. = FALSE)
+  if (!all(is.numeric(loc.df$start))) stop("start should be numeric !", call. = FALSE)
+  if (!all(is.numeric(loc.df$end))) stop("end should be numeric !", call. = FALSE)
 
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
 
@@ -968,7 +965,6 @@ loc.nt.count.hs <- function(loc.df = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC.
   print("Stopping cluster ...")
   parallel::stopCluster(cl)
 
-  # rownames(xcounts) <- paste0(loc.df$chr, ":", loc.df$start, "-", loc.df$end)
   out.df <- cbind(loc.df, xcounts)
 
   return(out.df)
@@ -1000,7 +996,7 @@ genome.build.finder <- function(BAM.header = NULL, valid.genomes = NULL) {
   BAM.header <- unlist(BAM.header)
   query <- paste0("(", paste0(valid.genomes, collapse = "|"), ")")
   stvh.grep <- grep(query, unlist(BAM.header))
-  if (length(stvh.grep) == 0) stop(tmsg("Could not automatically determine genome build ! Please specify it !"))
+  if (length(stvh.grep) == 0) stop(tmsg("Could not automatically determine genome build ! Please specify it !"), call. = FALSE)
 
   stvh.regexec <- unique(vapply(stvh.grep, function(x) {
     rc.res <- regexec(query, BAM.header[x])[[1]]
@@ -1008,8 +1004,8 @@ genome.build.finder <- function(BAM.header = NULL, valid.genomes = NULL) {
   }, "a"))
 
   ok.genome <- unique(stvh.regexec[stvh.regexec %in% valid.genomes])
-  if (length(ok.genome) == 0) stop(tmsg(paste0("Identified a putative genome build (", ok.genome, "), but not a supported one !")))
-  if (length(ok.genome) >= 2) stop(tmsg(paste0("Identified more than one putative genome build (", ok.genome, ") !")))
+  if (length(ok.genome) == 0) stop(tmsg(paste0("Identified a putative genome build (", ok.genome, "), but not a supported one !")), call. = FALSE)
+  if (length(ok.genome) >= 2) stop(tmsg(paste0("Identified more than one putative genome build (", ok.genome, ") !")), call. = FALSE)
   return(ok.genome)
 }
 

@@ -52,9 +52,9 @@
 ## Rescale BAF
 BAF.Rescale <- function(data = NULL, bafbin.size = 1E+07, toclustname = "BAF", out.dir = getwd(), return.data = FALSE, write.data = TRUE) {
   
-  if (is.null(data)) stop(tmsg("data is NULL"))
-  if (!is.null(data$data$Tumor_BAF_segmented)) stop(tmsg("BAF is already segmented : BAF.Rescale should be used on unsegmented data."))
-  if (!dir.exists(out.dir)) stop(tmsg("out.dir does not exist !"))
+  if (is.null(data)) stop(tmsg("data is NULL"), call. = FALSE)
+  if (!is.null(data$data$Tumor_BAF_segmented)) stop(tmsg("BAF is already segmented : BAF.Rescale should be used on unsegmented data."), call. = FALSE)
+  if (!dir.exists(out.dir)) stop(tmsg("out.dir does not exist !"), call. = FALSE)
   
   tmsg("Rescaling BAF ...")
   Tumor_BAF_noNA = data$data$Tumor_BAF[!is.na(data$data$Tumor_BAF[, 1]), 1]
@@ -66,7 +66,7 @@ BAF.Rescale <- function(data = NULL, bafbin.size = 1E+07, toclustname = "BAF", o
   tbsm[which(tbsm < 0)] <- -tbsm[which(tbsm < 0)]
   tbsm[which(tbsm > 1)] <- 2 - tbsm[which(tbsm > 1)]
   bsm <- ifelse(bsm < .5, bsm, 1 - bsm)
-  if (toclustname == "BAF") bafcdf$value <- tbsm else if (toclustname == "mBAF") bafcdf$value <- bsm else stop(tmsg("Unknown toclustname value !"))
+  if (toclustname == "BAF") bafcdf$value <- tbsm else if (toclustname == "mBAF") bafcdf$value <- bsm else stop(tmsg("Unknown toclustname value !"), call. = FALSE)
   bafcdf.nna <- bafcdf[!is.na(bafcdf$value),]
   
   `%do%` <- foreach::"%do%"
@@ -114,8 +114,8 @@ BAF.Rescale <- function(data = NULL, bafbin.size = 1E+07, toclustname = "BAF", o
 ## Rescale BAF
 
 BAF.Rescale.ff <- function(RDSfile = NULL, ...) {
-  if (is.null(RDS.file)) stop(tmsg("A RDS file is needed !"))
-  if (!file.exists(RDS.file)) stop(tmsg(paste0("Could not find RDS file ", RDS.file, " !")))
+  if (is.null(RDS.file)) stop(tmsg("A RDS file is needed !"), call. = FALSE)
+  if (!file.exists(RDS.file)) stop(tmsg(paste0("Could not find RDS file ", RDS.file, " !")), call. = FALSE)
   ## Data loading
   tmsg(paste0("Loading data from ", RDS.file, " ..."))
   my.data <- readRDS(RDS.file)
@@ -123,8 +123,8 @@ BAF.Rescale.ff <- function(RDSfile = NULL, ...) {
 }
 
 Segment.ASCAT.ff <- function(RDS.file = NULL, ...) {
-  if (is.null(RDS.file)) stop(tmsg("A RDS file is needed !"))
-  if (!file.exists(RDS.file)) stop(tmsg(paste0("Could not find RDS file ", RDS.file, " !")))
+  if (is.null(RDS.file)) stop(tmsg("A RDS file is needed !"), call. = FALSE)
+  if (!file.exists(RDS.file)) stop(tmsg(paste0("Could not find RDS file ", RDS.file, " !")), call. = FALSE)
   ## Data loading
   tmsg(paste0("Loading data from ", RDS.file, " ..."))
   my.data <- readRDS(RDS.file)
@@ -152,9 +152,9 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, bafbin.size = 1E+07, modelNa
   ## Loading genome data
   if (!genome.pkg %in% BSgenome::installed.genomes()) {
     if (genome.pkg %in% BSgenome::available.genomes()) {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " available but not installed. Please install it !")), call. = FALSE)
     } else {
-      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")))
+      stop(tmsg(paste0("BSgenome ", genome.pkg, " not available in valid BSgenomes and not installed ... Please check your genome name or install your custom BSgenome !")), call. = FALSE)
     }
   }
   # data(list = genome, package = "chromosomes", envir = environment())
@@ -177,7 +177,7 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, bafbin.size = 1E+07, modelNa
   tbsm[which(tbsm < 0)] <- -tbsm[which(tbsm < 0)]
   tbsm[which(tbsm > 1)] <- 2 - tbsm[which(tbsm > 1)]
   bsm <- ifelse(bsm < .5, bsm, 1 - bsm)
-  if (toclustname == "BAF") bafcdf$value <- tbsm else if (toclustname == "mBAF") bafcdf$value <- bsm else stop("Unknown toclustname value !")
+  if (toclustname == "BAF") bafcdf$value <- tbsm else if (toclustname == "mBAF") bafcdf$value <- bsm else stop("Unknown toclustname value !", call. = FALSE)
   bafcdf.nna <- bafcdf[!is.na(bafcdf$value),]
 
   ## BAF.cutter modif
