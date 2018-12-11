@@ -49,7 +49,7 @@ It consists in a series of R packages that perform such type of analysis, from r
 * MOD : Edited the README.md (rewrote the INSTALL section)
 * MOD : WES.Bin() : Added support for BAI files that have the exact same rootname as BAM files (instead of rootname.bam.bai only)
 * MOD : Added "call. = FALSE" top all stop() calls
-* ADD : WES.Bin() : Added raw read depth plots (to control putative TEST / REF inversion of sex mismatch)
+* ADD : WES.Bin() : Added raw read depth plots (to control putative TEST / REF inversion, or sex mismatch)
 
 ### **2018-10-30 : v0.3.4 _(Papy60)_ is out !**
 
@@ -354,10 +354,10 @@ First, under R, load EaCoN and choose a directory in which results will be writt
       WES.Bin(testBAM = "/home/project/WES/S4_WES_hg19_Tumor.BAM", refBAM = "/home/project/WES/S4_WES_hg19_Tumor.BAM", BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda", samplename = "S4_WES")
       ```
 
-  - This will generate a **/home/project/EaCoN_results/S4_WES/** subdirectory which contains :
-    - _**S4_WES_hg19_b50_binned.RDS**_ : contains the binned data which will be provided to the next step
-    - _**S4_WES_hg19_b50_coverage.png**_ : shows a graphical representation of the proportion of the capture bed regions covered at different coverage levels
-    - _**S4_WES_hg19_b50_coverage.txt**_ : contins the numerical values corresponding to the coverage plot
+    - This will generate a **/home/project/EaCoN_results/S4_WES/** subdirectory which contains :
+      - _**S4_WES_hg19_b50_binned.RDS**_ : contains the binned data which will be provided to the next step
+      - _**S4_WES_hg19_b50_coverage.png**_ : shows a graphical representation of the proportion of the capture bed regions covered at different coverage levels
+      - _**S4_WES_hg19_b50_coverage.txt**_ : contins the numerical values corresponding to the coverage plot
 
   - **Third**, now that the data have been binned, the normalization step can be performed :
 
@@ -569,15 +569,14 @@ WES | `2` to `10` | `5` | `0.5` *(default)* to `1` | `0.75` *(default)*
 
 - The FACETS segmenter cannot currently be used on SNP6 data (due to missing normalized A and B signals).
 
-- For WES data, any BAM should work, but we recommend using BAMs for which duplicates were marked/removed (samtools markdup, Picard MarkDuplicates, etc...), for results of better quality.
+- SEQUENZA segmenter SHOULD NOT be used in SNP6 microarrays (it theoretically can, but requires huge amounts of RAM, ie more than 32 GB). This may halt / swap your computer !
+
+- For WES data, any sorted BAM should work, but we recommend using BAMs for which duplicates were marked/removed (samtools markdup, Picard MarkDuplicates, etc...), for results of better quality.
 
 ### NOTES
 
 - All the functions depicted above have other parameters not described here. As the above recommandations should do the trick in most cases, they certainly won't fit all. To adjust parameters more finely, I suggest to refer to the R help pages for corresponding functions.
 
-- FACETS segmenter CAN NOT be used on SNP6 microarrays results (due to missing data types)
-
-- SEQUENZA segmenter SHOULD NOT be used in SNP6 microarrays (it theoretically can, but requires huge amounts of RAM, ie more than 32 GB). This may halt / swap your computer !
 
 
 ---

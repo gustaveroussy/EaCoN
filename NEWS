@@ -8,7 +8,7 @@ v0.3.4-1 (20181210) *PostRoscovite*
 * MOD : Edited the README.md (rewrote the INSTALL section)
 * MOD : WES.Bin() : Added support for BAI files that have the exact same rootname as BAM files (instead of rootname.bam.bai only)
 * MOD : Added "call. = FALSE" top all stop() calls
-* ADD : WES.Bin() : Added raw read depth plots (to control putative TEST / REF inversion of sex mismatch)
+* ADD : WES.Bin() : Added raw read depth plots (to control putative TEST / REF inversion, or sex mismatch)
 
 v0.3.4 (20181030) *Papy60*
 -----------------
