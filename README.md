@@ -61,7 +61,7 @@ It consists in a series of R packages that perform such type of analysis, from r
 - Small code changes to adapt to "non-completely covered" genomes (ie, few chromosomes for toy datasets, by example).
 - Harmonized the penalty parameter for all segmenters (now just "penalty" rather than "ASCAT.pen", "SEQUENZA.pen" or "FACETS.pen")
 - Officially dropping support for sequenza with SNP6 arrays as it leads to a huge RAM consumption by copynumber::aspcf, due to the few probes covering both L2R and BAF.
-- Included chromosomes objects in package for hs, mm and rn, to avaoid dependency to another non-public sourceable package.
+- Included chromosomes objects in package for hs, mm and rn, to avoid dependency to another non-public sourceable package.
 
 ### **2018-10-02 : v0.3.3-1 _(LittleWomanNoCry)_ is out !**
 
@@ -69,13 +69,13 @@ It consists in a series of R packages that perform such type of analysis, from r
 
 ### **2018-09-12 : v0.3.3 _(Trinity)_ is out !**
 
-- Now EaCoN supports [**SEQUENZA**](https://www.ncbi.nlm.nih.gov/pubmed/25319062) segmenter and copy number estimator _(except for Affymatrix SNP6)_ ! This makes 3 different segmenters available for quick. Sequenza uses the same bivariate segmentation algorithm as ASCAT, _(PCF : piecewise constant curve fitting)_, but in a different implementation (sequenza relies on the _copynumber_ package, ASCAT has its own implementation built-in), so expect similar but not identical results !
-- Few bugs solved.
+- Now EaCoN supports the [**SEQUENZA**](https://www.ncbi.nlm.nih.gov/pubmed/25319062) segmenter and copy number estimator _(except for Affymatrix SNP6)_ ! This makes 3 different segmenters available for quick. Sequenza uses the same bivariate segmentation algorithm as ASCAT, _(PCF : piecewise constant curve fitting)_, but in a different implementation (sequenza relies on the _copynumber_ package, ASCAT has its own implementation built-in), so expect similar but not identical results !
+- A few bugs solved.
 
 ### **2018-08-08 : v0.3.2 _(PapeMamiePichine)_ is out !**
 
-- Now EaCoN supports [**FACETS**](https://www.ncbi.nlm.nih.gov/pubmed/27270079) segmenter and copy number estimator ! This segmenter extends the famous **CBS** _(Circular Binary Segmentation)_ algorithm by making it compatible with bi-variate segmentation (using both the L2R and BAF signals). However, please note that **FACETS is only avaiable for WES data**.
-- Few bugs solved.
+- Now EaCoN supports the [**FACETS**](https://www.ncbi.nlm.nih.gov/pubmed/27270079) segmenter and copy number estimator ! This segmenter extends the famous **CBS** _(Circular Binary Segmentation)_ algorithm by making it compatible with bi-variate segmentation (using both the L2R and BAF signals). However, please note that **FACETS is only available for WES data**.
+- A few bugs solved.
 
 ---
 
@@ -115,7 +115,7 @@ It consists in a series of R packages that perform such type of analysis, from r
 
 ### **MICROARRAY-SPECIFIC**
 
-While the current EaCoN package is the core of the process and will straitfully work for WES data, multiple other packages are needed to properly handle Affymetrix microarray : APT (affymetrix power tools), designs and corresponding annotations (genome build, Affymetrix annotation databases) ; others are required for the (re)normalization, especially pre-computed GC% or Wavetracks.
+While the current EaCoN package is the core of the process and will straightly work for WES data, multiple other packages are needed to properly handle Affymetrix microarray : APT (affymetrix power tools), designs and corresponding annotations (genome build, Affymetrix annotation databases) ; others are required for the (re)normalization, especially pre-computed GC% or Wavetracks.
 
 #### **ALL AFFYMETRIX MICROARRAYS**
 
@@ -162,7 +162,7 @@ While the current EaCoN package is the core of the process and will straitfully 
 
 #### **CYTOSCAN FAMILY (CytoScan 750k / CytoScan HD)**
 
-- First, install embedded APT tool from github :
+- First, install the embedded APT tool from github :
  
   ``` r
   devtools::install_github("gustaveroussy/apt.cytoscan.2.4.0")
@@ -193,7 +193,7 @@ While the current EaCoN package is the core of the process and will straitfully 
       install.packages( "https://partage.gustaveroussy.fr/pydio_public/24b026?dl=true&file=/CytoScanHD.Array.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
 
-- Lastly, install the **_rcnorm_** package to perform BAF normalization for CytoScan family of arrays :
+- Lastly, install the **_rcnorm_** package to perform BAF normalization for the CytoScan family of arrays :
 
   ``` r
   install.packages( "https://partage.gustaveroussy.fr/pydio_public/e6fe22?dl=true&file=/rcnorm_0.1.5.tar.gz", repos = NULL, type = "source")
@@ -201,7 +201,7 @@ While the current EaCoN package is the core of the process and will straitfully 
 
 #### **GENOMEWIDE SNP6**
 
-- First, install embedded APT tool from github :
+- First, install the embedded APT tool from github :
  
   ``` r
   devtools::install_github("gustaveroussy/apt.snp6.1.20.0")
@@ -278,7 +278,7 @@ While the current EaCoN package is the core of the process and will straitfully 
 
 ## **USAGE**
 
-The full workflow is decomposed in a few different functions, which roughly correspond to these steps :  
+The full workflow is decomposed into a few different functions, which roughly correspond to these steps :  
 
 ```
 normalization -> segmentation +-> reporting
@@ -286,11 +286,11 @@ normalization -> segmentation +-> reporting
                               +-> copy-number estimation
 ```
 
-EaCoN allows different ways to perform the full workflow : considering the analysis of a single sample, you can either perform each step independently and write, then load the intermediate results, or you can _**pipe**_ all steps in a single line of code. You can also perform the step-by-step approach on multiple samples in a row, even possibly at the same time using multithreading, using a batch mode.
+EaCoN allows different ways of running the full workflow : considering the analysis of a single sample, you can either run each step independently and write, then load the intermediate results, or you can _**pipe**_ all steps in a single line of code. You can also run the step-by-step approach on multiple samples in a row, even possibly at the same time using multithreading, using a batch mode.
 
 ### **Step by step mode**
 
-First, under R, load EaCoN and choose a directory in which results will be written, by exemple : **/home/project/EaCoN_results**
+First, under R, load EaCoN and choose a directory for writing results, for example : **/home/project/EaCoN_results**
 
   ``` r
   require(EaCoN)
@@ -308,7 +308,7 @@ First, under R, load EaCoN and choose a directory in which results will be writt
   ```
 
 - This will perform the normalization step, create a **/home/project/EaCoN_results/S1_OS/** subdirectory and write 5 files in it :
-  - _**S1_OS_OncoScan_CNV_hg19_processed.RDS**_ : contains the normalized data which will be provided to the next step
+  - _**S1_OS_OncoScan_CNV_hg19_processed.RDS**_ : contains the normalized data to be provided to the next step
   - _**S1_OS_OncoScan_CNV_hg19_rawplot.png**_ : shows a graphical representation of the normalized L2R and BAF data
   - _**S1_OS_2.4.0_na33.r2.paircheck.txt**_ : gives some statistics to evaluate the probability that the two "A" "C" CEL files effectively belong to the same individual (generated by APT)
   - _**S1_OS_2.4.0_na33.r2.qc.txt**_ : some quality metrics of the arrays and profiles (generated by APT)
@@ -335,13 +335,13 @@ First, under R, load EaCoN and choose a directory in which results will be writt
 ##### **WES data**
 
 - This time it is quite different : the processing will be performed in three steps :
-  - **First**, we will use the capture BED (A text file containing the positions of the captured regions, usualy provided by the capture kit manufacturer), choose a genome version corresponding to our aligned BAM files, and choose a window size for the future binning of the data. Thses will be used to generate what we call a "BINpack", a set of pre-computed tracks containing the bins position and corresponding GC% values. Several tracks will be computed corresponding to different levels of elongation of the bin positions. In the example below, we used the BED corresponding to Agilent SureSelect v5 capture kit, a bin size of 50 nt, and chose the human hg19 genome build.
+  - **First**, we will use the capture BED (A text file containing the positions of the captured regions, usualy provided by the capture kit manufacturer), choose a genome version corresponding to our aligned BAM files, and choose a window size for the future binning of the data. These will be used to generate what we call a "BINpack", a set of pre-computed tracks containing the bin positions and corresponding GC% values. Several tracks will be computed corresponding to different levels of elongation of the bin positions. In the example below, we used the BED corresponding to Agilent SureSelect v5 capture kit, a bin size of 50 nt, and chose the human hg19 genome build.
 
     ``` r
     BINpack.Maker(bed.file = "/home/project/WES/SureSelect_v5.bed", bin.size = 50, genome.pkg = "BSgenome.Hsapiens.UCSC.hg19")
     ```
 
-    - This will generate a "BINpack" (with a ".rda" extension) that will be used in the next normalization steps : **/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda**
+    - This will generate a "BINpack" (with a ".rda" extension) to be used in the next normalization steps : **/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda**
   
     - **PLEASE NOTE THAT THIS STEP IS SAMPLE-INDEPENDENT, THUS NEEDS TO BE PERFORMED AGAIN ONLY IF YOU CHANGE EITHER THE CAPTURE BED, THE BIN SIZE OR THE GENOME BUILD.** Thus, the generated BINpack can be used for any other sample in the same conditions.
 
@@ -355,9 +355,9 @@ First, under R, load EaCoN and choose a directory in which results will be writt
       ```
 
     - This will generate a **/home/project/EaCoN_results/S4_WES/** subdirectory which contains :
-      - _**S4_WES_hg19_b50_binned.RDS**_ : contains the binned data which will be provided to the next step
+      - _**S4_WES_hg19_b50_binned.RDS**_ : contains the binned data to be provided to the next step
       - _**S4_WES_hg19_b50_coverage.png**_ : shows a graphical representation of the proportion of the capture bed regions covered at different coverage levels
-      - _**S4_WES_hg19_b50_coverage.txt**_ : contins the numerical values corresponding to the coverage plot
+      - _**S4_WES_hg19_b50_coverage.txt**_ : contains the numerical values corresponding to the coverage plot
 
   - **Third**, now that the data have been binned, the normalization step can be performed :
 
@@ -365,7 +365,7 @@ First, under R, load EaCoN and choose a directory in which results will be writt
     WES.Normalize.ff(BIN.RDS.file = "/home/project/EaCoN_results/S4_WES/S4_WES_hg19_b50_binned.RDS", BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda")
     ```
 
-    - Analogously to what was described for Affymetrix microarrays, a **/home/project/EaCoN_results/S4_WES/ASCAT/L2R/** subdirectory will be created, containing the same type of files described earlierly.
+    - Analogously to what was described for Affymetrix microarrays, a **/home/project/EaCoN_results/S4_WES/ASCAT/L2R/** subdirectory will be created, containing the same type of files described earlier.
 
 
 #### **L2R & BAF Segmentation**
@@ -377,7 +377,7 @@ First, under R, load EaCoN and choose a directory in which results will be writt
   ```
 
   - This will perform the segmentation, centralization and calling steps, create a **/home/project/EaCoN_results/S1/ASCAT/L2R/** subdirectory and write multiple files in it :
-    - _**S1.SEG.ASCAT.RDS**_ : contains the segmented data which will be provided to the optional next step(s)
+    - _**S1.SEG.ASCAT.RDS**_ : contains the segmented data to be provided to the optional next step(s)
     - _**S1.SEG.ASCAT.png**_ : shows a graphical representation of the segmented, centered and called L2R and BAF data
     - _**S1.Rorschach.png**_ : shows a graphical representation of BAF vs L2R of probes, by chromosome
     - _**S1.Cut.cbs**_ : contains the L2R segmentation results in the standard CBS format. "Cut" means that L2R value for the segments called as normal were set to a value of 0.0
@@ -401,7 +401,7 @@ First, under R, load EaCoN and choose a directory in which results will be writt
     - _**S1_ASCATprofile.png**_ : shows a graphical representation of the final segmented TCN and ASCN profiles
     - _**S1_rawprofile.png**_ : shows a graphical representation of the raw (uncorrected) segmented TCN and ASCN profiles
     - _**S1_Rorschach.clown.png**_ : shows a graphical representation of BAF vs L2R of probes, by chromosome, with a coloration corresponding to CN levels.
-    - _**S1_TCNvsL2R.png**_ : shows a graphical representation of the comparison of the TCN and L2R values of each segment, clustered by TCN level. This is usefull to identify some mistakes in the TCN modelization.
+    - _**S1_TCNvsL2R.png**_ : shows a graphical representation of the comparison of the TCN and L2R values of each segment, clustered by TCN level. This is usefull to identify mistakes in the TCN modelization.
     - _**S1_gamma0.xx.cn**_ : contains the TCN and ASCN segmentation results in a non-standard format derived the CBS format
     - _**S1_gamma0.xx_model.txt**_ : Contains the ploidy, cellularity and model statistics
 
@@ -409,7 +409,7 @@ First, under R, load EaCoN and choose a directory in which results will be writt
 
 #### **HTML reporting**
 
-- Endly, an annotated HTML report can be rendered with :
+- Finally, an annotated HTML report can be rendered with :
 
   ``` r
   Annotate.ff(RDS.file = "/home/project/EaCoN_results/S1/ASCAT/L2R/S1.EaCoN.ASPCF.RDS", author.name = "Me!")
@@ -419,7 +419,7 @@ First, under R, load EaCoN and choose a directory in which results will be writt
 
 ### **Batch mode (with multithreadng)**
 
-All the steps described above in single sample mode can be run in batch mode, that is for multiple samples, even possibly with multithreading to process multiple at the same time. It simply consists into using different function with the same name but an added ".Batch" suffix. Those are just wrappers to the single-sample version of these.
+All the steps described above in single sample mode can be run in batch mode, that is for multiple samples, possibly combined with multithreading to process multiple samples in parallel. It simply consists into using different functions with the same name but an added ".Batch" suffix. Those are just wrappers to the single-sample version of the functions.
 
 #### **Raw data processing**
 
@@ -491,14 +491,14 @@ testBAM | refBAM | SampleName
 /home/project/WES/S13_WES_hg19_Tumor.BAM | /home/project/WES/S13_WES_hg19_Normal.BAM | S13_WES
 /home/project/WES/S14_WES_hg19_Tumor.BAM | /home/project/WES/S14_WES_hg19_Normal.BAM | S14_WES
 
-- The binning, then normalization command lines (using 2 threads)
+- Binning, then normalization command lines (using 2 threads)
 
   ``` r
   WES.Bin.Batch(BAM.list.file = "/home/project/WES/BAM_list.txt", BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda", nthread = 2)
   WES.Normalize.ff.Batch(BINpack = "/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda", nthread = 2)
   ```
 
-You can notice that here we did not specify any RDS or list file to **WES.Normalize.ff.Batch**. This is because this fonction needs as its first argument _BIN.RDS.files_, a **list** of _"\_binned.RDS"_ files (generated at the former command line), and by default it will recursively search downwards the current working directory for any of these RDS files. You can of course design your own list of RDS files to process, if you know a bit of R.
+Note that here we did not specify any RDS or list file to **WES.Normalize.ff.Batch**. This is because this fonction needs as its first argument _BIN.RDS.files_, a **list** of _"\_binned.RDS"_ files (generated at the former command line), and by default it will recursively search downwards the current working directory for any of these RDS files. You can of course design your own list of RDS files to process, if you know a bit of R.
 
 #### **L2R & BAF Segmentation**
 
@@ -532,7 +532,7 @@ And here again with the **Annotate.ff.Batch** :
 
 ### **Piped**
 
-EaCoN has been implemented in a way that one can also choose to launch the full workflow in a single command line for a single sample, using pipes from the [magrittr](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html) package. However, this is not recommended as default use : even though EaCoN is provided with recommandations that should fit most case, the user may have to deal with particular profiles that would require parameter tweaking, which is not possible in piped mode...
+EaCoN has been implemented in such a way that one can also opt to launch the full workflow in a single command line for a single sample, using pipes from the [magrittr](https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html) package. However, this is not recommended as a default use : even though EaCoN is provided with recommendations that should fit most cases, users may have to deal with particular profiles requiring parameter tweaking, which is not possible in piped mode...
 Here is an example using ASCAT :
 
   ```r
@@ -548,9 +548,9 @@ Here is an example using ASCAT :
 ### **Conclusion on usage**
 
 - So, as you may have already noticed, most functions exist in EaCoN in three flavors :
-  - The **"directly"** named : that accept a R _data_ object as first parameter, designed to be used in pipe mode.
-  - The **".ff"** named ("from file") : that require a file as first parameter, designed to be used in step-by-step mode.
-  - The **".ff.Batch"** named ("from file, in batch") : that require a list as first parameter, designed to be used in step-by-step mode, but running multiple samples for each step, possibly with multithreading.
+  - The **"directly"** named : that accept a R _data_ object as first parameter, designed for usein pipe mode.
+  - The **".ff"** named ("from file") : that require a file as first parameter, designed for use in step-by-step mode.
+  - The **".ff.Batch"** named ("from file, in batch") : that require a list as first parameter, designed for use in step-by-step mode, but running multiple samples for each step, possibly with multithreading.
 
 ---
 
@@ -558,7 +558,7 @@ Here is an example using ASCAT :
 
 ### **Segmentation**
 
-- For each step, default values for each data source already correspond to recommendations. However, for the common **segmentation** step, adaptation to the data source is recommended, by changing few parameters :
+- For each step, default values for each data source already correspond to recommendations. However, for the common **segmentation** step, adaptation to the data source is recommended, by changing a few parameters :
 
 SOURCE | SER.pen | smooth.k | nrf | BAF.filter
 --- | --- | --- | --- | ---
@@ -569,15 +569,13 @@ WES | `2` to `10` | `5` | `0.5` *(default)* to `1` | `0.75` *(default)*
 
 - The FACETS segmenter cannot currently be used on SNP6 data (due to missing normalized A and B signals).
 
-- SEQUENZA segmenter SHOULD NOT be used in SNP6 microarrays (it theoretically can, but requires huge amounts of RAM, ie more than 32 GB). This may halt / swap your computer !
+- The SEQUENZA segmenter SHOULD NOT be used with SNP6 microarrays (it theoretically can, but requires huge amounts of RAM, ie more than 32 GB). This may halt / swap your computer !
 
-- For WES data, any sorted BAM should work, but we recommend using BAMs for which duplicates were marked/removed (samtools markdup, Picard MarkDuplicates, etc...), for results of better quality.
+- For WES data, any sorted BAM should work, but we recommend using BAMs for which duplicates were marked/removed (samtools markdup, Picard MarkDuplicates, etc...), for higher quality results.
 
 ### NOTES
 
-- All the functions depicted above have other parameters not described here. As the above recommandations should do the trick in most cases, they certainly won't fit all. To adjust parameters more finely, I suggest to refer to the R help pages for corresponding functions.
-
-
+- All the functions depicted above have other parameters not described here. As the above recommendations should do the trick in most cases, they certainly won't fit all. To adjust parameters more finely, please refer to the R help pages of corresponding functions.
 
 ---
 
