@@ -92,13 +92,13 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   
   
   ## Winsorization
-  if(!is.null(smooth.k)) {
-    tmsg("Smoothing L2R outliers ...")
-    cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
-    cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = smooth.k, tau = 1, verbose = FALSE)
-    data$data$Tumor_LogR[,1] <- cndf.wins[, 3, drop = FALSE]
-    rm(list = c("cndf", "cndf.wins"))
-  }
+  #if(!is.null(smooth.k)) {
+  #  tmsg("Smoothing L2R outliers ...")
+  #  cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+  #  cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = smooth.k, tau = 1, verbose = FALSE)
+  #  data$data$Tumor_LogR[,1] <- cndf.wins[, 3, drop = FALSE]
+  #  rm(list = c("cndf", "cndf.wins"))
+  #}
   
   ## BAF filtering
   tmsg("Filtering BAF...")
@@ -200,12 +200,12 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   } else stop(tmsg("Invalid recentering method called !"), call. = FALSE)
   
   ## Winsorization (for aesthetics)
-  tmsg("Smoothing L2R (for plots)...")
-  cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
-  cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = 5, tau = 1, verbose = FALSE)
-  data$data$Tumor_LogR_wins <- cndf.wins[, 3, drop = FALSE]
-  colnames(data$data$Tumor_LogR_wins) <- samplename
-  rm(list = c("cndf", "cndf.wins"))
+  #tmsg("Smoothing L2R (for plots)...")
+  #cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+  #cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = 5, tau = 1, verbose = FALSE)
+  #data$data$Tumor_LogR_wins <- cndf.wins[, 3, drop = FALSE]
+  #colnames(data$data$Tumor_LogR_wins) <- samplename
+  #rm(list = c("cndf", "cndf.wins"))
   
   
   ## PELT rescue
@@ -353,7 +353,8 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
     l2r.value <- data.frame(Chr = l2r.chr,
                             Start = as.integer(data$data$SNPpos$pos),
                             End = as.integer(data$data$SNPpos$pos),
-                            Value = data$data$Tumor_LogR_wins[,1],
+                            #Value = data$data$Tumor_LogR_wins[,1],
+                            Value = data$data$Tumor_LogR[,1],
                             stringsAsFactors = FALSE)
     baf.value <- data.frame(Chr = l2r.chr,
                             Start = as.integer(data$data$SNPpos$pos),
@@ -475,13 +476,13 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   ))
   
   ## Winsorization
-  if(!is.null(smooth.k)) {
-    tmsg("Smoothing L2R outliers ...")
-    cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
-    cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = smooth.k, tau = 1, verbose = FALSE)
-    data$data$Tumor_LogR[,1] <- cndf.wins[, 3, drop = FALSE]
-    rm(list = c("cndf", "cndf.wins"))
-  }
+  #if(!is.null(smooth.k)) {
+  #  tmsg("Smoothing L2R outliers ...")
+  #  cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+  #  cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = smooth.k, tau = 1, verbose = FALSE)
+  #  data$data$Tumor_LogR[,1] <- cndf.wins[, 3, drop = FALSE]
+  #  rm(list = c("cndf", "cndf.wins"))
+  #}
   
   ## BAF filtering
   tmsg("Filtering BAF...")
@@ -625,12 +626,12 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   } else stop(tmsg("Invalid recentering method called !"), call. = FALSE)
   
   ## Winsorization
-  tmsg("Smoothing L2R (for plots)...")
-  cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
-  cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = 5, tau = 1, verbose = FALSE)
-  data$data$Tumor_LogR_wins <- cndf.wins[, 3, drop = FALSE]
-  colnames(data$data$Tumor_LogR_wins) <- samplename
-  rm(list = c("cndf", "cndf.wins"))
+  #tmsg("Smoothing L2R (for plots)...")
+  #cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+  #cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = 5, tau = 1, verbose = FALSE)
+  #data$data$Tumor_LogR_wins <- cndf.wins[, 3, drop = FALSE]
+  #colnames(data$data$Tumor_LogR_wins) <- samplename
+  #rm(list = c("cndf", "cndf.wins"))
   
   
   ## PELT rescue
@@ -781,7 +782,8 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
     l2r.value <- data.frame(Chr = l2r.chr,
                             Start = data$data$SNPpos$pos,
                             End = data$data$SNPpos$pos,
-                            Value = data$data$Tumor_LogR_wins[,1],
+                            #Value = data$data$Tumor_LogR_wins[,1],
+                            Value = data$data$Tumor_LogR[,1],
                             stringsAsFactors = FALSE)
     # baf.chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(data$data$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)])
     baf.value <- data.frame(Chr = l2r.chr,
@@ -897,13 +899,13 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   ))
   
   ## Winsorization
-  if(!is.null(smooth.k)) {
-    tmsg("Smoothing L2R outliers ...")
-    cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
-    cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = smooth.k, tau = 1, verbose = FALSE)
-    data$data$Tumor_LogR[,1] <- cndf.wins[, 3, drop = FALSE]
-    rm(list = c("cndf", "cndf.wins"))
-  }
+  #if(!is.null(smooth.k)) {
+  #  tmsg("Smoothing L2R outliers ...")
+  #  cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+  #  cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = smooth.k, tau = 1, verbose = FALSE)
+  #  data$data$Tumor_LogR[,1] <- cndf.wins[, 3, drop = FALSE]
+  #  rm(list = c("cndf", "cndf.wins"))
+  #}
   
   ## BAF filtering
   tmsg("Filtering BAF...")
@@ -1060,11 +1062,11 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   } else stop(tmsg("Invalid recentering method called !"), call. = FALSE)
   
   ## Winsorization
-  tmsg("Smoothing L2R (for plots)...")
-  cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
-  cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = 5, tau = 1, verbose = FALSE)
-  data$data$Tumor_LogR_wins <- cndf.wins[, 3, drop = FALSE]
-  colnames(data$data$Tumor_LogR_wins) <- samplename
+  #tmsg("Smoothing L2R (for plots)...")
+  #cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+  #cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = 5, tau = 1, verbose = FALSE)
+  #data$data$Tumor_LogR_wins <- cndf.wins[, 3, drop = FALSE]
+  #colnames(data$data$Tumor_LogR_wins) <- samplename
   rm(list = c("cndf", "cndf.wins"))
   
   
@@ -1216,7 +1218,8 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
     l2r.value <- data.frame(Chr = l2r.chr,
                             Start = data$data$SNPpos$pos,
                             End = data$data$SNPpos$pos,
-                            Value = data$data$Tumor_LogR_wins[,1],
+                            #Value = data$data$Tumor_LogR_wins[,1],
+                            Value = data$data$Tumor_LogR[,1],
                             stringsAsFactors = FALSE)
     # baf.chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(data$data$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)])
     baf.value <- data.frame(Chr = l2r.chr,
