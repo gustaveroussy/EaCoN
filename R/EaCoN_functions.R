@@ -20,6 +20,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # source("~/git_gustaveroussy/EaCoN/R/plot_functions.R")
 
+  `%do%` <- foreach::"%do%"
   
   calling.method <- tolower(calling.method)
   
@@ -93,11 +94,13 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   
   ## Winsorization
   if(!is.null(smooth.k)) {
-    tmsg("Smoothing L2R outliers ...")
+   tmsg("Smoothing L2R outliers ...")
     cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+    l2r.nona <- !is.na(data$data$Tumor_LogR[[1]])
+    cndf <- cndf[l2r.nona,]
     cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = smooth.k, tau = 1, verbose = FALSE)
-    data$data$Tumor_LogR[,1] <- cndf.wins[, 3, drop = FALSE]
-    rm(list = c("cndf", "cndf.wins"))
+    data$data$Tumor_LogR[l2r.nona,1] <- cndf.wins[, 3, drop = FALSE]
+    rm(list = c("cndf", "cndf.wins", "l2r.nona"))
   }
   
   ## BAF filtering
@@ -130,7 +133,8 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   
   ## Computing gaps
   if (!is.null(mingap)) {
-    data$data$chr <- foreach(k = data$data$ch, .combine = "c") %do% {
+    # `%do%` <- foreach::"%do%"
+    data$data$chr <- foreach::foreach(k = data$data$ch, .combine = "c") %do% {
       gapz <- which(diff(data$data$SNPpos$pos[k]) >= mingap)
       return(unname(split(k, findInterval(k, k[gapz+1]))))
     }
@@ -202,11 +206,13 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   ## Winsorization (for aesthetics)
   tmsg("Smoothing L2R (for plots)...")
   cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+  l2r.nona <- !is.na(data$data$Tumor_LogR[[1]])
+  cndf <- cndf[l2r.nona,]
   cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = 5, tau = 1, verbose = FALSE)
-  data$data$Tumor_LogR_wins <- cndf.wins[, 3, drop = FALSE]
+  data$data$Tumor_LogR_wins <- data$data$Tumor_LogR
+  data$data$Tumor_LogR_wins[l2r.nona,] <- cndf.wins[, 3, drop = FALSE]
   colnames(data$data$Tumor_LogR_wins) <- samplename
-  rm(list = c("cndf", "cndf.wins"))
-  
+  rm(list = c("cndf", "cndf.wins", "l2r.nona"))
   
   ## PELT rescue
   if (!is.null(SER.pen)) {
@@ -239,7 +245,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
       tmsg(paste0(" Found ", length(rescued), "."))
       if (length(rescued) > seg.maxn) tmsg("WARNING : Many small events found, profile may be noisy ! Consider using 'smooth.k', or for WES data, strengthen low depth filtering !")
       data$meta$eacon[["PELT-nseg"]] <- length(rescued)
-      `%do%` <- foreach::"%do%"
+      # `%do%` <- foreach::"%do%"
       foreach::foreach(re = rescued, .combine = "c") %do% {
         interv <- mydf$idx.ori[seg.start[re]]:mydf$idx.ori[seg.end[re]]
         data$data$Tumor_LogR_segmented[interv] <- median(data$data$Tumor_LogR[interv, 1], na.rm = TRUE)
@@ -354,6 +360,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
                             Start = as.integer(data$data$SNPpos$pos),
                             End = as.integer(data$data$SNPpos$pos),
                             Value = data$data$Tumor_LogR_wins[,1],
+                            # Value = data$data$Tumor_LogR[,1],
                             stringsAsFactors = FALSE)
     baf.value <- data.frame(Chr = l2r.chr,
                             Start = as.integer(data$data$SNPpos$pos),
@@ -475,12 +482,14 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   ))
   
   ## Winsorization
-  if(!is.null(smooth.k)) {
+   if(!is.null(smooth.k)) {
     tmsg("Smoothing L2R outliers ...")
     cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+    l2r.nona <- !is.na(data$data$Tumor_LogR[[1]])
+    cndf <- cndf[l2r.nona,]
     cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = smooth.k, tau = 1, verbose = FALSE)
-    data$data$Tumor_LogR[,1] <- cndf.wins[, 3, drop = FALSE]
-    rm(list = c("cndf", "cndf.wins"))
+    data$data$Tumor_LogR[l2r.nona,1] <- cndf.wins[, 3, drop = FALSE]
+    rm(list = c("cndf", "cndf.wins", "l2r.nona"))
   }
   
   ## BAF filtering
@@ -624,13 +633,16 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
     tmsg("No recentering.")
   } else stop(tmsg("Invalid recentering method called !"), call. = FALSE)
   
-  ## Winsorization
+  ## Winsorization (for aesthetics)
   tmsg("Smoothing L2R (for plots)...")
   cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+  l2r.nona <- !is.na(data$data$Tumor_LogR[[1]])
+  cndf <- cndf[l2r.nona,]
   cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = 5, tau = 1, verbose = FALSE)
-  data$data$Tumor_LogR_wins <- cndf.wins[, 3, drop = FALSE]
+  data$data$Tumor_LogR_wins <- data$data$Tumor_LogR
+  data$data$Tumor_LogR_wins[l2r.nona,] <- cndf.wins[, 3, drop = FALSE]
   colnames(data$data$Tumor_LogR_wins) <- samplename
-  rm(list = c("cndf", "cndf.wins"))
+  rm(list = c("cndf", "cndf.wins", "l2r.nona"))
   
   
   ## PELT rescue
@@ -782,6 +794,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
                             Start = data$data$SNPpos$pos,
                             End = data$data$SNPpos$pos,
                             Value = data$data$Tumor_LogR_wins[,1],
+                            # Value = data$data$Tumor_LogR[,1],
                             stringsAsFactors = FALSE)
     # baf.chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(data$data$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)])
     baf.value <- data.frame(Chr = l2r.chr,
@@ -844,6 +857,8 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
 
   calling.method <- tolower(calling.method)
   
+  `%do%` <- foreach::"%do%"
+  
   if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   if (!dir.exists(out.dir)) stop(tmsg(paste0("Output directory [", out.dir, "] does not exist !")), call. = FALSE)
   if (!(calling.method %in% c("mad", "density"))) stop(tmsg("calling.method should be 'MAD' or 'density' !"), call. = FALSE)
@@ -900,9 +915,11 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   if(!is.null(smooth.k)) {
     tmsg("Smoothing L2R outliers ...")
     cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+    l2r.nona <- !is.na(data$data$Tumor_LogR[[1]])
+    cndf <- cndf[l2r.nona,]
     cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = smooth.k, tau = 1, verbose = FALSE)
-    data$data$Tumor_LogR[,1] <- cndf.wins[, 3, drop = FALSE]
-    rm(list = c("cndf", "cndf.wins"))
+    data$data$Tumor_LogR[l2r.nona,1] <- cndf.wins[, 3, drop = FALSE]
+    rm(list = c("cndf", "cndf.wins", "l2r.nona"))
   }
   
   ## BAF filtering
@@ -1059,14 +1076,16 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
     tmsg("No recentering.")
   } else stop(tmsg("Invalid recentering method called !"), call. = FALSE)
   
-  ## Winsorization
+  ## Winsorization (for aesthetics)
   tmsg("Smoothing L2R (for plots)...")
   cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+  l2r.nona <- !is.na(data$data$Tumor_LogR[[1]])
+  cndf <- cndf[l2r.nona,]
   cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = 5, tau = 1, verbose = FALSE)
-  data$data$Tumor_LogR_wins <- cndf.wins[, 3, drop = FALSE]
+  data$data$Tumor_LogR_wins <- data$data$Tumor_LogR
+  data$data$Tumor_LogR_wins[l2r.nona,] <- cndf.wins[, 3, drop = FALSE]
   colnames(data$data$Tumor_LogR_wins) <- samplename
-  rm(list = c("cndf", "cndf.wins"))
-  
+  rm(list = c("cndf", "cndf.wins", "l2r.nona"))
   
   ## PELT rescue
   if (!is.null(SER.pen)) {
@@ -1099,7 +1118,6 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
       tmsg(paste0(" Found ", length(rescued), "."))
       if (length(rescued) > seg.maxn) tmsg("WARNING : Many small events found, profile may be noisy ! Consider using 'smooth.k', or for WES data, strengthen low depth filtering !")
       data$meta$eacon[["PELT-nseg"]] <- length(rescued)
-      `%do%` <- foreach::"%do%"
       foreach::foreach(re = rescued, .combine = "c") %do% {
         interv <- mydf$idx.ori[seg.start[re]]:mydf$idx.ori[seg.end[re]]
         data$data$Tumor_LogR_segmented[interv] <- median(data$data$Tumor_LogR[interv, 1], na.rm = TRUE)
@@ -1217,6 +1235,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
                             Start = data$data$SNPpos$pos,
                             End = data$data$SNPpos$pos,
                             Value = data$data$Tumor_LogR_wins[,1],
+                            # Value = data$data$Tumor_LogR[,1],
                             stringsAsFactors = FALSE)
     # baf.chr <- if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(data$data$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)])
     baf.value <- data.frame(Chr = l2r.chr,
@@ -1334,6 +1353,7 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
   cls <- parallel::makeCluster(spec = nsubthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cls)
   gamma <- 0
+  `%dopar%` <- foreach::"%dopar%"
   fit.val <- as.data.frame(foreach::foreach(gamma = gammavec, .combine = "rbind", .inorder = TRUE) %dopar% {
     tmsg(paste0(" gamma = ", gamma))
     odirg <- paste0(odir, "/gamma", sprintf("%.2f", gamma))
@@ -2014,6 +2034,8 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
   # require(foreach)
   
   oridir <- getwd()
+  
+  `%do%` <- foreach::"%do%"
   
   if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   

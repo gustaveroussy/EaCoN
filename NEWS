@@ -1,6 +1,12 @@
 EaCoN
 -----
 
+v0.3.5 (20200817)*CloudyMonday*
+-----------------
+* CORR : Segment.*() : Added a patch to handle the NA behavior in copynumber::winsorize (error raised by new handling of NA values in runmed). The patch consists on applying winsorization on non-NA values only (whereas all values were transmitted in earlier versions).
+* CORR : WES.Bin() : Better handling of a possible desynch in chr names (when a canonical chr had no remaining values, its level was kept. This raised a rare error).
+* MOD : Many funcs : Fixed calls to the "%do%" and "%dopar" operators without loading it.
+
 v0.3.4-1 (20181210) *PostRoscovite*
 -----------------
 * CORR : SNP6.Process(), CSHD.Process() : Edited code to handle changes in the rcnorm package, to discard the "chromosomes" package dependency.
@@ -83,7 +89,7 @@ v0.3.0 (20180724) *PapoQueen*
 * All : Removed "EaCoN." prefix from most functions (less self-centric...)
 * All : Took care of vectors and columns that could be converted to factor or integer (to free some RAM up).
 * All : Added missing support for manual PELT penalty (only asymptotic mode was considered when SER.value was numeric).
-* SNP6 : Revamped BAF homozygous calling and rescaling. 
+* SNP6 : Revamped BAF homozygous calling and rescaling.
 * Defined the novel sets of default parameters for all supported technologies.
 * Redacted the README.md
 
