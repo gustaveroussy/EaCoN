@@ -338,6 +338,10 @@ WES.Bin <- function(testBAM = NULL, refBAM = NULL, BINpack = NULL, samplename = 
   meta.w$SNP.tot.count.ref.summary <- my.summary(SNP.all$tot_count.ref[!is.na(SNP.all$tot_count.ref)])
   gc()
   
+  ## Cleaning uncovered chr levels
+  CN.all$chr <- droplevels(CN.all$chr)
+  SNP.all$chr <- droplevels(SNP.all$chr)
+  
   WESobj <- list(RD = CN.all, SNP = SNP.all, meta = list(basic = meta.b, WES = meta.w))
   rm(CN.all, SNP.all)
   gc()

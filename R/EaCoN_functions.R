@@ -20,6 +20,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # source("~/git_gustaveroussy/EaCoN/R/plot_functions.R")
 
+  `%do%` <- foreach::"%do%"
   
   calling.method <- tolower(calling.method)
   
@@ -100,6 +101,17 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   #  rm(list = c("cndf", "cndf.wins"))
   #}
   
+  ## Winsorization *FIXATTEMPT*
+  if(!is.null(smooth.k)) {
+   tmsg("Smoothing L2R outliers ...")
+    cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+    l2r.nona <- !is.na(data$data$Tumor_LogR[[1]])
+    cndf <- cndf[l2r.nona,]
+    cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = smooth.k, tau = 1, verbose = FALSE)
+    data$data$Tumor_LogR[l2r.nona,1] <- cndf.wins[, 3, drop = FALSE]
+    rm(list = c("cndf", "cndf.wins", "l2r.nona"))
+  }
+  
   ## BAF filtering
   tmsg("Filtering BAF...")
   if ("Tumor_BAF.unisomy" %in% names(data$data)) {
@@ -130,6 +142,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   
   ## Computing gaps
   if (!is.null(mingap)) {
+    # `%do%` <- foreach::"%do%"
     data$data$chr <- foreach(k = data$data$ch, .combine = "c") %do% {
       gapz <- which(diff(data$data$SNPpos$pos[k]) >= mingap)
       return(unname(split(k, findInterval(k, k[gapz+1]))))
@@ -209,6 +222,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   
   ## Winsorization (for aesthetics) *FIXATTEMPT*
   tmsg("Smoothing L2R (for plots)...")
+  # str(data)
   cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
   l2r.nona <- !is.na(data$data$Tumor_LogR[[1]])
   cndf <- cndf[l2r.nona,]
@@ -249,7 +263,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
       tmsg(paste0(" Found ", length(rescued), "."))
       if (length(rescued) > seg.maxn) tmsg("WARNING : Many small events found, profile may be noisy ! Consider using 'smooth.k', or for WES data, strengthen low depth filtering !")
       data$meta$eacon[["PELT-nseg"]] <- length(rescued)
-      `%do%` <- foreach::"%do%"
+      # `%do%` <- foreach::"%do%"
       foreach::foreach(re = rescued, .combine = "c") %do% {
         interv <- mydf$idx.ori[seg.start[re]]:mydf$idx.ori[seg.end[re]]
         data$data$Tumor_LogR_segmented[interv] <- median(data$data$Tumor_LogR[interv, 1], na.rm = TRUE)
