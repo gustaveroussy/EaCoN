@@ -207,6 +207,16 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   #colnames(data$data$Tumor_LogR_wins) <- samplename
   #rm(list = c("cndf", "cndf.wins"))
   
+  ## Winsorization (for aesthetics) *FIXATTEMPT*
+  tmsg("Smoothing L2R (for plots)...")
+  cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
+  l2r.nona <- !is.na(data$data$Tumor_LogR[[1]])
+  cndf <- cndf[l2r.nona,]
+  cndf.wins <- copynumber::winsorize(data = cndf, pos.unit = "bp", method = "mad", k = 5, tau = 1, verbose = FALSE)
+  data$data$Tumor_LogR_wins <- data$data$Tumor_LogR
+  data$data$Tumor_LogR_wins[l2r.nona,] <- cndf.wins[, 3, drop = FALSE]
+  colnames(data$data$Tumor_LogR_wins) <- samplename
+  rm(list = c("cndf", "cndf.wins", "l2r.nona"))
   
   ## PELT rescue
   if (!is.null(SER.pen)) {
