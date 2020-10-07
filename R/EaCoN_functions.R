@@ -1,6 +1,6 @@
 ## ASCAT L2R + BAF segmentation
 Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filter = .75, homoCut = .05, penalty = 50, recenter = "l2r.centeredpeak", calling.method = "mad", nrf = .5, SER.pen = 40, out.dir = getwd(), return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
-  
+
   # setwd("/home/job/Documents/ROSCOFF/Roscoff_2018/TP_CNV/WES/REDUX/A18R.11.17.18")
   # data <- readRDS("A18R.11.17.18_hs37d5_b50_processed.RDS")
   # mingap = 5E+06
@@ -21,20 +21,20 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   # source("~/git_gustaveroussy/EaCoN/R/plot_functions.R")
 
   `%do%` <- foreach::"%do%"
-  
+
   calling.method <- tolower(calling.method)
-  
+
   if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   if (!dir.exists(out.dir)) stop(tmsg(paste0("Output directory [", out.dir, "] does not exist !")), call. = FALSE)
   if (!(calling.method %in% c("mad", "density"))) stop(tmsg("calling.method should be 'MAD' or 'density' !"), call. = FALSE)
   if (calling.method == "mad" & is.null(nrf)) stop(tmsg("If calling.method is set to 'MAD', nrf is required !"), call. = FALSE)
   if (!is.null(SER.pen)) if (!is.character(SER.pen)) if (SER.pen <= 0) stop(tmsg("SER.pen should be NULL, a character or an integer/float > 0 !"), call. = FALSE)
-  
-  
+
+
   ## Extract samplename
   samplename <- data$meta$basic$samplename
   tmsg(paste0("Sample : ", samplename))
-  
+
   ## Extract genome version and load corresponding data
   genome <- data$meta$basic$genome
   genome.pkg <- data$meta$basic$genome.pkg
@@ -49,10 +49,10 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   cs <- chromobjector(BSg.obj)
-  
+
   ## Init graphical parameters
   oridir <- getwd()
-  
+
   ## Create output dir
   if (write.data | plot) {
     odir <- paste0(out.dir, "/ASCAT/L2R")
@@ -64,9 +64,9 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
       } else stop(tmsg(paste0("A [", odir, "] dir already exists !")), call. = FALSE)
     } else dir.create(path = odir, recursive = TRUE, showWarnings = FALSE)
   } else odir <- out.dir
-  
+
   setwd(odir)
-  
+
   data$meta$eacon <- c(data$meta$eacon, list(
     "segmenter" = "ASCAT",
     "mingap" = mingap,
@@ -78,7 +78,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
     "calling.nrf" = if(is.null(nrf)) "NA" else nrf,
     "small.events.rescue.PELT.penalty" = if(is.null(SER.pen)) "NA" else SER.pen
   ))
-  
+
   ## BAF scaling
   # if (BAF.rescale) {
   #   tmsg("BAF scaling ...")
@@ -89,9 +89,9 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   # tmsg("Generating germline ...")
   # # data$germline <- EaCoN.Predict.Germline(ASCATobj = data$data, prior = prior, bafbin.size = bafbin.size, modelName = "E", toclustname = "BAF", mcMin = mc.range[1], mcMax = mc.range[2], nfactor = 4, BAF.filter = BAF.filter, BAF.cutter = BAF.cutter, segmentLength = segmentLength, genome.pkg = genome.pkg)
   # data$germline <- EaCoN.Predict.Germline(ASCATobj = data$data, bafbin.size = bafbin.size, modelName = "E", toclustname = "BAF", mc.G = mc.G, nfactor = nfactor, BAF.filter = BAF.filter, BAF.cutter = BAF.cutter, segmentLength = segmentLength, genome.pkg = genome.pkg)
-  # 
-  
-  
+  #
+
+
   ## Winsorization
   if(!is.null(smooth.k)) {
    tmsg("Smoothing L2R outliers ...")
@@ -102,7 +102,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
     data$data$Tumor_LogR[l2r.nona,1] <- cndf.wins[, 3, drop = FALSE]
     rm(list = c("cndf", "cndf.wins", "l2r.nona"))
   }
-  
+
   ## BAF filtering
   tmsg("Filtering BAF...")
   if ("Tumor_BAF.unisomy" %in% names(data$data)) {
@@ -118,19 +118,19 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   Bfiltered <- mBAF.diff <= quantile(mBAF.diff, BAF.filter)
   if (any(Bfiltered)) data$germline$germlinegenotypes[called][!Bfiltered] <- TRUE
   rm(called, mBAF, smoB, mBAF.rm, mBAF.diff, Bfiltered)
-  
+
   ## Edging BAF
   # bnna <- !is.na(data$data$Tumor_BAF)
   # data$data$Tumor_BAF[bnna,1][data$data$Tumor_BAF[bnna,1] > 1] <- 1
   # data$data$Tumor_BAF[bnna,1][data$data$Tumor_BAF[bnna,1] < 0] <- 0
-  
+
   ## Rorschard plot
   if (plot) {
     png(paste0(samplename, ".Rorschach.png"), width = 980, height = 980)
     EaCoN.Rorschard.plot(data = data)
     dev.off()
   }
-  
+
   ## Computing gaps
   if (!is.null(mingap)) {
     # `%do%` <- foreach::"%do%"
@@ -139,25 +139,25 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
       return(unname(split(k, findInterval(k, k[gapz+1]))))
     }
   }
-  
+
   ## Limiting BAF range
   # data$data$Tumor_BAF[[1]][data$data$Tumor_BAF[[1]] > 1] <- 1
   # data$data$Tumor_BAF[[1]][data$data$Tumor_BAF[[1]] < 0] <- 0
-  
+
   ## ASPCF segmentation
   tmsg("ASPCF segmentation ...")
   aspcf.res <- ASCAT::ascat.aspcf(ASCATobj = data$data, ascat.gg = data$germline, penalty = penalty)
   aspcf.res$germline <- data$germline
   data$data <- aspcf.res
   rm(aspcf.res)
-  
+
   ## Removing big, unused text files
   pcftxt <- list.files(path = ".", pattern = "\\.PCFed\\.txt", full.names = TRUE, recursive = FALSE, ignore.case = TRUE, include.dirs = FALSE)
   if (length(pcftxt) > 0) unlink(pcftxt)
-  
+
   ## Adjusting out-of-range BAF segments
   data$data$Tumor_BAF_segmented[[1]][(data$data$Tumor_BAF_segmented[[1]][,1] < 0),1] <- 0
-  
+
   ## Re-centering
   smo <- round(length(data$data$Tumor_LogR[!is.na(data$data$Tumor_LogR[,1]), 1]) / 550)
   if(smo%%2 == 0) smo <- smo+1
@@ -182,7 +182,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
         rrr <- rle(denf$sign2)
         repr <- data.frame(values = rrr$values, start = c(0, (cumsum(rrr$lengths[-c(length(rrr$lengths))]) + 1)), end = cumsum(rrr$lengths), stringsAsFactors = F)
         npk <- which(repr$values == -2)
-        
+
         if (length(npk) == 1) {
           fx <- my.den$x[repr$start[npk[1]]]
         } else {
@@ -202,7 +202,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   } else if (is.null(recenter)) {
     tmsg("No recentering.")
   } else stop(tmsg("Invalid recentering method called !"), call. = FALSE)
-  
+
   ## Winsorization (for aesthetics)
   tmsg("Smoothing L2R (for plots)...")
   cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
@@ -213,7 +213,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   data$data$Tumor_LogR_wins[l2r.nona,] <- cndf.wins[, 3, drop = FALSE]
   colnames(data$data$Tumor_LogR_wins) <- samplename
   rm(list = c("cndf", "cndf.wins", "l2r.nona"))
-  
+
   ## PELT rescue
   if (!is.null(SER.pen)) {
     tmsg("Rescuing small events ...")
@@ -253,13 +253,13 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
       }
     }
   }
-  
+
   ## BAF objects
   bafpos <- data$data$SNPpos[rownames(data$data$Tumor_LogR_segmented) %in% rownames(data$data$Tumor_BAF_segmented[[1]]),]
   bafpos$ProbeSet <- rownames(data$data$Tumor_BAF_segmented[[1]])
   bafpos$BAF <- data$data$Tumor_BAF_segmented[[1]][,1]
   bafpos$chrs <- as.character(bafpos$chrs)
-  
+
   bafkend <- vapply(unique(bafpos$chrs), function(x) { max(which(bafpos$chrs == x))}, 1)
   bafbreaks <- cumsum(rle(bafpos$BAF)$lengths)
   baf.seg <- data.frame(end.idx = sort(unique(c(bafkend, bafbreaks))), stringsAsFactors = FALSE)
@@ -276,7 +276,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   baf.seg$End <- bafpos$pos[baf.seg$end.idx]
   baf.seg$Width <- baf.seg$End - baf.seg$Start + 1
   baf.seg$Value <- bafpos$BAF[baf.seg$start.idx]
-  
+
   ## BAF calling
   baf.homocut <- homoCut
   ### Calling
@@ -285,12 +285,12 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   if (length(baf.homo) > 0) baf.seg$Status[baf.homo] <- "Homo"
   baf.hetero <- sort(which(baf.seg$Value == .5))
   if (length(baf.hetero) > 0) baf.seg$Status[baf.hetero] <- "Hetero"
-  
+
   baf.seg.out <- baf.seg[,c(6,7:12,4:5,1:3)]
   colnames(baf.seg.out) <- c("Chrom", "Chr", "Start", "End", "Width", "BAF.Value", "BAF.Status", "Start.FeatureName", "End.FeatureName", "Start.FeatureIdx", "End.FeatureIdx", "Features")
-  
+
   if (write.data) write.table(baf.seg.out, paste0(samplename, ".SegmentedBAF.txt"), sep = "\t", row.names = FALSE, quote = FALSE)
-  
+
   ## L2R calling
   tmsg("Calling L2R ...")
   l2r.segments <- foreach::foreach(k = 1:length(data$data$ch), .combine = "rbind") %do% {
@@ -305,9 +305,9 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
     segdf$End <- as.integer(data$data$SNPpos$pos[segdf$End.idx])
     segdf <- segdf[, c(3, 4, 7, 8, 2, 1, 6, 5)]
   }
-  
+
   my.mad <- get.mad(data$data$Tumor_LogR[,1])
-  
+
   if (calling.method == "mad") {
     g.cut <- my.mad * nrf
     l.cut <- -g.cut
@@ -328,8 +328,8 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
   }
   data$meta$eacon[["L2R-segments-gain-cutoff"]] <- g.cut
   data$meta$eacon[["L2R-segments-loss-cutoff"]] <- l.cut
-  
-  
+
+
   ## Profile metrics
   data$meta$eacon$MAD <- my.mad
   data$meta$eacon$SSAD <- sum(abs(diff(runmed(data$data$Tumor_LogR[!is.na(data$data$Tumor_LogR[,1]),1], smo))))
@@ -349,7 +349,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
     write.table(data$cbs$nocut, paste0(samplename, ".NoCut.cbs"), sep = "\t", row.names = FALSE, quote = FALSE)
     write.table(data$cbs$cut, paste0(samplename, ".Cut.cbs"), sep = "\t", row.names = FALSE, quote = FALSE)
   }
-  
+
   ## REPLOTS
   if (plot) {
     tmsg("Plotting ...")
@@ -367,7 +367,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
                             End = as.integer(data$data$SNPpos$pos),
                             Value = data$data$Tumor_BAF[,1],
                             stringsAsFactors = FALSE)
-    
+
     png(paste0(samplename, ".SEG.ASCAT.png"), width = 1850, height = 980)
     par(mar = c(1, 6, 3, 1), mfrow = c(2, 1))
     EaCoN.l2rplot.geno(l2r = l2r.value,
@@ -378,7 +378,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
                        genome.pkg = genome.pkg,
                        title = paste0(samplename, " L2R"),
                        ylim = c(-1.5,1.5))
-    
+
     EaCoN.bafplot.geno(baf = baf.value,
                        seg = baf.seg,
                        seg.type = "both",
@@ -386,13 +386,13 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
                        title = paste0(samplename, " BAF"))
     dev.off()
   }
-  
+
   ## Saving segmentation object
   if (write.data) {
     tmsg("Saving data ...")
     saveRDS(data, paste0(samplename, ".SEG.ASCAT.RDS"), compress = "bzip2")
   }
-  
+
   setwd(oridir)
   tmsg("Done.")
   if (return.data) return(data)
@@ -400,7 +400,7 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
 
 ## FACETS L2R + BAF segmentation
 Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoCut = .05, penalty = 100, recenter = "l2r.centeredpeak", calling.method = "mad", nrf = .5, SER.pen = 2, out.dir = getwd(), return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
-  
+
   # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta2/WES/TCGA-A7-A0CE-01A_vs_10A")
   # data = readRDS("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta2/WES/TCGA-A7-A0CE-01A_vs_10A/TCGA-A7-A0CE-01A_vs_10A_hs37d5_b_processed.RDS")
   # setwd("/home/job/WORKSPACE/EaCoN_tests/OS/FACETSTEST")
@@ -423,22 +423,22 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   # source("~/git_gustaveroussy/EaCoN/R/plot_functions.R")
   # source("~/git_gustaveroussy/EaCoN/R/FACETS_hack.R")
 
-  
+
   calling.method <- tolower(calling.method)
-  
+
   if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   if (!dir.exists(out.dir)) stop(tmsg(paste0("Output directory [", out.dir, "] does not exist !")), call. = FALSE)
   if (!(calling.method %in% c("mad", "density"))) stop(tmsg("calling.method should be 'MAD' or 'density' !"), call. = FALSE)
   if (calling.method == "mad" & is.null(nrf)) stop(tmsg("If calling.method is set to 'MAD', nrf is required !"), call. = FALSE)
   if (!is.null(SER.pen)) if (!is.character(SER.pen)) if (SER.pen <= 0) stop(tmsg("SER.pen should be NULL, a character or an integer/float > 0 !"), call. = FALSE)
-  
+
   # valid.types <- c("WES", "WGS", "OncoScan_CNV")
   if(!("additional" %in% names(data$data))) stop(tmsg("FACETS is not available for this data source !"), call. = FALSE)
-  
+
   ## Extract samplename
   samplename <- data$meta$basic$samplename
   tmsg(paste0("Sample : ", samplename))
-  
+
   ## Extract genome version and load corresponding data
   genome <- data$meta$basic$genome
   genome.pkg <- data$meta$basic$genome.pkg
@@ -453,10 +453,10 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   cs <- chromobjector(BSg.obj)
-  
+
   ## Init graphical parameters
   oridir <- getwd()
-  
+
   ## Create output dir
   if (write.data | plot) {
     odir <- paste0(out.dir, "/FACETS/L2R")
@@ -467,9 +467,9 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
       } else stop(tmsg(paste0("A [", odir, "] dir already exists !")), call. = FALSE)
     } else dir.create(path = odir, recursive = TRUE, showWarnings = FALSE)
   } else odir <- out.dir
-  
+
   setwd(odir)
-  
+
   data$meta$eacon <- c(data$meta$eacon, list(
     "segmenter" = "FACETS",
     "BAF.filter" = BAF.filter,
@@ -480,7 +480,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
     "calling.nrf" = if(is.null(nrf)) "NA" else nrf,
     "small.events.rescue.PELT.penalty" = if(is.null(SER.pen)) "NA" else SER.pen
   ))
-  
+
   ## Winsorization
    if(!is.null(smooth.k)) {
     tmsg("Smoothing L2R outliers ...")
@@ -491,7 +491,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
     data$data$Tumor_LogR[l2r.nona,1] <- cndf.wins[, 3, drop = FALSE]
     rm(list = c("cndf", "cndf.wins", "l2r.nona"))
   }
-  
+
   ## BAF filtering
   tmsg("Filtering BAF...")
   if ("Tumor_BAF.unisomy" %in% names(data$data)) {
@@ -507,19 +507,19 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   Bfiltered <- mBAF.diff <= quantile(mBAF.diff, BAF.filter)
   if (any(Bfiltered)) data$germline$germlinegenotypes[called][!Bfiltered] <- TRUE
   rm(called, mBAF, smoB, mBAF.rm, mBAF.diff, Bfiltered)
-  
+
   ## Edging BAF
   # bnna <- !is.na(data$data$Tumor_BAF)
   # data$data$Tumor_BAF[bnna,1][data$data$Tumor_BAF[bnna,1] > 1] <- 1
   # data$data$Tumor_BAF[bnna,1][data$data$Tumor_BAF[bnna,1] < 0] <- 0
-  
+
   ## Rorschard plot
   if (plot) {
     png(paste0(samplename, ".Rorschach.png"), width = 980, height = 980)
     EaCoN.Rorschard.plot(data = data)
     dev.off()
   }
-  
+
   ## Computing gaps
   # if (!is.null(mingap)) {
   #   data$data$chr <- foreach(k = data$data$ch, .combine = "c") %do% {
@@ -527,22 +527,22 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   #     return(unname(split(k, findInterval(k, k[gapz+1]))))
   #   }
   # }
-  # 
+  #
   ## Limiting BAF range
   # data$data$Tumor_BAF[[1]][data$data$Tumor_BAF[[1]] > 1] <- 1
   # data$data$Tumor_BAF[[1]][data$data$Tumor_BAF[[1]] < 0] <- 0
-  
+
   ## FACETS segmentation
   tmsg("FACETS segmentation ...")
-  
+
   snp.nbhd <- 250
   hetscale <- TRUE
   deltaCN <- 0
-  
+
   ### Data conversion
   # F.dmat <- data.frame(chrom = as.integer(data$data$SNPpos$chrs), maploc = as.numeric(data$data$SNPpos$pos), rCountT = data$data$additional$RD.test, rCountN = data$data$additional$RD.ref, vafT = data$data$Tumor_BAF[,1], vafN = NA, het = abs(as.numeric(data$germline$germlinegenotypes)-1), keep = NA, gcpct = NA, gcbias = NA, cnlr = data$data$Tumor_LogR[,1], valor = data$data$additional$LOR, lorvar = data$data$additional$LORvar)
   F.dmat <- data.frame(chrom = unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)]), maploc = as.numeric(data$data$SNPpos$pos), rCountT = data$data$additional$RD.test, rCountN = data$data$additional$RD.ref, vafT = data$data$Tumor_BAF[,1], vafN = NA, het = abs(as.numeric(data$germline$germlinegenotypes)-1), keep = NA, gcpct = NA, gcbias = NA, cnlr = data$data$Tumor_LogR[,1], valor = data$data$additional$LOR, lorvar = data$data$additional$LORvar)
-  
+
   ### Selection of SNP position to smooth their density
   F.dmat$keep <- if ("germline" %in% names(data)) as.numeric(!unname(data$germline$germlinegenotypes[,1])) else F.dmat$keep <- facets:::scanSnp(maploc = F.dmat$maploc, het = F.dmat$het, nbhd = snp.nbhd)
   facets.keep <- F.dmat$keep == 1 & !is.na(F.dmat$vafT) & !is.na(F.dmat$lorvar) & !is.na(F.dmat$cnlr)
@@ -550,21 +550,21 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   facets.keep[c(vapply(data$data$chr, function(x) {head(x, 1)}, 1L), vapply(data$data$chr, function(x) {tail(x, 1)}, 1L))] <- TRUE
   #### Applying the selectionn
   F.dmat <- F.dmat[facets.keep,]
-  
+
   ## OS hack
   if (any(is.na(F.dmat$lorvar))) F.dmat$lorvar[is.na(F.dmat$lorvar)] <- 0
   if (any(is.na(F.dmat$vafT))) F.dmat$vafT[is.na(F.dmat$vafT)] <- 0.5
   if (any(is.na(F.dmat$cnlr))) F.dmat$cnlr[is.na(F.dmat$cnlr)] <- 0
-  
+
   ### Presegmentation (clustering positions)
   nX <- which(data$data$chrs == data$data$sexchromosomes[1])
   F.tmp <- facets:::segsnps(mat = F.dmat, cval = penalty, hetscale = hetscale, delta = deltaCN)
   rm(F.dmat)
-  
+
   ### Segmentation
   F.proc.out <- procSample.hacked(x = c(gbuild = data$meta$basic$genome, nX = nX, F.tmp), cval = penalty, chromlevels = data$data$chrs)
   rm(F.tmp)
-  
+
   ### Inserting results in data
   ori.idx <- which(facets.keep)
   seg.end.idx <- ori.idx[cumsum(F.proc.out$out$num.mark)]
@@ -584,10 +584,10 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   data$data$Tumor_BAF_segmented[[1]][pc50.idx,1] <- .5
   #### Additional
   data$data$additional <- F.proc.out
-  
+
   ## Adjusting out-of-range BAF segments
   data$data$Tumor_BAF_segmented[[1]][(data$data$Tumor_BAF_segmented[[1]][,1] < 0),1] <- 0
-  
+
   ## Re-centering
   smo <- round(length(data$data$Tumor_LogR[!is.na(data$data$Tumor_LogR[,1]), 1]) / 550)
   if(smo%%2 == 0) smo <- smo+1
@@ -612,7 +612,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
         rrr <- rle(denf$sign2)
         repr <- data.frame(values = rrr$values, start = c(0, (cumsum(rrr$lengths[-c(length(rrr$lengths))]) + 1)), end = cumsum(rrr$lengths), stringsAsFactors = F)
         npk <- which(repr$values == -2)
-        
+
         if (length(npk) == 1) {
           fx <- my.den$x[repr$start[npk[1]]]
         } else {
@@ -632,7 +632,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   } else if (is.null(recenter)) {
     tmsg("No recentering.")
   } else stop(tmsg("Invalid recentering method called !"), call. = FALSE)
-  
+
   ## Winsorization (for aesthetics)
   tmsg("Smoothing L2R (for plots)...")
   cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
@@ -643,8 +643,8 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   data$data$Tumor_LogR_wins[l2r.nona,] <- cndf.wins[, 3, drop = FALSE]
   colnames(data$data$Tumor_LogR_wins) <- samplename
   rm(list = c("cndf", "cndf.wins", "l2r.nona"))
-  
-  
+
+
   ## PELT rescue
   if (!is.null(SER.pen)) {
     tmsg("Rescuing small events ...")
@@ -684,13 +684,13 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
       }
     }
   }
-  
+
   ## BAF objects
   bafpos <- data$data$SNPpos[rownames(data$data$Tumor_LogR_segmented) %in% rownames(data$data$Tumor_BAF_segmented[[1]]),]
   bafpos$ProbeSet <- rownames(data$data$Tumor_BAF_segmented[[1]])
   bafpos$BAF <- data$data$Tumor_BAF_segmented[[1]][,1]
   bafpos$chrs <- as.character(bafpos$chrs)
-  
+
   bafkend <- vapply(unique(bafpos$chrs), function(x) { max(which(bafpos$chrs == x))}, 1)
   bafbreaks <- cumsum(rle(bafpos$BAF)$lengths)
   baf.seg <- data.frame(end.idx = sort(unique(c(bafkend, bafbreaks))), stringsAsFactors = FALSE)
@@ -707,7 +707,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   baf.seg$End <- bafpos$pos[baf.seg$end.idx]
   baf.seg$Width <- baf.seg$End - baf.seg$Start + 1
   baf.seg$Value <- bafpos$BAF[baf.seg$start.idx]
-  
+
   ## BAF calling
   baf.homocut <- homoCut
   ### Calling
@@ -716,12 +716,12 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   if (length(baf.homo) > 0) baf.seg$Status[baf.homo] <- "Homo"
   baf.hetero <- sort(which(baf.seg$Value == .5))
   if (length(baf.hetero) > 0) baf.seg$Status[baf.hetero] <- "Hetero"
-  
+
   baf.seg.out <- baf.seg[,c(6,7:12,4:5,1:3)]
   colnames(baf.seg.out) <- c("Chrom", "Chr", "Start", "End", "Width", "BAF.Value", "BAF.Status", "Start.FeatureName", "End.FeatureName", "Start.FeatureIdx", "End.FeatureIdx", "Features")
-  
+
   if (write.data) write.table(baf.seg.out, paste0(samplename, ".SegmentedBAF.txt"), sep = "\t", row.names = FALSE, quote = FALSE)
-  
+
   ## L2R calling
   tmsg("Calling L2R ...")
   l2r.segments <- foreach::foreach(k = 1:length(data$data$ch), .combine = "rbind") %do% {
@@ -737,9 +737,9 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
     segdf$End <- data$data$SNPpos$pos[segdf$End.idx]
     segdf <- segdf[, c(3, 4, 7, 8, 2, 1, 6, 5)]
   }
-  
+
   my.mad <- get.mad(data$data$Tumor_LogR[,1])
-  
+
   if (calling.method == "mad") {
     g.cut <- my.mad * nrf
     l.cut <- -g.cut
@@ -760,12 +760,12 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   }
   data$meta$eacon[["L2R-segments-gain-cutoff"]] <- g.cut
   data$meta$eacon[["L2R-segments-loss-cutoff"]] <- l.cut
-  
-  
+
+
   ## Profile metrics
   data$meta$eacon$MAD <- my.mad
   data$meta$eacon$SSAD <- sum(abs(diff(runmed(data$data$Tumor_LogR[!is.na(data$data$Tumor_LogR[,1]),1], smo))))
-  
+
   ## Generating CBS
   gain.idx <- which(l2r.segments$Value > g.cut)
   loss.idx <- which(l2r.segments$Value < l.cut)
@@ -781,7 +781,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
     write.table(data$cbs$nocut, paste0(samplename, ".NoCut.cbs"), sep = "\t", row.names = FALSE, quote = FALSE)
     write.table(data$cbs$cut, paste0(samplename, ".Cut.cbs"), sep = "\t", row.names = FALSE, quote = FALSE)
   }
-  
+
   ## REPLOTS
   if (plot) {
     tmsg("Plotting ...")
@@ -802,7 +802,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
                             End = data$data$SNPpos$pos,
                             Value = data$data$Tumor_BAF[,1],
                             stringsAsFactors = FALSE)
-    
+
     png(paste0(samplename, ".SEG.FACETS.png"), width = 1850, height = 980)
     par(mar = c(1, 6, 3, 1), mfrow = c(2, 1))
     EaCoN.l2rplot.geno(l2r = l2r.value,
@@ -813,7 +813,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
                        genome.pkg = genome.pkg,
                        title = paste0(samplename, " L2R"),
                        ylim = c(-1.5,1.5))
-    
+
     EaCoN.bafplot.geno(baf = baf.value,
                        seg = baf.seg,
                        seg.type = "both",
@@ -821,13 +821,13 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
                        title = paste0(samplename, " BAF"))
     dev.off()
   }
-  
+
   ## Saving segmentation object
   if (write.data) {
     tmsg("Saving data ...")
     saveRDS(data, paste0(samplename, ".SEG.FACETS.RDS"), compress = "bzip2")
   }
-  
+
   setwd(oridir)
   tmsg("Done.")
   if (return.data) return(data)
@@ -835,7 +835,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
 
 ## SEQUENZA L2R + BAF segmentation
 Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoCut = .05, penalty = 50, recenter = "l2r.centeredpeak", calling.method = "mad", nrf = .5, SER.pen = 40, out.dir = getwd(), return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
-  
+
   # setwd("/home/job/Documents/ROSCOFF/Roscoff_2018/TP_CNV/WES/REDUX/A18R.11.17.18")
   # data = readRDS("A18R.11.17.18_hs37d5_b50_processed.RDS")
   # smooth.k = 5
@@ -856,19 +856,19 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   # source("~/git_gustaveroussy/EaCoN/R/plot_functions.R")
 
   calling.method <- tolower(calling.method)
-  
+
   `%do%` <- foreach::"%do%"
-  
+
   if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   if (!dir.exists(out.dir)) stop(tmsg(paste0("Output directory [", out.dir, "] does not exist !")), call. = FALSE)
   if (!(calling.method %in% c("mad", "density"))) stop(tmsg("calling.method should be 'MAD' or 'density' !"), call. = FALSE)
   if (calling.method == "mad" & is.null(nrf)) stop(tmsg("If calling.method is set to 'MAD', nrf is required !"), call. = FALSE)
   if (!is.null(SER.pen)) if (!is.character(SER.pen)) if (SER.pen <= 0) stop(tmsg("SER.pen should be NULL, a character or an integer/float > 0 !"), call. = FALSE)
-  
+
   ## Extract samplename
   samplename <- data$meta$basic$samplename
   tmsg(paste0("Sample : ", samplename))
-  
+
   ## Extract genome version and load corresponding data
   genome <- data$meta$basic$genome
   genome.pkg <- data$meta$basic$genome.pkg
@@ -883,10 +883,10 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   cs <- chromobjector(BSg.obj)
-  
+
   ## Init graphical parameters
   oridir <- getwd()
-  
+
   ## Create output dir
   if (write.data | plot) {
     odir <- paste0(out.dir, "/SEQUENZA/L2R")
@@ -897,9 +897,9 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
       } else stop(tmsg(paste0("A [", odir, "] dir already exists !")), call. = FALSE)
     } else dir.create(path = odir, recursive = TRUE, showWarnings = FALSE)
   } else odir <- out.dir
-  
+
   setwd(odir)
-  
+
   data$meta$eacon <- c(data$meta$eacon, list(
     "segmenter" = "SEQUENZA",
     "BAF.filter" = BAF.filter,
@@ -910,7 +910,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
     "calling.nrf" = if(is.null(nrf)) "NA" else nrf,
     "small.events.rescue.PELT.penalty" = if(is.null(SER.pen)) "NA" else SER.pen
   ))
-  
+
   ## Winsorization
   if(!is.null(smooth.k)) {
     tmsg("Smoothing L2R outliers ...")
@@ -921,7 +921,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
     data$data$Tumor_LogR[l2r.nona,1] <- cndf.wins[, 3, drop = FALSE]
     rm(list = c("cndf", "cndf.wins", "l2r.nona"))
   }
-  
+
   ## BAF filtering
   tmsg("Filtering BAF...")
   if ("Tumor_BAF.unisomy" %in% names(data$data)) {
@@ -937,22 +937,22 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   Bfiltered <- mBAF.diff <= quantile(mBAF.diff, BAF.filter)
   if (any(Bfiltered)) data$germline$germlinegenotypes[called][!Bfiltered] <- TRUE
   rm(called, mBAF, smoB, mBAF.rm, mBAF.diff, Bfiltered)
-  
+
   ## Edging BAF
   # bnna <- !is.na(data$data$Tumor_BAF)
   # data$data$Tumor_BAF[bnna,1][data$data$Tumor_BAF[bnna,1] > 1] <- 1
   # data$data$Tumor_BAF[bnna,1][data$data$Tumor_BAF[bnna,1] < 0] <- 0
-  
+
   ## Rorschard plot
   if (plot) {
     png(paste0(samplename, ".Rorschach.png"), width = 980, height = 980)
     EaCoN.Rorschard.plot(data = data)
     dev.off()
   }
-  
+
   ## SEQUENZA segmentation
   tmsg("SEQUENZA segmentation ...")
-  
+
   ### Data conversion
   tpos <- as.integer(unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)]))
   l2r.df <- data.frame(chrs = tpos, pos = as.integer(data$data$SNPpos$pos), s1 = data$data$Tumor_LogR[,1], stringsAsFactors = FALSE)
@@ -960,50 +960,50 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   tbaf[data$germline$germlinegenotypes] <- 0
   baf.df <- data.frame(chrs = tpos, pos = as.integer(data$data$SNPpos$pos), s1 = tbaf, stringsAsFactors = FALSE)
   colnames(l2r.df)[3] <- colnames(baf.df)[3] <- samplename
-  
+
   ### Blanking bins uncovered by BAF
   isna <- is.na(baf.df[[samplename]])
   baf.df[[samplename]][isna] <- 1
   baf.df[[samplename]][isna][baf.df$pos[isna] %% 2 == 0] <- 0
-  
+
   ### Imputing missing L2R values
   if(any(is.na(l2r.df[,3]))) {
     l2r.tmp <- l2r.df[,3]
     l2r.df[,3] <- approxfun(seq_along(l2r.tmp), l2r.tmp, rule = 2)(seq_along(l2r.tmp))
   }
-  
+
   # ### Data conversion
   # tpos <- as.integer(unlist(cs$chrom2chr[as.character(data$data$SNPpos$chrs)]))
   # l2r.df <- data.frame(chrs = tpos, pos = as.integer(data$data$SNPpos$pos), s1 = data$data$Tumor_LogR[,1], stringsAsFactors = FALSE)
-  # 
+  #
   # ### Imputing missing L2R values
   # if(any(is.na(l2r.df[,3]))) {
   #   l2r.tmp <- l2r.df[,3]
   #   l2r.df[,3] <- approxfun(seq_along(l2r.tmp), l2r.tmp, rule = 2)(seq_along(l2r.tmp))
   # }
-  # 
+  #
   # tbaf <- data$data$Tumor_BAF[,1]
-  # 
+  #
   # k.edges <- as.vector(vapply(unique(l2r.df$chrs), function(k) { c(min(which(l2r.df$chrs == k)), max(which(l2r.df$chrs == k))) }, c(1,1)))
   # p.keep <- data$germline$germlinegenotypes
   # p.keep[is.na(p.keep)] <- TRUE
   # p.keep[is.na(tbaf)] <- TRUE
   # p.keep[k.edges] <- FALSE
-  # 
+  #
   # baf.df <- data.frame(chrs = tpos, pos = as.integer(data$data$SNPpos$pos), s1 = tbaf, stringsAsFactors = FALSE)
   # colnames(l2r.df)[3] <- colnames(baf.df)[3] <- samplename
-  # 
+  #
   # # isna <- is.na(baf.df[[samplename]])
   # p.idx <- seq_len(length(data$data$SNPpos$pos))[!p.keep]
   # l2r.df <- l2r.df[!p.keep,]
   # baf.df <- baf.df[!p.keep,]
-  # 
+  #
   # ### Imputing missing BAF values
   # if(any(is.na(baf.df[,3]))) {
   #   baf.tmp <- baf.df[,3]
   #   baf.df[,3] <- approxfun(seq_along(baf.tmp), baf.tmp, rule = 2)(seq_along(baf.tmp))
   # }
-  
+
   ### Segmentation
   sqz.pcf <- copynumber::aspcf(logR = l2r.df, BAF = baf.df, kmin = 10, gamma = penalty, baf.thres = c(0.05,0.95), arms = rep("p", nrow(l2r.df)), verbose = FALSE)
 
@@ -1013,24 +1013,24 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   # glob.start.idx <- p.idx[seg.start.idx]
   # glob.end.idx <- p.idx[seg.end.idx]
   # new.n.probes <- p.idx[seg.end.idx] - p.idx[seg.start.idx] + 1
-  
+
   ### Inserting results in data
-  
+
   data$data$Tumor_LogR_segmented <- matrix(rep(sqz.pcf$logR.mean, sqz.pcf$n.probes), ncol = 1)
   rownames(data$data$Tumor_LogR_segmented) <- rownames(data$data$SNPpos)
   data$data$Tumor_BAF_segmented <- list(matrix(rep(sqz.pcf$BAF.mean, sqz.pcf$n.probes), ncol = 1))
   rownames(data$data$Tumor_BAF_segmented[[1]]) <- rownames(data$data$SNPpos)
-  
-  
+
+
   #### Additional
   # sqz.pcf$chrom <- data$data$chrs[sqz.pcf$chrom]
   # sqz.pcf$chrom <- unlist(cs$chr2chrom[sqz.pcf$chrom])
   data$data$additional <- sqz.pcf
-  
-  
+
+
   ## Adjusting out-of-range BAF segments
   data$data$Tumor_BAF_segmented[[1]][(data$data$Tumor_BAF_segmented[[1]][,1] < 0),1] <- 0
-  
+
   ## Re-centering
   smo <- round(length(data$data$Tumor_LogR[!is.na(data$data$Tumor_LogR[,1]), 1]) / 550)
   if(smo%%2 == 0) smo <- smo+1
@@ -1055,7 +1055,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
         rrr <- rle(denf$sign2)
         repr <- data.frame(values = rrr$values, start = c(0, (cumsum(rrr$lengths[-c(length(rrr$lengths))]) + 1)), end = cumsum(rrr$lengths), stringsAsFactors = F)
         npk <- which(repr$values == -2)
-        
+
         if (length(npk) == 1) {
           fx <- my.den$x[repr$start[npk[1]]]
         } else {
@@ -1075,7 +1075,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   } else if (is.null(recenter)) {
     tmsg("No recentering.")
   } else stop(tmsg("Invalid recentering method called !"), call. = FALSE)
-  
+
   ## Winsorization (for aesthetics)
   tmsg("Smoothing L2R (for plots)...")
   cndf <- data.frame(Chr = rep(unlist(cs$chrom2chr[data$data$chrs]), vapply(data$data$ch, length, 1L)), Position = unlist(data$data$ch), MySample = data$data$Tumor_LogR[[1]], stringsAsFactors = FALSE)
@@ -1086,7 +1086,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   data$data$Tumor_LogR_wins[l2r.nona,] <- cndf.wins[, 3, drop = FALSE]
   colnames(data$data$Tumor_LogR_wins) <- samplename
   rm(list = c("cndf", "cndf.wins", "l2r.nona"))
-  
+
   ## PELT rescue
   if (!is.null(SER.pen)) {
     tmsg("Rescuing small events ...")
@@ -1125,13 +1125,13 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
       }
     }
   }
-  
+
   ## BAF objects
   bafpos <- data$data$SNPpos[rownames(data$data$Tumor_LogR_segmented) %in% rownames(data$data$Tumor_BAF_segmented[[1]]),]
   bafpos$ProbeSet <- rownames(data$data$Tumor_BAF_segmented[[1]])
   bafpos$BAF <- data$data$Tumor_BAF_segmented[[1]][,1]
   bafpos$chrs <- as.character(bafpos$chrs)
-  
+
   bafkend <- vapply(unique(bafpos$chrs), function(x) { max(which(bafpos$chrs == x))}, 1)
   bafbreaks <- cumsum(rle(bafpos$BAF)$lengths)
   baf.seg <- data.frame(end.idx = sort(unique(c(bafkend, bafbreaks))), stringsAsFactors = FALSE)
@@ -1148,7 +1148,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   baf.seg$End <- bafpos$pos[baf.seg$end.idx]
   baf.seg$Width <- baf.seg$End - baf.seg$Start + 1
   baf.seg$Value <- bafpos$BAF[baf.seg$start.idx]
-  
+
   ## BAF calling
   baf.homocut <- homoCut
   ### Calling
@@ -1157,12 +1157,12 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   if (length(baf.homo) > 0) baf.seg$Status[baf.homo] <- "Homo"
   baf.hetero <- sort(which(baf.seg$Value == .5))
   if (length(baf.hetero) > 0) baf.seg$Status[baf.hetero] <- "Hetero"
-  
+
   baf.seg.out <- baf.seg[,c(6,7:12,4:5,1:3)]
   colnames(baf.seg.out) <- c("Chrom", "Chr", "Start", "End", "Width", "BAF.Value", "BAF.Status", "Start.FeatureName", "End.FeatureName", "Start.FeatureIdx", "End.FeatureIdx", "Features")
-  
+
   if (write.data) write.table(baf.seg.out, paste0(samplename, ".SegmentedBAF.txt"), sep = "\t", row.names = FALSE, quote = FALSE)
-  
+
   ## L2R calling
   tmsg("Calling L2R ...")
   l2r.segments <- foreach::foreach(k = 1:length(data$data$ch), .combine = "rbind") %do% {
@@ -1178,9 +1178,9 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
     segdf$End <- data$data$SNPpos$pos[segdf$End.idx]
     segdf <- segdf[, c(3, 4, 7, 8, 2, 1, 6, 5)]
   }
-  
+
   my.mad <- get.mad(data$data$Tumor_LogR[,1])
-  
+
   if (calling.method == "mad") {
     g.cut <- my.mad * nrf
     l.cut <- -g.cut
@@ -1201,12 +1201,12 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
   }
   data$meta$eacon[["L2R-segments-gain-cutoff"]] <- g.cut
   data$meta$eacon[["L2R-segments-loss-cutoff"]] <- l.cut
-  
-  
+
+
   ## Profile metrics
   data$meta$eacon$MAD <- my.mad
   data$meta$eacon$SSAD <- sum(abs(diff(runmed(data$data$Tumor_LogR[!is.na(data$data$Tumor_LogR[,1]),1], smo))))
-  
+
   ## Generating CBS
   gain.idx <- which(l2r.segments$Value > g.cut)
   loss.idx <- which(l2r.segments$Value < l.cut)
@@ -1222,7 +1222,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
     write.table(data$cbs$nocut, paste0(samplename, ".NoCut.cbs"), sep = "\t", row.names = FALSE, quote = FALSE)
     write.table(data$cbs$cut, paste0(samplename, ".Cut.cbs"), sep = "\t", row.names = FALSE, quote = FALSE)
   }
-  
+
   ## REPLOTS
   if (plot) {
     tmsg("Plotting ...")
@@ -1243,7 +1243,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
                             End = data$data$SNPpos$pos,
                             Value = data$data$Tumor_BAF[,1],
                             stringsAsFactors = FALSE)
-    
+
     png(paste0(samplename, ".SEG.SEQUENZA.png"), width = 1850, height = 980)
     par(mar = c(1, 6, 3, 1), mfrow = c(2, 1))
     EaCoN.l2rplot.geno(l2r = l2r.value,
@@ -1254,7 +1254,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
                        genome.pkg = genome.pkg,
                        title = paste0(samplename, " L2R"),
                        ylim = c(-1.5,1.5))
-    
+
     EaCoN.bafplot.geno(baf = baf.value,
                        seg = baf.seg,
                        seg.type = "both",
@@ -1262,13 +1262,13 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
                        title = paste0(samplename, " BAF"))
     dev.off()
   }
-  
+
   ## Saving segmentation object
   if (write.data) {
     tmsg("Saving data ...")
     saveRDS(data, paste0(samplename, ".SEG.SEQUENZA.RDS"), compress = "bzip2")
   }
-  
+
   setwd(oridir)
   tmsg("Done.")
   if (return.data) return(data)
@@ -1308,7 +1308,7 @@ Segment.ff.Batch <- function (RDS.files = list.files(path = getwd(), pattern = "
 
 ## ASCAT Total and Allele-Specific Copy Number
 ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, cluster.type = "PSOCK", out.dir = getwd(), force = FALSE, ...) {
-  
+
   # setwd("/mnt/data_cigogne/job/PUBLI_EaCoN/TCGA/ANALYSES/EaCoN_0.3.0_beta1/WES/TCGA-A7-A0CE-01A_vs_10A/ASCAT/L2R")
   # data <- readRDS("TCGA-A7-A0CE-01A_vs_10A.EaCoN.ASPCF.RDS")
   # gammaRange <- c(0.35,.95)
@@ -1319,7 +1319,7 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
   # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # require(foreach)
 
-  
+
   ## CHECKS
   if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   odir <- paste0(out.dir, "/ASCAT/ASCN")
@@ -1329,7 +1329,7 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
       unlink(odir, recursive = TRUE, force = FALSE)
     } else stop(tmsg(paste0("Output directory [", out.dir, "] already exists !")), call. = FALSE)
   }
-  
+
   samplename <- data$meta$basic$samplename
   ## Extract genome version and load corresponding data
   genome <- data$meta$basic$genome
@@ -1345,11 +1345,11 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   cs <- chromobjector(BSg.obj)
-  
+
   tmsg("ASCN modeling (using ASCAT) ...")
   gammavec <- if(length(gammaRange) > 1 ) seq(gammaRange[1], gammaRange[2], 0.05) else gammaRange
   oridirx <- getwd()
-  
+
   cls <- parallel::makeCluster(spec = nsubthread, type = cluster.type, outfile = "")
   doParallel::registerDoParallel(cls)
   gamma <- 0
@@ -1360,7 +1360,7 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
     dir.create(path = odirg, recursive = TRUE, showWarnings = FALSE)
     setwd(odirg)
     my.ascat.seg.ascn <- suppressWarnings(ASCAT::ascat.runAscat(ASCATobj = data$data, gamma = gamma, ...))
-    
+
     if (is.null(my.ascat.seg.ascn$nA)) {
       tmsg("  ASCAT could not find an optimal ploidy / cellularity from the data.")
       setwd(oridirx)
@@ -1368,16 +1368,16 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
       return(rep(NA, 8))
     }
     else {
-      
+
       unlink(paste0(samplename, ".ASCATprofile.png"))
       unlink(paste0(samplename, ".sunrise.png"))
-      
+
       ## Correcting bugged ploidy in ASCAT
       # my.tcn <- my.ascat.seg.ascn$segments$nMajor + my.ascat.seg.ascn$segments$nMinor
       # median(my.tcn)
       # wt.tcn <- my.tcn * (my.ascat.seg.ascn$segments$endpos - my.ascat.seg.ascn$segments$startpos + 1)
       # sum(wt.tcn) / sum(my.ascat.seg.ascn$segments$endpos - my.ascat.seg.ascn$segments$startpos + 1)
-      
+
       tcn.tbl.ung <- dplyr::as.tbl(cbind(my.ascat.seg.ascn$segments, nTotal = my.ascat.seg.ascn$segments$nMajor + my.ascat.seg.ascn$segments$nMinor, width = my.ascat.seg.ascn$segments$endpos - my.ascat.seg.ascn$segments$startpos + 1))
       tcn.tbl <- dplyr::group_by(tcn.tbl.ung, nTotal)
       tcn.tbl.prop <- dplyr::summarise(tcn.tbl, tot_width = sum(width))
@@ -1386,9 +1386,9 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
       baseline.ploidy <- tcn.tbl.prop$nTotal[which.max(tcn.tbl.prop$tot_width)]
       if (baseline.ploidy == 0) baseline.ploidy <- tcn.tbl.prop$nTotal[order(tcn.tbl.prop$tot_width, decreasing = TRUE)[2]]
       weighted.ploidy <- sum(tcn.tbl.prop$nTotal * (tcn.tbl.prop$tot_width / sum(tcn.tbl.prop$tot_width)))
-      
+
       my.ascat.seg.ascn$ploidy <- list(ascat = as.numeric(my.ascat.seg.ascn$ploidy), median = median.ploidy, most.width = baseline.ploidy, width.weighted = weighted.ploidy)
-      
+
       ## Saving ASCN object
       saveRDS(my.ascat.seg.ascn, paste0(samplename, ".ASCN.ASCAT.RDS"), compress = "bzip2")
 
@@ -1409,12 +1409,12 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
       outdf <- outdf[,c(1,2,7,3,4,8,9,5,6)]
       colnames(outdf)[1:5] <- c(samplename, "Chr", "Chrom", "Start", "End")
       write.table.fast(x = outdf, file = outfile)
-      
+
       ## Generating cellularity + ploidy + metrics file
       outfile <- paste0(samplename, ".gamma", gamma, "_model.txt")
       modeldf <- data.frame(key = c("Sample", "Gamma", "Goodness.of.Fit", "Psi", "Ploidy.ASCAT", "Ploidy.Median", "Ploidy.Most.Width", "Ploidy.Width.weighted", "Cellularity"), value = c(samplename, gamma, unname(my.ascat.seg.ascn$goodnessOfFit), unname(my.ascat.seg.ascn$psi), my.ascat.seg.ascn$ploidy$ascat, my.ascat.seg.ascn$ploidy$median, my.ascat.seg.ascn$ploidy$most.width, my.ascat.seg.ascn$ploidy$width.weighted, unname(my.ascat.seg.ascn$aberrantcellfraction)), stringsAsFactors = FALSE)
       write.table.fast(x = modeldf, file = outfile, header = FALSE)
-      
+
       ## Reploting
       ylim <- 6
       ### TCN
@@ -1452,9 +1452,9 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
                  pch = ".", col = "darkgreen", lwd = 6)
       abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
       abline(h = 0:ylim, col = "grey75", lty = 3)
-      
+
       try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
-      
+
       # graphics::plot(0, 0, type = "n", xlim = c(0, max(segments.genoend)), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
       graphics::plot(0, 0, type = "n", xlim = c(0, cs$genome.length), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
       abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
@@ -1470,7 +1470,7 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
       abline(h = 0:ylim, col = "grey75", lty = 3)
       try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
       dev.off()
-      
+
       ### RAW CN
       segments.posN <- unlist(cs$chrom2chr[my.ascat.seg.ascn$segments_raw$chr])
       # segments.posN[segments.posN == "X"] <- 23
@@ -1528,7 +1528,7 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
       abline(h = 0:ylim, col = "grey75", lty = 3)
       try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
       dev.off()
-      
+
       ### TCNvsL2R
       cnpTotal <- my.ascat.seg.ascn$nA + my.ascat.seg.ascn$nB
       my.xlim <- c(min(cnpTotal, na.rm = TRUE) - 0.5, max(cnpTotal, na.rm = TRUE) + 0.5)
@@ -1576,7 +1576,7 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
     gammaOpt.idx <- which.max(fit.val$GoF)
     gammaOpt <- fit.val$gamma[gammaOpt.idx]
     write.table(fit.val, file = paste0(odir, "/", samplename, ".gammaEval.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
-    
+
     png(paste0(odir, "/", samplename, ".gammaEval.png"), width = 1850, height = 980)
     par(mfrow = c(3, 1), mar = c(2, 4, 3, 1), cex = 1)
     graphics::plot(fit.val$gamma, fit.val$GoF, xlab = "Gamma", ylab = "Goodness of fit", main = "Goodness of fit curve", type = "b", pch = 20)
@@ -1595,7 +1595,7 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
     lines(fit.val$gamma, fit.val$ploidy.Width.weighted, type = "b", pch = 20, col = "yellow", lwd = 2)
     abline(v = fit.val$gamma[gammaOpt.idx], lty = 2, col = 2)
     dev.off()
-    
+
     # try(file.rename(from = paste0(out.dir, "/gamma", sprintf("%.2f", gammaOpt)), to = paste0(out.dir, "/gamma", sprintf("%.2f", gammaOpt), "_optimal")))
   } else {
     tmsg("WARNING : ASCN failed for all evaluated gamma values !")
@@ -1604,7 +1604,7 @@ ASCN.ASCAT <- function(data = NULL, gammaRange = c(.35,.95), nsubthread = 1, clu
 
 ## FACETS Total and Allele-Specific Copy Number
 ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
-  
+
   # setwd("/home/job/Documents/ROSCOFF/Roscoff_2018/TP_CNV/WES/REDUX/A18R.11.17.18/FACETS/L2R")
   # data <- readRDS("A18R.11.17.18.SEG.FACETS.RDS")
   # out.dir <- "/home/job/Documents/ROSCOFF/Roscoff_2018/TP_CNV/WES/REDUX/A18R.11.17.18"
@@ -1612,7 +1612,7 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
   # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # require(foreach)
 
-  
+
   ## CHECKS
   if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   odir <- paste0(out.dir, "/FACETS/ASCN")
@@ -1622,7 +1622,7 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
       unlink(odir, recursive = TRUE, force = FALSE)
     } else stop(tmsg(paste0("Output directory [", out.dir, "] already exists !")), call. = FALSE)
   }
-  
+
   samplename <- data$meta$basic$samplename
   ## Extract genome version and load corresponding data
   genome <- data$meta$basic$genome
@@ -1638,34 +1638,34 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   cs <- chromobjector(BSg.obj)
-  
+
   tmsg("ASCN modeling (using FACETS) ...")
   ascn.res <- facets::emcncf(x = data$data$additional, ...)
   ascn.res$cncf$lcn.em[is.na(ascn.res$cncf$lcn.em)] <- 0
-  
+
   ## Handling purity
   purity <- ascn.res$purity
   if (!"loglik" %in% names(ascn.res)) ascn.res$loglik <- NA
-  
+
   ## Handling ploidy
   tcn.tbl.ung <- dplyr::as.tbl(cbind(ascn.res$cncf, width = ascn.res$cncf$end - ascn.res$cncf$start + 1))
   tcn.tbl <- dplyr::group_by(tcn.tbl.ung, tcn.em)
   tcn.tbl.prop <- dplyr::summarise(tcn.tbl, tot_width = sum(width))
-  
+
   facets.ploidy <- ascn.res$ploidy
   median.ploidy <- limma::weighted.median(tcn.tbl.prop$tcn.em, tcn.tbl.prop$tot_width)
   baseline.ploidy <- tcn.tbl.prop$tcn.em[which.max(tcn.tbl.prop$tot_width)]
   if (baseline.ploidy == 0) baseline.ploidy <- tcn.tbl.prop$tcn.em[order(tcn.tbl.prop$tot_width, decreasing = TRUE)[2]]
   weighted.ploidy <- sum(tcn.tbl.prop$tcn.em * (tcn.tbl.prop$tot_width / sum(tcn.tbl.prop$tot_width)))
-  
+
   ascn.res$ploidy <- list(facets = as.numeric(facets.ploidy), median = median.ploidy, most.width = baseline.ploidy, width.weighted = weighted.ploidy)
-  
+
   ## Saving ASCN object
   oridir <- getwd()
   dir.create(path = odir, recursive = TRUE, showWarnings = FALSE)
   setwd(odir)
   saveRDS(ascn.res, paste0(samplename, ".ASCN.FACETS.RDS"), compress = "bzip2")
-  
+
   ## Generating TCN-CBS
   outfile <- paste0(samplename, ".cn")
   outdf <- ascn.res$cncf
@@ -1678,14 +1678,14 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
   outdf <- outdf[,c(17,15,1,10,11,16,13,18,14)]
   colnames(outdf) <- c(samplename, "Chr", "Chrom", "Start", "End", "Width", "TCN", "nMajor", "nMinor")
   write.table.fast(x = outdf, file = outfile)
-  
+
   ## Generating cellularity + ploidy + metrics file
   outfile <- paste0(samplename, "_model.txt")
   modeldf <- data.frame(
     key =   c("Sample", "LogLik", "dipLogR", "emFlags", "Ploidy.FACETS", "Ploidy.Median", "Ploidy.Most.Width", "Ploidy.Width.weighted", "Cellularity"),
     value = c(samplename, ascn.res$loglik, ascn.res$dipLogR, if(is.null(ascn.res$emflags)) "NA" else ascn.res$emflags, ascn.res$ploidy$facets, ascn.res$ploidy$median, ascn.res$ploidy$most.width, ascn.res$ploidy$width.weighted, ascn.res$purity), stringsAsFactors = FALSE)
   write.table.fast(x = modeldf, file = outfile, header = FALSE)
-  
+
   ## Plots
   ylim <- 6
   ### TCN
@@ -1724,9 +1724,9 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
   # abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
   abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
   abline(h = 0:ylim, col = "grey75", lty = 3)
-  
+
   try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
-  
+
   # graphics::plot(0, 0, type = "n", xlim = c(0, max(segments.genoend)), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
   graphics::plot(0, 0, type = "n", xlim = c(0, cs$genome.length), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
   abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
@@ -1742,7 +1742,7 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
   abline(h = 0:ylim, col = "grey75", lty = 3)
   try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
   dev.off()
-  
+
   ### TCNvsL2R
   my.xlim <- c(min(ascn.res$cncf$tcn.em, na.rm = TRUE) - 0.5, max(ascn.res$cncf$tcn.em, na.rm = TRUE) + 0.5)
   png(paste0(samplename, ".TCNvsL2R.png"), width = 980, height = 980)
@@ -1761,7 +1761,7 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
   points(ascn.res$cncf$tcn.em, ascn.res$cncf$cnlr.median, pch = ".", cex = 5, col = ascn.res$cncf$tcn.em + 1)
   abline(h = 0, lty = 2)
   dev.off()
-  
+
   ### Fail
   # ## Rorschach clown
   # png(paste0(samplename, ".Rorschach.clown.png"), width = 980, height = 980)
@@ -1783,7 +1783,7 @@ ASCN.FACETS <- function(data = NULL, out.dir = getwd(), force = FALSE, ...) {
 ### *** WARNING : Does not seem very efficient at predicting absolute copy number, unfortunately
 ### *** and especially for homozygous regions which are totaly wrong...
 ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min.size = 1E+06, out.dir = getwd(), force = FALSE) {
-  
+
   # setwd("/home/job/Documents/ROSCOFF/Roscoff_2018/TP_CNV/WES/REDUX/A18R.11.17.18")
   # data <- readRDS("SEQUENZA/L2R/A18R.11.17.18.SEG.SEQUENZA.RDS")
   # max.ploidy = 4
@@ -1792,7 +1792,7 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
   # out.dir = getwd()
   # force = TRUE
   # source("~/git_gustaveroussy/EaCoN/R/mini_functions.R")
-  
+
   ## CHECKS
   if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   odir <- paste0(out.dir, "/SEQUENZA/ASCN")
@@ -1802,12 +1802,12 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
       unlink(odir, recursive = TRUE, force = FALSE)
     } else stop(tmsg(paste0("Output directory [", out.dir, "] already exists !")), call. = FALSE)
   }
-  
+
   if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
   if (any(is.null(c(data$data$Tumor_LogR_segmented, data$data$Tumor_BAF_segmented)))) stop(tmsg("No segmentation data found in the provided RDS file !"), call. = FALSE)
-  
+
   samplename <- data$meta$basic$samplename
-  
+
   ## Extract genome version and load corresponding data
   genome <- data$meta$basic$genome
   genome.pkg <- data$meta$basic$genome.pkg
@@ -1822,12 +1822,12 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
   cs <- chromobjector(BSg.obj)
-  
+
   tmsg("ASCN modeling (using sequenza) ...")
-  
+
   ## Loading segments table
   seg.df <- data$data$additional
-  
+
   ## Fixing segments of length 1
   for (k in unique(seg.df$chrom)) {
     kidx <- seg.df$chrom == k
@@ -1848,11 +1848,11 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
       }
     }
   }
-  
+
   ## Computing width
   seg.df$width <- seg.df$end.pos - seg.df$start.pos + 1
   seg.df$weight <- 0 + round(seg.df$width / 1E+06, 0)
-  
+
   ## Ploidy model
   seg.min.size <- 1E+06
   max.ploidy <- 4
@@ -1863,15 +1863,15 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
   ploidy   <- confint$max.ploidy
   cellularity <- confint$max.cellularity
   rm(CP)
-  
+
   ## Modeling ASCN
   seq.ascn <- sequenza::baf.bayes(Bf = seg.df$BAF.mean, depth.ratio = 2^seg.df$logR.mean, cellularity = cellularity, ploidy = ploidy, avg.depth.ratio = 1)
   seg.df$chr <- seg.df$chrom
   seg.df$chr <- unlist(cs$chrom2chr[seg.df$chr])
   ascn.res <- list(data = cbind(seg.df, seq.ascn))
   rm(seq.ascn)
-  
-  
+
+
   ## Computing other ploidy measures
   ascn.res$purity <- cellularity
   seg.tbl <- dplyr::as.tbl(ascn.res$data)
@@ -1883,28 +1883,28 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
   if (baseline.ploidy == 0) baseline.ploidy <- seg.tbl.prop$CNt[order(seg.tbl.prop$tot_width, decreasing = TRUE)[2]]
   weighted.ploidy <- sum(seg.tbl.prop$CNt * (seg.tbl.prop$tot_width / sum(seg.tbl.prop$tot_width)))
   ascn.res$ploidy <- list(sequenza = as.numeric(ploidy), median = median.ploidy, most.width = baseline.ploidy, width.weighted = weighted.ploidy)
-  
-  
+
+
   ## Saving ASCN object
   oridir <- getwd()
   dir.create(path = odir, recursive = TRUE, showWarnings = FALSE)
   setwd(odir)
   saveRDS(ascn.res, paste0(samplename, ".ASCN.SEQUENZA.RDS"), compress = "bzip2")
-  
+
   ## Generating TCN-CBS
   outfile <- paste0(samplename, ".cn")
   # outdf <- ascn.res$data[,c(1,2,15,4,5,9,11:13)]
   outdf <- ascn.res$data[,c(1,11,2,4,5,9,12:14)]
   colnames(outdf) <- c(samplename, "Chr", "Chrom", "Start", "End", "Width", "TCN", "nMajor", "nMinor")
   write.table.fast(x = outdf, file = outfile)
-  
+
   ## Generating cellularity + ploidy + metrics file
   outfile <- paste0(samplename, "_model.txt")
   modeldf <- data.frame(
     key =   c("Sample", "Ploidy.SEQUENZA", "Ploidy.Median", "Ploidy.Most.Width", "Ploidy.Width.weighted", "Cellularity"),
     value = c(samplename, ascn.res$ploidy$sequenza, ascn.res$ploidy$median, ascn.res$ploidy$most.width, ascn.res$ploidy$width.weighted, ascn.res$purity), stringsAsFactors = FALSE)
   write.table.fast(x = modeldf, file = outfile, header = FALSE)
-  
+
   ## Plots
   ylim <- 6
   ### TCN
@@ -1942,9 +1942,9 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
   # abline(v = cs$chromosomes$chr.length.sum[ink], col = 1, lty = 3, lwd = 2)
   abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 3, lwd = 2)
   abline(h = 0:ylim, col = "grey75", lty = 3)
-  
+
   try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
-  
+
   graphics::plot(0, 0, type = "n", xlim = c(0, cs$genome.length), xaxs = "i", ylim = c(0, (ylim + 0.1)), main = paste0(samplename, " Total Copy Number"), xlab = "Genomic position", ylab = "TCN", xaxt = "n", cex.main = 2)
   abline(v = c(segments.genostart, segments.genoend), col = "grey90", lwd = 1)
   abline(h = ascn.res$ploidy$median, col = "red", lty = 2)
@@ -1959,7 +1959,7 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
   abline(h = 0:ylim, col = "grey75", lty = 3)
   try(text(x = cs$chromosomes$mid.chr.geno[ink], y = ylim, labels = cs$chromosomes$chrom[ink], pos = 1, cex = 1))
   dev.off()
-  
+
   ### TCNvsL2R
   my.xlim <- c(min(ascn.res$data$CNt, na.rm = TRUE) - 0.5, max(ascn.res$data$CNt, na.rm = TRUE) + 0.5)
   png(paste0(samplename, ".TCNvsL2R.png"), width = 980, height = 980)
@@ -1978,7 +1978,7 @@ ASCN.SEQUENZA <- function(data = NULL, max.ploidy = 4, ploidy.step = .1, seg.min
   points(ascn.res$data$CNt, ascn.res$data$logR.mean, pch = ".", cex = 5, col = ascn.res$data$CNt + 1)
   abline(h = 0, lty = 2)
   dev.off()
-  
+
   setwd(oridir)
 }
 
@@ -1993,7 +1993,7 @@ ASCN.ff <- function(RDS.file = NULL, ...) {
   my.data <- readRDS(RDS.file)
   segmenter <- toupper(my.data$meta$eacon$segmenter)
   tmsg(paste0("Provided RDS.file was segmented with ", my.data$meta$eacon$segmenter, "."))
-  
+
   ## Calling
   out.dir <- sub(pattern = paste0(toupper(segmenter), "/L2R"), replacement = "", x = dirname(RDS.file))
   if (out.dir == "") out.dir <- "."
@@ -2019,8 +2019,8 @@ ASCN.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern = "\\.S
 }
 
 ## Generate the HTML report
-Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, report = TRUE, author.name = "", out.dir = getwd(), solo = FALSE, ldb = "/mnt/data_cigogne/bioinfo/") {
-  
+Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, report = TRUE, author.name = "", out.dir = getwd(), solo = FALSE, ldb = "/mnt/data_cigogne/bioinfo/", grd="grd") {
+
   # setwd("/home/job/Documents/ROSCOFF/Roscoff_2018/TP_CNV/WES/REDUX/A18R.11.17.18/ASCAT/L2R")
   # data <- readRDS("A18R.11.17.18.SEG.ASCAT.RDS")
   # targets.table <- NULL
@@ -2032,21 +2032,21 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
   # source("/home/job/git_gustaveroussy/EaCoN/R/mini_functions.R")
   # source("/home/job/git_gustaveroussy/EaCoN/R/plot_functions.R")
   # require(foreach)
-  
+
   oridir <- getwd()
-  
+
   `%do%` <- foreach::"%do%"
-  
+
   if (!is.list(data)) stop(tmsg("data should be a list !"), call. = FALSE)
-  
+
   valid.genomes <- get.valid.genomes()
   my.ascat.seg <- data$data
-  
+
   samplename <- data$meta$basic$samplename
   genome <- data$meta$basic$genome
   manufacturer <- data$meta$basic$manufacturer
   source <- data$meta$basic$source
-  
+
   tmsg("Loading genome data ...")
   ## No refGene provided ...
   if (is.null(refGene.table)) {
@@ -2075,14 +2075,14 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     }
     gen.df <- gen.df[order(gen.df$chrN, gen.df$start, gen.df$end),]
   }
-  
+
   if (!("cbs" %in% names(data))) stop(tmsg("CBS slot not found in RDS object ! Are you sure it is a valid one ?"), call. = FALSE)
   cbs.df <- foreach::foreach(seg = 1:nrow(data$cbs$cut), .combine = "rbind") %do% {
     ingenz <- if(exists("gen.df")) gen.df$symbol[gen.df$chrN == data$cbs$cut$Chr[seg] & gen.df$start <= data$cbs$cut$End[seg] & gen.df$end >= data$cbs$cut$Start[seg]] else ingenz <- "NA"
     ingenz.len <- if(exists("gen.df")) length(ingenz) else "NA"
     return(data.frame(data$cbs$cut[seg, ], Genes = ingenz.len, Symbol = paste0(ingenz, collapse = ","), stringsAsFactors = FALSE))
   }
-  
+
   tmsg("Building L2R segmentation table ...")
   l2r.segments <- foreach::foreach(k = 1:length(my.ascat.seg$ch), .combine = "rbind") %do% {
     segrle <- rle(my.ascat.seg$Tumor_LogR_segmented[my.ascat.seg$ch[[k]],1])
@@ -2097,7 +2097,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     segdf$End <- as.integer(my.ascat.seg$SNPpos$pos[segdf$End.idx])
     segdf <- segdf[, c(3, 4, 7, 8, 2, 1, 6, 5)]
   }
-  
+
   tmsg("Building BAF segmentation table ...")
   bafpos <- my.ascat.seg$SNPpos[rownames(my.ascat.seg$Tumor_LogR_segmented) %in% rownames(my.ascat.seg$Tumor_BAF_segmented[[1]]),]
   bafpos$ProbeSet <- rownames(my.ascat.seg$Tumor_BAF_segmented[[1]])
@@ -2118,31 +2118,31 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
   baf.seg$End <- bafpos$pos[baf.seg$end.idx]
   baf.seg$Width <- baf.seg$End - baf.seg$Start + 1
   baf.seg$Value <- bafpos$BAF[baf.seg$start.idx]
-  
+
   ## BAF calling
   # baf.homocut <- as.numeric(data$meta$eacon[["BAF-segments-homo-limit"]])
   baf.homocut <- as.numeric(data$meta$eacon[["BAF.segments.homo.limit"]])
-  
+
   ### Calling
   baf.seg$Status <- "Unbalanced"
   baf.homo <- sort(which(baf.seg$Value <= baf.homocut))
   if (length(baf.homo) > 0) baf.seg$Status[baf.homo] <- "Homo"
   baf.hetero <- sort(which(baf.seg$Value == .5))
   if (length(baf.hetero) > 0) baf.seg$Status[baf.hetero] <- "Hetero"
-  
+
   ## Writing ACBS (cut)
   setwd(out.dir)
   if (exists("gen.df")) {
     tmsg("Building Targets table ...")
     write.table(cbs.df, file = paste0(samplename, ".Cut.acbs"), sep = "\t", quote = FALSE, row.names = FALSE)
   }
-  
+
   cbsNC.df <- data$cbs$nocut
   cbsNC.df <- cbind(cbsNC.df, cbs.df[, c(7, 8)])
   cbsNC.df$Status <- "Normal"
   cbsNC.df$Status[cbs.df$Log2Ratio > 0] <- "Gain"
   cbsNC.df$Status[cbs.df$Log2Ratio < 0] <- "Loss"
-  
+
   ## Loading targets
   if (is.null(targets.table)) {
     if (data$meta$basic$species %in% c("Homo sapiens")) {
@@ -2175,13 +2175,13 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
       scb <- cs$cytobands$chrom == targ.regz$chrom[x] & cs$cytobands$start <= targ.regz$start[x] & cs$cytobands$end >= targ.regz$start[x]
       return(paste0(cs$cytobands$chrA[scb], cs$cytobands$cytoband[scb]))
     }, "a")
-    
+
     targ.regz <- targ.regz[order(as.numeric(unlist(cs$chrom2chr[targ.regz$chrom])), targ.regz$match.start, targ.regz$match.end), c(1:6,16,7:15)]
     colnames(targ.regz) <- c("Target Symbol", "Chr", "Gene Start", "Gene End", "Gene Width", "Gene Strand", "Gene Cytoband", "Match Start", "Match End", "Match Width", "L2R Status", "L2R Value", "L2R Segment Width", "BAF Status", "BAF Value", "BAF Segment Width")
     # write.table(targ.regz, file = paste0(out.dir, "/", samplename, ".TargetGenes.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
     write.table(targ.regz, file = paste0(samplename, ".TargetGenes.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
   }
-  
+
   tmsg("Building Truncated table ...")
   # gen.trunk.idx <- which(gen.df$chrN == cbsNC.df$Chr & gen.df$start < cbsNC.df$End & gen.df & gen.df$end > cbsNC.df$Start)
   gen.trunk.idx.list <- sapply(1:nrow(gen.df), function(g) {
@@ -2226,16 +2226,16 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     # write.table(trunc.regz, file = paste0(out.dir, "/", samplename, ".TruncatedGenes.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
     write.table(trunc.regz, file = paste0(samplename, ".TruncatedGenes.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
   }
-  
+
   if (report) {
     tmsg("Preparing HTML report ...")
-    
+
     ## Locating RMD
     self.pkg.name <- "EaCoN"
     rmd.path <- system.file("extdata", "html_report.Rmd", package = self.pkg.name)
-    
+
     if ( (source == "microarray") & (manufacturer == "Affymetrix") ) {
-      
+
       ## Getting meta data
       tmsg("Getting META keys ...")
       meta.tags <- data.frame(
@@ -2277,7 +2277,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
         ),
         stringsAsFactors = FALSE
       )
-      
+
       chip.list <- names(data$meta$affy)[names(data$meta$affy) != "analysis"]
       meta.tags$val <- foreach(t = seq_len(nrow(meta.tags)), .combine = "c") %do% {
         if (meta.tags$entry[t] == "analysis") {
@@ -2289,11 +2289,11 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
         }
         return(ext.meta)
       }
-      
+
       arraytype <- meta.tags$val[meta.tags$key == "affymetrix-array-type"]
       meta.tags$val[meta.tags$key == "affymetrix-scan-date"] <- gsub(replacement = "/", x = gsub(replacement = "_", x = gsub(replacement = "", x = meta.tags$val[meta.tags$key == "affymetrix-scan-date"], pattern = "Z", ignore.case = FALSE), pattern = "T", ignore.case = FALSE), pattern = "-", ignore.case = FALSE)
       meta.tags$val[meta.tags$key == "affymetrix-array-id"] <- gsub(replacement = "_", x = meta.tags$val[meta.tags$key == "affymetrix-array-id"], pattern = "-", ignore.case = FALSE)
-      
+
       ## Loading CEL files for intensity data/plot
       tmsg("Plotting CEL file(s) intensity map ...")
       # intplotf <- paste0(out.dir, "/", samplename, ".INT.png")
@@ -2311,7 +2311,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
       dev.off()
       intplotf <- tools::file_path_as_absolute(intplotf)
       # meta.tags <- rbind(meta.tags, data.frame(key = c("a2p-cel-median-intensity", "a2p-cel-outliers", "a2p-cel-outliers-pc"), sig = c("Median Raw Intensity", "# Outliers", "Outliers (%)"), val = c(celobj$int.median, celobj$n.outliers, paste0(round(celobj$pc.outliers / 100, digits = 3), " %")), stringsAsFactors = FALSE))
-      
+
       ## Building array & QC tables
       tmsg("Building Array & QC tables ...")
       array.df <- data.frame(t(meta.tags$val[1:6]), stringsAsFactors = FALSE)
@@ -2320,7 +2320,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
       colnames(qc.df) <- meta.tags$sig[7:11]
       qc.df[["Median Raw Intensity"]] <- paste0(vapply(chip.list, function(p) { return(median(data$CEL[[p]]$intensities, na.rm = TRUE)) }, 1), collapse = " ; ")
       qc.df[["Outlier Probes"]] <- paste0(vapply(chip.list, function(p) { return(length(data$CEL[[p]]$outliers)) }, 1), collapse = " ; ")
-      
+
       qc.df$mapd.flag <- if(is.na(as.numeric(qc.df$MAPD))) "#e0e0e0" else if(as.numeric(qc.df$MAPD) < .2) "#00cc00" else if(as.numeric(qc.df$MAPD) < .25) "#ff9900" else "#f7543b"
       qc.df$snpqc.flag <- if(is.na(as.numeric(qc.df$SNPQC))) "#e0e0e0" else if(as.numeric(qc.df$SNPQC) >= 26) "#00cc00" else if(as.numeric(qc.df$SNPQC) >= 15) "#ff9900" else "#f7543b"
       qc.df$waviness.flag <- if(is.na(as.numeric(qc.df$WavinessSd))) "#e0e0e0" else if(as.numeric(qc.df$WavinessSd) < .12) "#00cc00" else "#f7543b"
@@ -2330,12 +2330,12 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     tmsg("Plotting L2R (geno) ...")
     mad.diff <- abs(diff(my.ascat.seg$Tumor_LogR[,1]))
     my.mad <- stats::median(mad.diff[mad.diff>0], na.rm = TRUE)
-    
+
     # g.cut <- getmeta(key = "L2R-segments-gain-cutoff", meta = data$meta$eacon)
     g.cut <- data$meta$eacon[["L2R-segments-gain-cutoff"]]
     # l.cut <- getmeta(key = "L2R-segments-loss-cutoff", meta = data$meta$eacon)
     l.cut <- data$meta$eacon[["L2R-segments-loss-cutoff"]]
-    
+
     gain.idx <- which(l2r.segments$Value > g.cut)
     loss.idx <- which(l2r.segments$Value < l.cut)
     normal.idx <- which(l2r.segments$Value >= l.cut & l2r.segments$Value <= g.cut)
@@ -2349,7 +2349,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
                             Value = my.ascat.seg$Tumor_LogR_wins[,1],
                             stringsAsFactors = FALSE)
     genome.pkg <- data$meta$basic$genome.pkg
-    
+
     # png(paste0(out.dir, "/", samplename, ".L2R.G.png"), width = 1850, height = 980)
     png(paste0(samplename, ".L2R.G.png"), width = 1850, height = 980)
     par(mar = c(1, 6, 3, 1))
@@ -2362,7 +2362,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
                        title = paste0(samplename, " L2R"),
                        ylim = c(-1.5,1.5))
     dev.off()
-    
+
     ### Genomic BAF plot
     tmsg("Plotting BAF ...")
     # baf.chr <-if(length(grep(pattern = "chr", x = names(cs$chrom2chr), ignore.case = TRUE)) > 0) unlist(cs$chrom2chr[paste0("chr", as.character(my.ascat.seg$SNPpos$chrs))]) else unlist(cs$chrom2chr[as.character(my.ascat.seg$SNPpos$chrs)])
@@ -2372,7 +2372,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
                             End = my.ascat.seg$SNPpos$pos,
                             Value = my.ascat.seg$Tumor_BAF[,1],
                             stringsAsFactors = FALSE)
-    
+
     # png(paste0(out.dir, "/", samplename, ".BAF.png"), width = 1850, height = 980)
     png(paste0(samplename, ".BAF.png"), width = 1850, height = 980)
     par(mar = c(1, 6, 3, 1))
@@ -2383,7 +2383,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
                        title = paste0(samplename, " BAF")
     )
     dev.off()
-    
+
     ### L2R Karyotypic plot
     tmsg("Plotting L2R (karyotype) ...")
     # karyoplotf <- paste0(out.dir, "/", samplename, ".L2R.K.png")
@@ -2392,7 +2392,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     EaCoN.l2rplot.karyo(l2r = l2r.value, seg = l2r.seg.obj, seg.col = seg.col, seg.type = "block", seg.normal = TRUE, ylim = c(-1.5,1.5), genome.pkg = genome.pkg)
     dev.off()
     karyoplotf <- tools::file_path_as_absolute(karyoplotf)
-    
+
     ### Chromosomal plots
     tmsg("Plotting L2R (chromosomes) ...")
     # kpdir <- paste0(out.dir, "/chromosomes/")
@@ -2401,7 +2401,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     krN <- unique(l2r.seg.obj$pos$Chr)
     krA <- unlist(cs$chr2chrom[krN])
     for (kr in 1:length(krN)) {
-      
+
       png(paste0(kpdir, "/", krA[kr], ".png"), width=1350, height = 750)
       EaCoN.l2rplot.chromo(chr = krN[kr],
                            l2r = l2r.value,
@@ -2417,7 +2417,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     }
     # kplotlist <- fpaav(list.files(path = "chromosomes", pattern = "\\.png", full.names = TRUE, ignore.case = FALSE, include.dirs = FALSE, recursive = FALSE))
     kplotlist <- fpaav(vapply(krA, function(k) { paste0("chromosomes/", k, ".png") }, "a"))
-    
+
     ## Instability metrics
     tmsg("Building instability metrics table ...")
     gi.df <- data.frame(Status = c("Gain", "Loss", "Aberrant (Gain + Loss)", "Normal", "TOTAL"), stringsAsFactors = FALSE)
@@ -2431,14 +2431,14 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     gi.df$Frac <- gi.df$SumWidth / cs$genome.length
     gi.df$MedianWidth <- vapply(names(gi.idx), function(x) { if(length(gi.idx[[x]]) > 0) return(median(cbsNC.df$End[gi.idx[[x]]] - cbsNC.df$Start[gi.idx[[x]]] +1)) else return(0)}, 1)
     gi.df$MedianL2R <- round(vapply(names(gi.idx), function(x) { if(length(gi.idx[[x]]) > 0) return(median(cbsNC.df$Log2Ratio[gi.idx[[x]]])) else return(NA)}, 1), digits = 2)
-    
+
     gi.df$SumWidth <- format(gi.df$SumWidth, big.mark = ",")
     gi.df$Frac <- paste0(format(gi.df$Frac * 100, digits = 2), " %")
     gi.df$MedianWidth <- format(ceiling(gi.df$MedianWidth), big.mark = ",")
     colnames(gi.df) <- c("CNA Status", "# Segments", "Total Width (nt)", "Genome Fraction", "Median Width (nt)", "Median log2(ratio)")
     # write.table(gi.df, file = paste0(out.dir, "/", samplename, ".Instab.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
     write.table(gi.df, file = paste0(samplename, ".Instab.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
-    
+
     ## Segments table
     ### L2R
     tmsg("Polishing L2R segments table ...")
@@ -2464,20 +2464,20 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     segtab.df$l2rbold <- 0
     segtab.df$l2rbold[abs(segtab.df$Value) > minbold] <- 1
     # segtab.df <- segtab.df[,c(10,3,4,11:14,5,9,6,16,15,17)]
-    
+
     # segtab.df <- segtab.df[,c(1,3,4,10:13,5,9,6,15,14,16)]
     segtab.df <- segtab.df[,c(2,3,4,10:13,5,9,6,15,14,16)]
-    
+
     colnames(segtab.df) <- c("Chr", "Start", "End", "Width", "Start Cytoband", "End Cytoband", "Status", "L2R", "Ratio", "# Markers", "# Genes", "symbols", "l2rbold")
     # segtab.df$Start <- format(segtab.df$Start, big.mark = ",")
     # segtab.df$End <- format(segtab.df$End, big.mark = ",")
     # segtab.df$Width <- width.unit.conv(segtab.df$Width)
     segtab.df$L2R <- round(segtab.df$L2R, digits = 3)
     segtab.df$Ratio <- round(segtab.df$Ratio, digits = 3)
-    
+
     l2r.segstat <- c("Gain", "Loss", "Normal")
     l2r.segcol <- c(seg.col$gain, seg.col$loss, seg.col$normal)
-    
+
     ### BAF
     tmsg("Polishing BAF segmentation table ...")
     segbaf.df <- baf.seg
@@ -2502,11 +2502,11 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     # segbaf.df$Width <- format(segbaf.df$Width, big.mark = ",")
     # segbaf.df$Width <- width.unit.conv(segbaf.df$Width)
     segbaf.df$BAF <- round(segbaf.df$BAF, digits = 3)
-    
+
     baf.segstat <- c("Hetero", "Homo", "Unbalanced")
     baf.segcol <- c(paste0("rgb(", paste0(col2rgb("black"), collapse = ","), ")"), paste0("rgb(", paste0(col2rgb("cadetblue4"), collapse = ","), ")"), paste0("rgb(", paste0(col2rgb("coral1"), collapse = ","), ")"))
-    
-    
+
+
     ## Targets table
     tmsg("Polishing targets table ...")
     # targ.regz[["Gene Start"]] <- format(targ.regz[["Gene Start"]], big.mark = ",")
@@ -2519,13 +2519,13 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     # targ.regz[["BAF Segment Width"]] <- width.unit.conv(targ.regz[["BAF Segment Width"]])
     targ.regz[["L2R Value"]] <- round(targ.regz[["L2R Value"]], digits = 3)
     targ.regz[["BAF Value"]] <- round(targ.regz[["BAF Value"]], digits = 3)
-    
+
     targ.regz$l2rbold <- 0
     targ.regz$l2rbold[abs(targ.regz[["L2R Value"]]) > minbold] <- 1
-    
+
     ## Truncated table
     if (length(gen.trunk.idx) > 0) {
-      
+
       # trunc.regz[["Gene Start"]] <- format(trunc.regz[["Gene Start"]], big.mark = ",")
       # trunc.regz[["Gene End"]] <- format(trunc.regz[["Gene End"]], big.mark = ",")
       # trunc.regz[["Gene Width"]] <- width.unit.conv(trunc.regz[["Gene Width"]])
@@ -2536,17 +2536,17 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
       # trunc.regz[["BAF Segment Width"]] <- width.unit.conv(trunc.regz[["BAF Segment Width"]])
       trunc.regz[["L2R Value"]] <- round(trunc.regz[["L2R Value"]], digits = 3)
       trunc.regz[["BAF Value"]] <- round(trunc.regz[["BAF Value"]], digits = 3)
-      
+
       trunc.regz$l2rbold <- 0
       trunc.regz$l2rbold[abs(trunc.regz[["L2R Value"]]) > minbold] <- 1
     }
-    
+
     ## Deactivate SOLO if no abnormal segment available
     if (solo & (length(which(segtab.df$Status != "Normal")) == 0)) {
       solo <- FALSE
       tmsg("No aberrant segment identified, deactivating SOLO ...")
     }
-    
+
     ## Render
     message(tmsg("Rendering report ..."))
     # htmlout <- paste0(out.dir, "/", samplename, ".REPORT.html")
@@ -2555,7 +2555,7 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     htmlout <- paste0(samplename, ".REPORT.html")
     show.flag <- if ((data$meta$basic$source == "microarray") & (data$meta$basic$manufacturer == "Affymetrix")) TRUE else FALSE
     rmarkdown::render(input = rmd.path, output_format = "html_document", output_file = htmlout, output_dir = getwd(), intermediates_dir = getwd())
-    
+
     ## Hacking HTML
     message(tmsg("Hacking HTML ..."))
     htmltmp <- readLines(htmlout)
@@ -2569,16 +2569,16 @@ Annotate <- function(data = NULL, refGene.table = NULL, targets.table = NULL, re
     if(length(mtocidx2) > 0) htmltmp[mtocidx2] <- "<div class=\"toc-content col-xs-12 col-sm-9 col-md-10\">"
     writeLines(htmltmp, htmlout)
     tmsg("Done.")
-    
+
   }
-  
+
   if (solo) {
     tmsg("Making SOLO ...")
     # tmpcbsname <- paste0(out.dir, "/", samplename, "_tmp.cbs")
     tmpcbsname <- paste0(samplename, "_solo.cbs")
     write.table(data$cbs$cut, tmpcbsname, sep="\t", quote = FALSE, row.names = FALSE)
     # EaCoN.Annotate.solo(out.dir = out.dir, samplename = samplename, genome = genome, ldb = ldb)
-    Annotate.solo(cbs.file = tmpcbsname, genome = genome, ldb = ldb)
+    Annotate.solo(cbs.file = tmpcbsname, genome = genome, ldb = ldb, grd=grd)
     file.remove(tmpcbsname)
   }
   setwd(oridir)
@@ -2614,7 +2614,7 @@ Annotate.ff.Batch <- function(RDS.files = list.files(path = getwd(), pattern = "
   parallel::stopCluster(cl)
 }
 
-Annotate.solo <- function(cbs.file = NULL, genome = NULL, ldb = "/mnt/data_cigogne/bioinfo/") {
+Annotate.solo <- function(cbs.file = NULL, genome = NULL, ldb = "/mnt/data_cigogne/bioinfo/", grd="grd") {
   if (is.null(genome)) stop(tmsg("A genome is required !"), call. = FALSE)
   if (!file.exists(cbs.file)) stop(tmsg(paste0("Could not find CBS file [", cbs.file, "] !")), call. = FALSE)
   cbs.df <- read.table.fast(cbs.file)
@@ -2631,7 +2631,5 @@ Annotate.solo <- function(cbs.file = NULL, genome = NULL, ldb = "/mnt/data_cigog
   gb <- as.numeric(sub(pattern = "[a-z]+", replacement = "", x = genome, ignore.case = TRUE))
   sp <- as.character(sub(pattern = "[0-9]+", replacement = "", x = genome, ignore.case = TRUE))
   if(sp == "hg") sp <- "hs"
-  suppressMessages(try(system(paste0("grd --sp ", sp, " --gb ", gb, " --ldb ", ldb, ' -o ', dirname(cbs.file), " -m solo ", solofile), wait = TRUE)))
+  suppressMessages(try(system(paste0(grd, " --sp ", sp, " --gb ", gb, " --ldb ", ldb, ' -o ', dirname(cbs.file), " -m solo ", solofile), wait = TRUE)))
 }
-
-
