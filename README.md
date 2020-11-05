@@ -96,7 +96,7 @@ It consists in a series of R packages that perform such type of analysis, from r
   ```
 
 - Then install required **_BioConductor_** packages :
- 
+
   ``` r
   ## try using http:// if https:// URLs are not supported
   source("https://bioconductor.org/biocLite.R")
@@ -108,7 +108,7 @@ It consists in a series of R packages that perform such type of analysis, from r
   ``` r
   ## Install the most recent STABLE version (@master)
   devtools::install_github("gustaveroussy/EaCoN")
-  
+
   ## ... or try your luck with the most recent DEVELOPMENT version (@dev)
   devtools::install_github("gustaveroussy/EaCoN", ref = "dev")
   ```
@@ -122,13 +122,13 @@ While the current EaCoN package is the core of the process and will straightly w
 - The **_affy.CN.norm_** package provides pre-computed GC% and wave-effect (re)normalization datasets for all compatible Affymetrix designs, for both NA33/NA35 (hg19) and NA36 (hg38) human genome builds. Install from remote URL :
 
   ``` r
-  install.packages("https://partage.gustaveroussy.fr/pydio_public/083305?dl=true&file=/affy.CN.norm.data_0.1.2.tar.gz", repos = NULL, type = "source")
+  install.packages("https://nextcloud.gustaveroussy.fr/s/gfLnN8xrndFHMdM/download", repos = NULL, type = "source")
   ```
 
 #### **ONCOSCAN FAMILY (OncoScan / OncoScan_CNV)**
 
 - First, install embedded APT tool from github :
- 
+
   ``` r
   devtools::install_github("gustaveroussy/apt.oncoscan.2.4.0")
   ```
@@ -136,26 +136,26 @@ While the current EaCoN package is the core of the process and will straightly w
 - Then install annotations from remote URL :
   - For the **NA33 (hg19)** build :
     - For the **OncoScan** design :
-    
+
       ``` r
       install.packages("https://partage.gustaveroussy.fr/pydio_public/b88fb8?dl=true&file=/OncoScan.na33.r4_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
 
     - For the **OncoScan_CNV** design :
-    
+
       ``` r
-      install.packages("https://partage.gustaveroussy.fr/pydio_public/cd59c8?dl=true&file=/OncoScanCNV.na33.r2_0.1.0.tar.gz", repos = NULL, type = "source")
+      install.packages("https://nextcloud.gustaveroussy.fr/s/BanRj6fAn4HFAA5/download", repos = NULL, type = "source")
       ```
-      
+
   - For the **NA36 (hg38)** build :
     - For the **OncoScan** design :
-    
+
       ``` r
       install.packages("https://partage.gustaveroussy.fr/pydio_public/582a03?dl=true&file=/OncoScan.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
-      
+
     - For the **OncoScan_CNV** design :
-    
+
       ``` r
       install.packages( "https://partage.gustaveroussy.fr/pydio_public/41d8af?dl=true&file=/OncoScanCNV.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
@@ -163,7 +163,7 @@ While the current EaCoN package is the core of the process and will straightly w
 #### **CYTOSCAN FAMILY (CytoScan 750k / CytoScan HD)**
 
 - First, install the embedded APT tool from github :
- 
+
   ``` r
   devtools::install_github("gustaveroussy/apt.cytoscan.2.4.0")
   ```
@@ -178,7 +178,7 @@ While the current EaCoN package is the core of the process and will straightly w
     - For the **CytoScan HD** design :
 
       ``` r
-      install.packages( "https://partage.gustaveroussy.fr/pydio_public/bc4b54?dl=true&file=/CytoScanHD.Array.na33.r4_0.1.0.tar.gz", repos = NULL, type = "source")
+      install.packages( "https://nextcloud.gustaveroussy.fr/s/ip294gysJdcccYm/download", repos = NULL, type = "source")
       ```
 
   - For the **NA36 (hg38)** build :
@@ -196,13 +196,13 @@ While the current EaCoN package is the core of the process and will straightly w
 - Lastly, install the **_rcnorm_** package to perform BAF normalization for the CytoScan family of arrays :
 
   ``` r
-  install.packages( "https://partage.gustaveroussy.fr/pydio_public/e6fe22?dl=true&file=/rcnorm_0.1.5.tar.gz", repos = NULL, type = "source")
+  install.packages( "https://nextcloud.gustaveroussy.fr/s/Zc7JR3QaAk6rFBi/download", repos = NULL, type = "source")
   ```
 
 #### **GENOMEWIDE SNP6**
 
 - First, install the embedded APT tool from github :
- 
+
   ``` r
   devtools::install_github("gustaveroussy/apt.snp6.1.20.0")
   ```
@@ -216,7 +216,7 @@ While the current EaCoN package is the core of the process and will straightly w
 - Lastly, install the **_rcnorm_** package to perform BAF normalization for SNP6 arrays **(if not already installed at the CytoScan step!)** :
 
   ``` r
-  install.packages( "https://partage.gustaveroussy.fr/pydio_public/e6fe22?dl=true&file=/rcnorm_0.1.5.tar.gz", repos = NULL, type = "source")
+  install.packages( "https://nextcloud.gustaveroussy.fr/s/Zc7JR3QaAk6rFBi/download", repos = NULL, type = "source")
   ```
 
 ### **GENOMES**
@@ -238,10 +238,10 @@ While the current EaCoN package is the core of the process and will straightly w
   ``` r
   ## try using http:// if https:// URLs are not supported
   source("https://bioconductor.org/biocLite.R")
-  
+
   ## To support NA33 / NA35 annotations (hg19)
   biocLite("BSgenome.Hsapiens.UCSC.hg19")
-  
+
   ## To support NA36 annotations (hg38)
   biocLite("BSgenome.Hsapiens.UCSC.hg38")
   ```
@@ -251,12 +251,12 @@ While the current EaCoN package is the core of the process and will straightly w
   ``` r
   ## try using http:// if https:// URLs are not supported
   source("https://bioconductor.org/biocLite.R")
-  
+
   biocLite("BSgenome.Hsapiens.1000genomes.hs37d5")
   ```
 
 - If your favorite genome is not available, **it is possible to build your own** !
-  - Simply download locally any public genome package (by example [BSgenome.Hsapiens.UCSC.hg19](https://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg19/)) 
+  - Simply download locally any public genome package (by example [BSgenome.Hsapiens.UCSC.hg19](https://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg19/))
   - Uncompress it locally (MS Windows users can use [7-zip](https://www.7-zip.org/))
   - Rename the decompressed folder to your genome name
   - Edit all possible files (**_DESCRIPTION_**, **_NAMESPACE_**, **_R/zzz.R_**, **_man/package.Rd_**) to insert all required information relative to your own genome
@@ -342,10 +342,10 @@ First, under R, load EaCoN and choose a directory for writing results, for examp
     ```
 
     - This will generate a "BINpack" (with a ".rda" extension) to be used in the next normalization steps : **/home/project/EaCoN_results/SureSelect_v5_merged_sorted_hg19_b50.GC.rda**
-  
+
     - **PLEASE NOTE THAT THIS STEP IS SAMPLE-INDEPENDENT, THUS NEEDS TO BE PERFORMED AGAIN ONLY IF YOU CHANGE EITHER THE CAPTURE BED, THE BIN SIZE OR THE GENOME BUILD.** Thus, the generated BINpack can be used for any other sample in the same conditions.
 
-  - **Second**, the WES data will be binned using the generated BINpack. We need three files as input : 
+  - **Second**, the WES data will be binned using the generated BINpack. We need three files as input :
     - The aligned reads for the test sample (usualy in cancer, the patient tumor), in BAM format
     - The aligned reads for the reference sample (patient normal), in BAM format too
     - The BINpack itself
@@ -541,7 +541,7 @@ Here is an example using ASCAT :
   setwd(workdir)
   require(EaCoN)
   require(magrittr)
-  
+
   OS.Process(ATChannelCel = "/home/me/my_project/CEL/SAMPLE1_OncoScan_CNV_A.CEL", GCChannelCel = "/home/me/my_project/CEL/SAMPLE1_OncoScan_CNV_C.CEL", samplename = samplename, return.data = TRUE) %>% Segment(out.dir = paste0(workdir, "/", samplename), segmenter = "ASCAT", return.data = TRUE) %T>% Annotate(out.dir = paste0(workdir, "/", samplename, "/ASCAT/L2R")) %>% ASCN.ASCAT(out.dir = paste0(workdir, "/", samplename))
   ```
 
@@ -583,4 +583,3 @@ WES | `2` to `10` | `5` | `0.5` *(default)* to `1` | `0.75` *(default)*
 
  - Bastien Job (bastien.job@inserm.fr, bastien.job@gustaveroussy.fr) : developer and maintainer
  - Thibault Dayris (thibault.dayris@gustaveroussy.fr) : tester, user
-
