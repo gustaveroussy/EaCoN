@@ -108,9 +108,6 @@ It consists in a series of R packages that perform such type of analysis, from r
   ``` r
   ## Install the most recent STABLE version (@master)
   devtools::install_github("gustaveroussy/EaCoN")
-
-  ## ... or try your luck with the most recent DEVELOPMENT version (@dev)
-  devtools::install_github("gustaveroussy/EaCoN", ref = "dev")
   ```
 
 ### **MICROARRAY-SPECIFIC**
@@ -138,7 +135,7 @@ While the current EaCoN package is the core of the process and will straightly w
     - For the **OncoScan** design :
 
       ``` r
-      install.packages("https://partage.gustaveroussy.fr/pydio_public/b88fb8?dl=true&file=/OncoScan.na33.r4_0.1.0.tar.gz", repos = NULL, type = "source")
+      install.packages("https://nextcloud.gustaveroussy.fr/s/jrWWJDdpJbaR82o/download", repos = NULL, type = "source")
       ```
 
     - For the **OncoScan_CNV** design :
@@ -151,13 +148,13 @@ While the current EaCoN package is the core of the process and will straightly w
     - For the **OncoScan** design :
 
       ``` r
-      install.packages("https://partage.gustaveroussy.fr/pydio_public/582a03?dl=true&file=/OncoScan.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
+      install.packages("https://nextcloud.gustaveroussy.fr/s/ZpnYYwmKPzaeHWj/download", repos = NULL, type = "source")
       ```
 
     - For the **OncoScan_CNV** design :
 
       ``` r
-      install.packages( "https://partage.gustaveroussy.fr/pydio_public/41d8af?dl=true&file=/OncoScanCNV.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
+      install.packages( "https://nextcloud.gustaveroussy.fr/s/MQ9LwiZAHxnzJ2D/download", repos = NULL, type = "source")
       ```
 
 #### **CYTOSCAN FAMILY (CytoScan 750k / CytoScan HD)**
@@ -173,7 +170,7 @@ While the current EaCoN package is the core of the process and will straightly w
     - For the **CytoScan 750k** design :
 
       ``` r
-      install.packages("https://partage.gustaveroussy.fr/pydio_public/74d4cf?dl=true&file=/CytoScan750K.Array.na33.r4_0.1.0.tar.gz", repos = NULL, type = "source")
+      install.packages("https://nextcloud.gustaveroussy.fr/s/zx6iwPNKxX798Zg/download", repos = NULL, type = "source")
       ```
     - For the **CytoScan HD** design :
 
@@ -185,12 +182,12 @@ While the current EaCoN package is the core of the process and will straightly w
     - For the **CytoScan 750k** design :
 
       ``` r
-      install.packages("https://partage.gustaveroussy.fr/pydio_public/656d13?dl=true&file=/CytoScan750K.Array.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
+      install.packages("https://nextcloud.gustaveroussy.fr/s/riXGCQNBENdkQSM/download", repos = NULL, type = "source")
       ```
     - For the **CytoScan HD** design :
 
       ``` r
-      install.packages( "https://partage.gustaveroussy.fr/pydio_public/24b026?dl=true&file=/CytoScanHD.Array.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
+      install.packages( "https://nextcloud.gustaveroussy.fr/s/SjRmBFreAee9mqD/download", repos = NULL, type = "source")
       ```
 
 - Lastly, install the **_rcnorm_** package to perform BAF normalization for the CytoScan family of arrays :
@@ -210,7 +207,7 @@ While the current EaCoN package is the core of the process and will straightly w
 - Then install annotations from remote URL (There is no other build available than **NA35 (hg19)**) :
 
   ``` r
-  install.packages("https://partage.gustaveroussy.fr/pydio_public/152397?dl=true&file=/GenomeWideSNP.6.na35.r1_0.1.0.tar.gz", repos = NULL, type = "source")
+  install.packages("https://nextcloud.gustaveroussy.fr/s/46iyPjPPjFsni5S/download", repos = NULL, type = "source")
   ```
 
 - Lastly, install the **_rcnorm_** package to perform BAF normalization for SNP6 arrays **(if not already installed at the CytoScan step!)** :
