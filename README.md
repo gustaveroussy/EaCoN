@@ -43,7 +43,7 @@ It consists in a series of R packages that perform such type of analysis, from r
 
 ## **NOTES**
 
-* EaCoN is not yet fully compatible with R 4.x, but a patch is coming.
+* Support for R v4.0.x has been added thanks to suggestions by [ShenWei-wei](https://github.com/ShenWei-wei), but has not been extensively tested yet (few successful tests using CytoScanHD CEL files only).
 * Links for dependencies hosted on our institutional NextCloud instance have a forced deadline. Current one should be 2021-11-03, so if a link fail for you, it means I probably forgot to renew these links : please warn me by mail and I'll fix this :)
 
 ## **QUICK NEWS**
