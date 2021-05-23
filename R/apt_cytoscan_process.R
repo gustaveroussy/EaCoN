@@ -252,23 +252,12 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   
   ## Preparing germline
   ao.df$germ <- ao.df$ForcedCall
-  ao.df$germ[ao.df$germ %in% c(8,11)] <- 0
-  ao.df$germ[ao.df$germ !=0 ] <- 1
+  ao.df$germ[ao.df$germ %in% as.raw(c(8,11))] <- as.raw(0)
+  ao.df$germ[ao.df$germ !=0 ] <- as.raw(1)
   
-  ## Filtering BAF
-  # called <- which(ao.df$germ == 0 & !is.na(ao.df$BAF))
-  # ao.df$mBAF <- BAF2mBAF(ao.df$BAF)
-  # smoB <- round(length(called) / 3300)
-  # if(smoB%%2 == 0) smoB <- smoB+1
-  # mBAF.rm <- runmed(ao.df$mBAF[called], smoB)
-  # mBAF.diff <- abs(ao.df$mBAF[called] - mBAF.rm)
-  # Bfiltered <- mBAF.diff <= quantile(mBAF.diff, BAF.filter)
-  # if (any(Bfiltered)) ao.df$germ[called][!Bfiltered] <- 1
-  # rm(mBAF.rm, mBAF.diff, Bfiltered)
-  # 
+  
   ## Building ASCAT-like object
   tmsg("Building normalized object ...")
-  # my.ch <- sapply(unique(ao.df$chr), function(x) { which(ao.df$chr == x) })
   my.ascat.obj <- list(
     data = list(
       Tumor_LogR.ori = data.frame(sample = ao.df$L2R.ori, row.names = ao.df$ProbeSetName),

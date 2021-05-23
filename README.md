@@ -48,7 +48,20 @@ It consists in a series of R packages that perform such type of analysis, from r
 
 ## **QUICK NEWS**
 
+### **2021-05-23 : v0.3.6 _(Barolo)_ is out !**
+
+* CORR : Added correction suggested by [ShenWei-wei](https://github.com/ShenWei-wei) to allow support for R v4.0.x
+* MOD : Updated README (fixed some links)
+* CORR : Updated outdated links to dependences hosted on nextcloud.gustaveroussy.fr
+
+### **2020-08-17 : v0.3.5 _(CloudyMonday)_ is out !**
+
+* CORR : Segment.*() : Added a patch to handle the NA behavior in copynumber::winsorize (error raised by new handling of NA values in runmed()). The patch consists in applying winsorization on non-NA values only (whereas all values were transmitted in earlier versions).
+* CORR : WES.Bin() : Better handling of a possible desynch in chr names (when a canonical chr had no remaining values, its level was kept. This raised a rare error).
+* MOD : Many funcs : Fixed calls to the "%do%" and "%dopar" operators without loading it.
+
 ### **2018-12-10 : v0.3.4-1 _(PostRoscovite)_ is out !**
+
 * CORR : SNP6.Process(), CSHD.Process() : Edited code to handle changes in the rcnorm package, to discard the "chromosomes" package dependency.
 * MOD : Removed some dependencies (already called by other dependencies, like 'copynumber' from 'sequenza') to make installation easier and more convenient.
 * MOD : Edited the README.md (rewrote the INSTALL section)
@@ -74,12 +87,12 @@ It consists in a series of R packages that perform such type of analysis, from r
 
 ### **2018-09-12 : v0.3.3 _(Trinity)_ is out !**
 
-- Now EaCoN supports the [**SEQUENZA**](https://www.ncbi.nlm.nih.gov/pubmed/25319062) segmenter and copy number estimator _(except for Affymatrix SNP6)_ ! This makes 3 different segmenters available for quick. Sequenza uses the same bivariate segmentation algorithm as ASCAT, _(PCF : piecewise constant curve fitting)_, but in a different implementation (sequenza relies on the _copynumber_ package, ASCAT has its own implementation built-in), so expect similar but not identical results !
+- Now EaCoN supports the [**SEQUENZA**](https://www.ncbi.nlm.nih.gov/pubmed/25319062) segmenter and copy number estimator _(except for Affymatrix SNP6)_ ! This makes 3 different segmenters available for quick. Sequenza uses the same bivariate segmentation algorithm as ASCAT, _(PCF : piecewise constant curve fitting)_, but in a different implementation (sequenza relies on the _copynumber_ package, ASCAT has its own built-in implementation), so expect similar but not identical results !
 - A few bugs solved.
 
 ### **2018-08-08 : v0.3.2 _(PapeMamiePichine)_ is out !**
 
-- Now EaCoN supports the [**FACETS**](https://www.ncbi.nlm.nih.gov/pubmed/27270079) segmenter and copy number estimator ! This segmenter extends the famous **CBS** _(Circular Binary Segmentation)_ algorithm by making it compatible with bi-variate segmentation (using both the L2R and BAF signals). However, please note that **FACETS is only available for WES data**.
+- Now EaCoN supports the [**FACETS**](https://www.ncbi.nlm.nih.gov/pubmed/27270079) segmenter and copy number estimator ! This segmenter extends the famous **CBS** _(Circular Binary Segmentation)_ algorithm by making it compatible with bi-variate segmentation (thus, using both the L2R and BAF signals). However, please note that **FACETS is only available for WES data**.
 - A few bugs solved.
 
 ---
@@ -159,7 +172,7 @@ While the current EaCoN package is the core of the process and will straightly w
     - For the **OncoScan_CNV** design :
 
       ``` r
-      install.packages( "https://nextcloud.gustaveroussy.fr/s/dEP8oirBM84zdwB/download", repos = NULL, type = "source")
+      install.packages("https://nextcloud.gustaveroussy.fr/s/dEP8oirBM84zdwB/download", repos = NULL, type = "source")
       ```
 
 #### **CYTOSCAN FAMILY (CytoScan 750k / CytoScan HD)**
@@ -180,7 +193,7 @@ While the current EaCoN package is the core of the process and will straightly w
     - For the **CytoScan HD** design :
 
       ``` r
-      install.packages( "https://nextcloud.gustaveroussy.fr/s/FHRnT99A2kLJk6p/download", repos = NULL, type = "source")
+      install.packages("https://nextcloud.gustaveroussy.fr/s/FHRnT99A2kLJk6p/download", repos = NULL, type = "source")
       ```
 
   - For the **NA36 (hg38)** build :
@@ -192,13 +205,13 @@ While the current EaCoN package is the core of the process and will straightly w
     - For the **CytoScan HD** design :
 
       ``` r
-      install.packages( "https://nextcloud.gustaveroussy.fr/s/ZBcCMMTtonc3nJf/download", repos = NULL, type = "source")
+      install.packages("https://nextcloud.gustaveroussy.fr/s/ZBcCMMTtonc3nJf/download", repos = NULL, type = "source")
       ```
 
 - Lastly, install the **_rcnorm_** package to perform BAF normalization for the CytoScan family of arrays :
 
   ``` r
-  install.packages( "https://nextcloud.gustaveroussy.fr/s/GLwtjGSm5PG8pAH/download", repos = NULL, type = "source")
+  install.packages("https://nextcloud.gustaveroussy.fr/s/GLwtjGSm5PG8pAH/download", repos = NULL, type = "source")
   ```
 
 #### **GENOMEWIDE SNP6**
@@ -218,7 +231,7 @@ While the current EaCoN package is the core of the process and will straightly w
 - Lastly, install the **_rcnorm_** package to perform BAF normalization for SNP6 arrays **(if not already installed at the CytoScan step!)** :
 
   ``` r
-  install.packages( "https://nextcloud.gustaveroussy.fr/s/GLwtjGSm5PG8pAH/download", repos = NULL, type = "source")
+  install.packages("https://nextcloud.gustaveroussy.fr/s/GLwtjGSm5PG8pAH/download", repos = NULL, type = "source")
   ```
 
 ### **GENOMES**
@@ -226,6 +239,8 @@ While the current EaCoN package is the core of the process and will straightly w
 - EaCoN requires a genome as available thanks to the [BSgenome](https://bioconductor.org/packages/release/bioc/html/BSgenome.html) package, available at BioConductor. To check which genomes are publicly availabe at BioConductor :
 
   ``` r
+  if(!'BiocManager' %in% installed.packages()) install.packages('BiocManager')
+  BiocManager::install('BSgenome')
   BSgenome::available.genomes()
   ```
 
@@ -238,23 +253,20 @@ While the current EaCoN package is the core of the process and will straightly w
 - For Affymetrix microarrays, you need to install these human genomes depending on which annotation package you want to use :
 
   ``` r
-  ## try using http:// if https:// URLs are not supported
-  source("https://bioconductor.org/biocLite.R")
+  if(!'BiocManager' %in% installed.packages()) install.packages('BiocManager')
 
   ## To support NA33 / NA35 annotations (hg19)
-  biocLite("BSgenome.Hsapiens.UCSC.hg19")
+  BiocManager::install('BSgenome.Hsapiens.UCSC.hg19')
 
   ## To support NA36 annotations (hg38)
-  biocLite("BSgenome.Hsapiens.UCSC.hg38")
+  BiocManager::install('BSgenome.Hsapiens.UCSC.hg38')
   ```
 
 - For TCGA WES data, you will need the **hs37d5** genome _(a variation of the hg19 build used in the 1000 Genomes project)_
 
   ``` r
-  ## try using http:// if https:// URLs are not supported
-  source("https://bioconductor.org/biocLite.R")
-
-  biocLite("BSgenome.Hsapiens.1000genomes.hs37d5")
+  if(!'BiocManager' %in% installed.packages()) install.packages('BiocManager')
+  BiocManager::install("BSgenome.Hsapiens.1000genomes.hs37d5")
   ```
 
 - If your favorite genome is not available, **it is possible to build your own** !

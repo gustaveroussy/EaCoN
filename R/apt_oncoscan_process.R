@@ -225,19 +225,8 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   
   ## Preparing germline
   germ <- ao.df$CallF
-  germ[germ %in% c(8,11)] <- 0
-  germ[germ !=0 ] <- 1
-  
-  ## Filtering BAF
-  # called <- which(germ == 0 & !is.na(ao.df$BAF))
-  # ao.df$mBAF <- BAF2mBAF(ao.df$BAF)
-  # smoB <- round(length(called) / 3300)
-  # if(smoB%%2 == 0) smoB <- smoB+1
-  # mBAF.rm <- runmed(ao.df$mBAF[called], smoB)
-  # mBAF.diff <- abs(ao.df$mBAF[called] - mBAF.rm)
-  # Bfiltered <- mBAF.diff <= quantile(mBAF.diff, BAF.filter)
-  # if (any(Bfiltered)) germ[called][!Bfiltered] <- 1
-  # 
+  germ[germ %in% as.raw(c(8,11))] <- as.raw(0)
+  germ[germ != 0 ] <- as.raw(1)
   
   ## Building ASCAT-like object
   tmsg("Building normalized object ...")
