@@ -103,7 +103,7 @@ It consists in a series of R packages that perform such type of analysis, from r
 -  Please first install the **_devtools_** package that will allow installing packages from _github_ :
 
   ``` r
-  install.packages("devtools")
+  install.packages('devtools')
   ```
 
 - Then install **_ASCAT_** and **_FACETS_** from github :
@@ -117,8 +117,8 @@ It consists in a series of R packages that perform such type of analysis, from r
 
   ``` r
   ## try using http:// if https:// URLs are not supported
-  source("https://bioconductor.org/biocLite.R")
-  biocLite(c("affxparser", "Biostrings", "aroma.light", "BSgenome", "copynumber", "GenomicRanges", "limma", "rhdf5", "sequenza"))
+  if(!installed.packages('BiocManager')) install.packages('BiocManager')
+  BiocManager::install(c("affxparser", "Biostrings", "aroma.light", "BSgenome", "copynumber", "GenomicRanges", "limma", "rhdf5", "sequenza"))
   ```
 
 - Then install **_EaCoN_** from github !
