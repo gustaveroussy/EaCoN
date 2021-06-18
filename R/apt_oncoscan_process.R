@@ -225,8 +225,15 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   
   ## Preparing germline
   germ <- ao.df$CallF
-  germ[germ %in% as.raw(c(8,11))] <- as.raw(0)
-  germ[germ != 0 ] <- as.raw(1)
+  
+  
+  if(as.numeric(version$major) >= 4) {
+    germ[germ %in% as.raw(c(8,11))] <- as.raw(0)
+    germ[germ != 0 ] <- as.raw(1)
+  } else {
+    germ[germ %in% c(8,11)] <- 0
+    germ[germ != 0 ] <- 1
+  }
   
   ## Building ASCAT-like object
   tmsg("Building normalized object ...")

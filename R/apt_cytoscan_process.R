@@ -252,9 +252,14 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   
   ## Preparing germline
   ao.df$germ <- ao.df$ForcedCall
-  ao.df$germ[ao.df$germ %in% as.raw(c(8,11))] <- as.raw(0)
-  ao.df$germ[ao.df$germ !=0 ] <- as.raw(1)
-  
+  if(as.numeric(version$major) >= 4) {
+    ao.df$germ[ao.df$germ %in% as.raw(c(8,11))] <- as.raw(0)
+    ao.df$germ[ao.df$germ !=0 ] <- as.raw(1)
+  } else {
+    ao.df$germ[ao.df$germ %in% c(8,11)] <- 0
+    ao.df$germ[ao.df$germ !=0 ] <- 1
+  }
+    
   
   ## Building ASCAT-like object
   tmsg("Building normalized object ...")

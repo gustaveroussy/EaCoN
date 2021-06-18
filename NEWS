@@ -1,13 +1,17 @@
 EaCoN
 -----
 
-v0.3.6 (20200523)*Barolo*
+v0.3.6-1 (20210618) *SweetSummerSweat*
+-----------------
+* CORR : Modified the correction to support R4 that er... broke compatibility with R3. Now the code evaluates the R major version (version$major) and applies ShenWei-wei's correction if >=4.
+
+v0.3.6 (20210523) *Barolo*
 -----------------
 * CORR : Added correction suggested by [ShenWei-wei](https://github.com/ShenWei-wei) to allow support for R v4.0.x
 * MOD : Updated README (fixed some links)
 * CORR : Updated outdated links to dependences hosted on nextcloud.gustaveroussy.fr
 
-v0.3.5 (20200817)*CloudyMonday*
+v0.3.5 (20200817) *CloudyMonday*
 -----------------
 * CORR : Segment.*() : Added a patch to handle the NA behavior in copynumber::winsorize (error raised by new handling of NA values in runmed). The patch consists on applying winsorization on non-NA values only (whereas all values were transmitted in earlier versions).
 * CORR : WES.Bin() : Better handling of a possible desynch in chr names (when a canonical chr had no remaining values, its level was kept. This raised a rare error).
