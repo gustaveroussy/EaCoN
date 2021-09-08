@@ -224,16 +224,16 @@ Segment.ASCAT <- function(data = NULL, mingap = 5E+06, smooth.k = NULL, BAF.filt
     mydf <- mydf[!is.na(mydf$l2r), ]
     chrends <- cumsum(rle(as.character(data$data$SNPpos$chrs[!is.na(data$data$Tumor_LogR[,1])]))$lengths)
     if (is.character(SER.pen)) {
-      seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = 5)@cpts))
+      pelt.try <- try(seg.end <- suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = 5)@cpts))
     } else if (is.numeric(SER.pen)) {
       if (SER.pen < 1) {
-        seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = 'Asymptotic', pen.value = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = 5)@cpts))
+        pelt.try <- try(seg.end <- suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = 'Asymptotic', pen.value = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = 5)@cpts))
       } else {
         SER.pen <- sum(abs(diff(runmed(mydf$l2r[!is.na(mydf$l2r)], smo)))) / SER.pen
-        seg.end <- try(suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = 'Manual', pen.value = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = 5)@cpts))
+        pelt.try <- try(seg.end <- suppressWarnings(changepoint::cpt.mean(data = mydf$l2r, penalty = 'Manual', pen.value = SER.pen, method = "PELT", param.estimates = FALSE, minseglen = 5)@cpts))
       }
     } else stop(tmsg("SER.pen should be a character or a numeric !"), call. = FALSE)
-    if (is.character(seg.end)) {
+    if (class(pelt.try) == 'try-error') {
       tmsg(" PELT segmentation failed with this combination of SER.pen and segmentLength options !")
       data$meta$eacon[["small.events.rescue.PELT.penalty"]] <- "ERROR"
     } else {
