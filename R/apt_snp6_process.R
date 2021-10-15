@@ -80,7 +80,8 @@ SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", gc
   tmsg(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
-  genome2 <- BSgenome::providerVersion(BSg.obj)
+  # genome2 <- BSgenome::providerVersion(BSg.obj)
+  genome2 <- metadata(BSg.obj)$genome
   cs <- chromobjector(BSg.obj)
   
   
@@ -122,6 +123,7 @@ SNP6.Process <- function(CEL = NULL, samplename = NULL, l2r.level = "normal", gc
 
   ## Extracting data : L2R
   ao.df <- dplyr::as.tbl(data.frame(my.oschp$MultiData$CopyNumber[,c(2:4)], L2R.ori = as.vector(my.oschp$MultiData$CopyNumber[[l2r.lev.conv[[l2r.level]]]])))
+  ao.df$Chromosome <- as.integer(ao.df$Chromosome) ### Patching the Chromosome column : on R4+, it is read as 'raw', we need ints
   affy.meta <- my.oschp$Meta
   affy.chrom <- my.oschp$MultiData[["CopyNumber_&keyvals"]][seq.int(3, nrow(my.oschp$MultiData[["CopyNumber_&keyvals"]]), 3),1:2]
   ao.df$L2R <- ao.df$L2R.ori

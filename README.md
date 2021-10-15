@@ -110,11 +110,26 @@ It consists in a series of R packages that perform such type of analysis, from r
   install.packages('devtools')
   ```
 
+  **WARNING** : If you get a **GITHUB_PAT** error when using the **_devtools::install_github()_** function, please run the following line once per session before running _devtools::install_github()_ :
+
+  ``` r
+  Sys.unsetenv("GITHUB_PAT")
+  ```
+
+
 - Then install **_ASCAT_** and **_FACETS_** from github :
 
   ``` r
   devtools::install_github("Crick-CancerGenomics/ascat/ASCAT")
   devtools::install_github("mskcc/facets")
+  ```
+
+- Then install required **_CRAN_** package(s) :
+
+  ``` r
+  ## try using http:// if https:// URLs are not supported
+  if(!installed.packages('BiocManager')) install.packages('BiocManager')
+  install.packages('sequenza')
   ```
 
 - Then install required **_BioConductor_** packages :

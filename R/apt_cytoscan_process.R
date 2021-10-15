@@ -84,7 +84,8 @@ CS.Process <- function(CEL = NULL, samplename = NULL, dual.norm = FALSE, normal.
   tmsg(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
-  genome2 <- BSgenome::providerVersion(BSg.obj)
+  # genome2 <- BSgenome::providerVersion(BSg.obj)
+  genome2 <- metadata(BSg.obj)$genome
   cs <- chromobjector(BSg.obj)
   
   ### Getting genome build version

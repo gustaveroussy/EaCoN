@@ -93,7 +93,8 @@ OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NU
   tmsg(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
-  genome2 <- BSgenome::providerVersion(BSg.obj)
+  # genome2 <- BSgenome::providerVersion(BSg.obj)
+  genome2 <- metadata(BSg.obj)$genome
   cs <- chromobjector(BSg.obj)
   
   ### Getting basic meta
