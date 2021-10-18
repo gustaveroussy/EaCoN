@@ -116,11 +116,26 @@ It consists in a series of R packages that perform such type of analysis, from r
   install.packages('devtools')
   ```
 
+  **WARNING** : If you get a **GITHUB_PAT** error when using the **_devtools::install_github()_** function, please run the following line once per session before running _devtools::install_github()_ :
+
+  ``` r
+  Sys.unsetenv("GITHUB_PAT")
+  ```
+
+
 - Then install **_ASCAT_** and **_FACETS_** from github :
 
   ``` r
   devtools::install_github("Crick-CancerGenomics/ascat/ASCAT")
   devtools::install_github("mskcc/facets")
+  ```
+
+- Then install required **_CRAN_** package(s) :
+
+  ``` r
+  ## try using http:// if https:// URLs are not supported
+  if(!installed.packages('BiocManager')) install.packages('BiocManager')
+  install.packages('sequenza')
   ```
 
 - Then install required **_BioConductor_** packages :
@@ -147,7 +162,7 @@ While the current EaCoN package is the core of the process and will straightly w
 - The **_affy.CN.norm_** package provides pre-computed GC% and wave-effect (re)normalization datasets for all compatible Affymetrix designs, for both NA33/NA35 (hg19) and NA36 (hg38) human genome builds. Install from remote URL :
 
   ``` r
-  install.packages("https://nextcloud.gustaveroussy.fr/s/NfttrQ4ptgoLB9g/download", repos = NULL, type = "source")
+  install.packages("https://zenodo.org/record/5494853/files/affy.CN.norm.data_0.1.2.tar.gz", repos = NULL, type = "source")
   ```
 
 #### **ONCOSCAN FAMILY (OncoScan / OncoScan_CNV)**
@@ -163,26 +178,26 @@ While the current EaCoN package is the core of the process and will straightly w
     - For the **OncoScan** design :
 
       ``` r
-      install.packages("https://nextcloud.gustaveroussy.fr/s/8DpEKa2SqHmmw5E/download", repos = NULL, type = "source")
+      install.packages("https://zenodo.org/record/5494853/files/OncoScan.na33.r4_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
 
     - For the **OncoScan_CNV** design :
 
       ``` r
-      install.packages("https://nextcloud.gustaveroussy.fr/s/xKcZPZYpJZqHNta/download", repos = NULL, type = "source")
+      install.packages("https://zenodo.org/record/5494853/files/OncoScanCNV.na33.r2_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
 
   - For the **NA36 (hg38)** build :
     - For the **OncoScan** design :
 
       ``` r
-      install.packages("https://nextcloud.gustaveroussy.fr/s/m3LWXzWTZjMqsBi/download", repos = NULL, type = "source")
+      install.packages("https://zenodo.org/record/5494853/files/OncoScan.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
 
     - For the **OncoScan_CNV** design :
 
       ``` r
-      install.packages("https://nextcloud.gustaveroussy.fr/s/dEP8oirBM84zdwB/download", repos = NULL, type = "source")
+      install.packages("https://zenodo.org/record/5494853/files/OncoScanCNV.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
 
 #### **CYTOSCAN FAMILY (CytoScan 750k / CytoScan HD)**
@@ -198,30 +213,30 @@ While the current EaCoN package is the core of the process and will straightly w
     - For the **CytoScan 750k** design :
 
       ``` r
-      install.packages("https://nextcloud.gustaveroussy.fr/s/bwo9MzksbPH4jMP/download", repos = NULL, type = "source")
+      install.packages("https://zenodo.org/record/5494853/files/CytoScan750K.Array.na33.r4_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
     - For the **CytoScan HD** design :
 
       ``` r
-      install.packages("https://nextcloud.gustaveroussy.fr/s/FHRnT99A2kLJk6p/download", repos = NULL, type = "source")
+      install.packages("https://zenodo.org/record/5494853/files/CytoScanHD.Array.na33.r4_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
 
   - For the **NA36 (hg38)** build :
     - For the **CytoScan 750k** design :
 
       ``` r
-      install.packages("https://nextcloud.gustaveroussy.fr/s/xkyPbsN22RkFKL5/download", repos = NULL, type = "source")
+      install.packages(https://zenodo.org/record/5494853/files/CytoScan750K.Array.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
     - For the **CytoScan HD** design :
 
       ``` r
-      install.packages("https://nextcloud.gustaveroussy.fr/s/ZBcCMMTtonc3nJf/download", repos = NULL, type = "source")
+      install.packages("https://zenodo.org/record/5494853/files/CytoScanHD.Array.na36.r1_0.1.0.tar.gz", repos = NULL, type = "source")
       ```
 
 - Lastly, install the **_rcnorm_** package to perform BAF normalization for the CytoScan family of arrays :
 
   ``` r
-  install.packages("https://nextcloud.gustaveroussy.fr/s/GLwtjGSm5PG8pAH/download", repos = NULL, type = "source")
+  install.packages("https://zenodo.org/record/5494853/files/rcnorm_0.1.5.tar.gz", repos = NULL, type = "source")
   ```
 
 #### **GENOMEWIDE SNP6**
@@ -235,13 +250,13 @@ While the current EaCoN package is the core of the process and will straightly w
 - Then install annotations from remote URL (There is no other build available than **NA35 (hg19)**) :
 
   ``` r
-  install.packages("https://nextcloud.gustaveroussy.fr/s/nBZk8HzwiBHs73s/download", repos = NULL, type = "source")
+  install.packages("https://zenodo.org/record/5494853/files/GenomeWideSNP.6.na35.r1_0.1.0.tar.gz", repos = NULL, type = "source")
   ```
 
 - Lastly, install the **_rcnorm_** package to perform BAF normalization for SNP6 arrays **(if not already installed at the CytoScan step!)** :
 
   ``` r
-  install.packages("https://nextcloud.gustaveroussy.fr/s/GLwtjGSm5PG8pAH/download", repos = NULL, type = "source")
+  install.packages("https://zenodo.org/record/5494853/files/rcnorm_0.1.5.tar.gz", repos = NULL, type = "source")
   ```
 
 ### **GENOMES**
