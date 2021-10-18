@@ -1,6 +1,13 @@
 EaCoN
 -----
 
+v0.3.6-2 (20211018) *CloudyMonday2*
+-----------------
+* CORR : Added some fixes that broke SNP6.Process :
+  . dependency loading OSCHP file (rhdf5) made the 'Chromosome' column raw instead of integer
+  . changepoint::cpt.mean do not accept the 'Allele Difference' column as an array anymore, so converted it to a simple vector.
+* MOD : Replaced some deprecated calls to BSgenome::providerVersion() by the now recommended way metadata()$genome.
+
 v0.3.6-1 (20210618) *SweetSummerSweat*
 -----------------
 * CORR : Modified the correction to support R4 that er... broke compatibility with R3. Now the code evaluates the R major version (version$major) and applies ShenWei-wei's correction if >=4.

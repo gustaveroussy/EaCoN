@@ -49,6 +49,12 @@ It consists in a series of R packages that perform such type of analysis, from r
 
 ## **QUICK NEWS**
 
+### **2021-10-18 : v0.3.6-2 _(CloudyMonday2)_ is out !**
+* CORR : Added some fixes to recent R updates that broke SNP6.Process (thanks to 卜小云 <boxy@sysucc.org.cn> that found the bug) :
+  . dependency loading OSCHP file (rhdf5) made the 'Chromosome' column raw instead of integer
+  . changepoint::cpt.mean do not accept the 'Allele Difference' column as an array anymore, so converted it to a simple vector.
+* MOD : Replaced some deprecated calls to BSgenome::providerVersion() by the now recommended way metadata()$genome.
+
 ### **2021-06-18 : v0.3.6-1 _(SweetSummerSweat)_ is out !**
 * CORR : Modified the correction to support R4 that er... broke compatibility with R3. Now the code evaluates the R major version (version$major) and applies ShenWei-wei's correction if >=4.
 

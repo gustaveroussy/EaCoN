@@ -141,7 +141,8 @@ EaCoN.set.bitmapType <- function(type = "cairo") {
 ## Create a chromosomes-like object from a BSgenome object
 chromobjector <- function(BSg = NULL) {
   if (is.null(BSg)) stop("NULL object !", call. = FALSE)
-  chromobj <- list(species = GenomeInfoDb::organism(BSg), genomebuild = BSgenome::providerVersion(BSg))
+  # chromobj <- list(species = GenomeInfoDb::organism(BSg), genomebuild = BSgenome::providerVersion(BSg))
+  chromobj <- list(species = GenomeInfoDb::organism(BSg), genomebuild = metadata(BSg)$genome)
   chromdf <- data.frame(chrom = BSgenome::seqnames(BSg), chrN = seq_along(BSgenome::seqnames(BSg)), chr.length = GenomeInfoDb::seqlengths(BSg), stringsAsFactors = FALSE)
   chromdf$chr.length.sum <- cumsum(as.numeric(chromdf$chr.length))
   chromdf$chr.length.toadd <- c(0, chromdf$chr.length.sum[-nrow(chromdf)])

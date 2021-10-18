@@ -161,7 +161,8 @@ EaCoN.Predict.Germline <- function(ASCATobj = NULL, bafbin.size = 1E+07, modelNa
   message(tmsg(paste0("Loading ", genome.pkg, " ...")))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
-  genome <- BSgenome::providerVersion(BSg.obj)
+  # genome <- BSgenome::providerVersion(BSg.obj)
+  genome <- metadata(BSg.obj)$genome
   cs <- chromobjector(BSg.obj)
   
   Homozygous = matrix(nrow = dim(ASCATobj$Tumor_LogR)[1], ncol = dim(ASCATobj$Tumor_LogR)[2])
