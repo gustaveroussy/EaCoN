@@ -104,7 +104,7 @@ seq.int2 <- Vectorize(seq.default, SIMPLIFY = FALSE)
 write.table.fast <- function(x, file = NULL, header = TRUE, sep = "\t", fileEncoding="", row.names = FALSE, ...) {
   if (header) write.table(x = x[NULL,], file = file, sep = "\t", quote = FALSE, row.names = FALSE, fileEncoding = fileEncoding)
   if(!row.names) rownames(x) <- NULL
-  trychk <- try(iotools::write.csv.raw(x = x, file = file, sep = sep, col.names=FALSE, fileEncoding=fileEncoding, append = header, ...))
+  trychk <- try(iotools::write.csv.raw(x = x, file = file, sep = sep, col.names = FALSE, fileEncoding=fileEncoding, append = header, ...))
   if (!is.null(trychk)) {
     print("Fast write failed, using canonical write.table ...")
     write.table(x = x, file = file, sep = sep, row.names = row.names, quote = FALSE)
@@ -139,11 +139,34 @@ EaCoN.set.bitmapType <- function(type = "cairo") {
 }
 
 ## Create a chromosomes-like object from a BSgenome object
-chromobjector <- function(BSg = NULL) {
+# chromobjector <- function(BSg = NULL) {
+#   if (is.null(BSg)) stop("NULL object !", call. = FALSE)
+#   # chromobj <- list(species = GenomeInfoDb::organism(BSg), genomebuild = BSgenome::providerVersion(BSg))
+#   chromobj <- list(species = GenomeInfoDb::organism(BSg), genomebuild = metadata(BSg)$genome)
+#   chromdf <- data.frame(chrom = BSgenome::seqnames(BSg), chrN = seq_along(BSgenome::seqnames(BSg)), chr.length = GenomeInfoDb::seqlengths(BSg), stringsAsFactors = FALSE)
+#   chromdf$chr.length.sum <- cumsum(as.numeric(chromdf$chr.length))
+#   chromdf$chr.length.toadd <- c(0, chromdf$chr.length.sum[-nrow(chromdf)])
+#   chromdf$mid.chr <- round(diff(c(0, chromdf$chr.length.sum)) /2)
+#   chromdf$mid.chr.geno <- chromdf$mid.chr + chromdf$chr.length.toadd
+#   chromobj$chromosomes <- chromdf
+#   rm(chromdf)
+#   chromobj$chrom2chr <- sapply(chromobj$chromosomes$chrom, function(k) { chromobj$chromosomes$chrN[chromobj$chromosomes$chrom == k]}, simplify = FALSE)
+#   chromobj$chr2chrom <- sapply(chromobj$chromosomes$chrN, function(k) { chromobj$chromosomes$chrom[chromobj$chromosomes$chrN == k]}, simplify = FALSE)
+#   names(chromobj$chr2chrom) <- chromobj$chromosomes$chrN
+#   chromobj$genome.length <- sum(as.numeric(chromobj$chromosomes$chr.length), na.rm = TRUE)
+#   return(chromobj)
+# }
+chromobjector <- function(BSg = NULL, chrs = NULL) {
   if (is.null(BSg)) stop("NULL object !", call. = FALSE)
-  # chromobj <- list(species = GenomeInfoDb::organism(BSg), genomebuild = BSgenome::providerVersion(BSg))
   chromobj <- list(species = GenomeInfoDb::organism(BSg), genomebuild = metadata(BSg)$genome)
   chromdf <- data.frame(chrom = BSgenome::seqnames(BSg), chrN = seq_along(BSgenome::seqnames(BSg)), chr.length = GenomeInfoDb::seqlengths(BSg), stringsAsFactors = FALSE)
+  
+  ## Restrict ?
+  ### Check
+  if (!is.null(chrs)) {
+    if (!all(chrs %in% chromdf$chrom)) stop('"chrs" provided but not all given values found in the provided BSgenome !') else chromdf <- chromdf[chromdf$chrom %in% chrs,]
+  }
+  
   chromdf$chr.length.sum <- cumsum(as.numeric(chromdf$chr.length))
   chromdf$chr.length.toadd <- c(0, chromdf$chr.length.sum[-nrow(chromdf)])
   chromdf$mid.chr <- round(diff(c(0, chromdf$chr.length.sum)) /2)
@@ -156,7 +179,6 @@ chromobjector <- function(BSg = NULL) {
   chromobj$genome.length <- sum(as.numeric(chromobj$chromosomes$chr.length), na.rm = TRUE)
   return(chromobj)
 }
-
 
 ## Handles GZ, BZ2 or ZIP -compressed CEL files
 compressed_handler <- function(CELz = NULL) {
@@ -188,4 +210,11 @@ BAF2mBAF <- function(Bvalues = NULL) {
   nona <- !is.na(Bvalues)
   Bvalues[nona][Bvalues[nona] > .5] <- 1 - Bvalues[nona][Bvalues[nona] > .5]
   return(Bvalues)
+}
+
+## Vector summaries (recoded function as R internal summary uses too much RAM !)
+my.summary <- function(myv = NULL) {
+  vsum <- c(min(myv, na.rm = TRUE), quantile(myv, .25, na.rm = TRUE), median(myv, na.rm = TRUE), mean(myv, na.rm = TRUE), quantile(myv, .75, na.rm = TRUE), max(myv, na.rm = TRUE))
+  names(vsum) <- c("min", "q25", "median", "mean", "q75", "max")
+  return(vsum)
 }

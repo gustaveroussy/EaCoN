@@ -4,7 +4,8 @@ EaCoN.l2rplot.geno <- function(l2r = NULL, seg = NULL, seg.col = list(gain = "bl
   # message(tmsg(paste0("Loading ", genome.pkg, " ...")))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
-  genome <- BSgenome::providerVersion(BSg.obj)
+  # genome <- BSgenome::providerVersion(BSg.obj)
+  genome <- metadata(BSg.obj)$genome
   cs <- chromobjector(BSg.obj)
   
   # data(list = genome, package = "chromosomes", envir = environment())
@@ -12,6 +13,12 @@ EaCoN.l2rplot.geno <- function(l2r = NULL, seg = NULL, seg.col = list(gain = "bl
   l2r$Start.geno <- l2r$Start + cs$chromosomes$chr.length.toadd[l2r$Chr]
   l2r$End.geno <- l2r$End + cs$chromosomes$chr.length.toadd[l2r$Chr]
 
+  ## Restrict cs to chromosomes in l2r
+  # cs$chromosomes <- cs$chromosomes[cs$chromosomes$chrom %in% l2r$Chr,]
+  cs$chromosomes <- cs$chromosomes[cs$chromosomes$chrN %in% l2r$Chr,]
+  cs$genome.length <- sum(cs$chromosomes$chr.length)
+  
+  ## Compute genomic pos
   seg$pos$Start.geno <- seg$pos$Start + cs$chromosomes$chr.length.toadd[seg$pos$Chr]
   seg$pos$End.geno <- seg$pos$End + cs$chromosomes$chr.length.toadd[seg$pos$Chr]
   graphics::plot(l2r$Start.geno, l2r$Value,
@@ -20,9 +27,9 @@ EaCoN.l2rplot.geno <- function(l2r = NULL, seg = NULL, seg.col = list(gain = "bl
                  cex.lab = 2, col = "grey80", xaxt = "n")
   ink <- cs$chromosomes$chrN %in% l2r$Chr
   yrange = abs(diff(ylim))
-  m.pos <- c(ylim[2] - (sign(ylim[2]) * yrange * .05), ylim[1] + (sign(ylim[2]) * yrange * .05))
+  m.pos <- c(ylim[2] - (sign(ylim[2]) * yrange * .075), ylim[1] + (sign(ylim[2]) * yrange * .075))
   m.mod <- -(cs$chromosomes$chrN[ink] %% 2) +2
-  try(text(x = cs$chromosomes$mid.chr.geno[ink], y = m.pos[m.mod], labels = cs$chromosomes$chrom[ink], cex = 1))
+  try(text(x = cs$chromosomes$mid.chr.geno[ink], y = m.pos[m.mod], labels = cs$chromosomes$chrom[ink], cex = 1.25, srt = 90, col = 'grey30'))
   abline(h = 0, col = 1, lwd = 2, lty = 3)
   smo <- round(nrow(l2r)/200)
   if (smo%%2 == 0) smo <- smo + 1
@@ -57,10 +64,14 @@ EaCoN.bafplot.geno <- function(baf = NULL, seg = NULL, seg.col = list(Hetero = "
 
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
-  genome <- BSgenome::providerVersion(BSg.obj)
+  # genome <- BSgenome::providerVersion(BSg.obj)
+  genome <- metadata(BSg.obj)$genome
   cs <- chromobjector(BSg.obj)
   
-  # data(list = genome, package = "chromosomes", envir = environment())
+  ## Restrict cs to chromosomes in l2r
+  cs$chromosomes <- cs$chromosomes[cs$chromosomes$chrN %in% baf$Chr,]
+  cs$genome.length <- sum(cs$chromosomes$chr.length)
+  
   baf$Start.geno <- baf$Start + cs$chromosomes$chr.length.toadd[baf$Chr]
   baf$End.geno <- baf$End + cs$chromosomes$chr.length.toadd[baf$Chr]
 
@@ -74,7 +85,7 @@ EaCoN.bafplot.geno <- function(baf = NULL, seg = NULL, seg.col = list(Hetero = "
   yrange = abs(diff(ylim))
   m.pos <- c(ylim[2] - (sign(ylim[2]) * yrange * .075), ylim[1] + (sign(ylim[2]) * yrange * .075))
   m.mod <- -(cs$chromosomes$chrN[ink] %% 2) +2
-  try(text(x = cs$chromosomes$mid.chr.geno[ink], y = m.pos[m.mod], labels = cs$chromosomes$chrom[ink], cex = 1))
+  try(text(x = cs$chromosomes$mid.chr.geno[ink], y = m.pos[m.mod], labels = cs$chromosomes$chrom[ink], cex = 1.25, srt = 90, col = 'grey30'))
   abline(h = 0.5, col = 1, lwd = 2, lty = 3)
 
   if(seg.type %in% c("block", "both")) {
@@ -89,12 +100,12 @@ EaCoN.bafplot.geno <- function(baf = NULL, seg = NULL, seg.col = list(Hetero = "
   abline(v = cs$chromosomes$chr.length.sum, col = 1, lty = 2, lwd = 2)
 }
 
-EaCoN.l2rplot.karyo <- function(l2r = NULL, seg = NULL, seg.col = list(gain = "blue", outscale.gain = "midnightblue", loss = "red", outscale.red = "darkred"),
-                                seg.type = "block", seg.normal = TRUE, ylim = c(-1.5,1.5), genome.pkg = NULL) {
+EaCoN.l2rplot.karyo <- function(l2r = NULL, seg = NULL, seg.col = list(gain = "blue", outscale.gain = "midnightblue", loss = "red", outscale.red = "darkred"), seg.type = "block", seg.normal = TRUE, ylim = c(-1.5,1.5), genome.pkg = NULL) {
 
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
-  genome <- BSgenome::providerVersion(BSg.obj)
+  # genome <- BSgenome::providerVersion(BSg.obj)
+  genome <- metadata(BSg.obj)$genome
   # cs <- chromobjector(BSg.obj)
   
   self.pkg.name <- "EaCoN"
@@ -144,17 +155,13 @@ EaCoN.l2rplot.karyo <- function(l2r = NULL, seg = NULL, seg.col = list(gain = "b
   }
 }
 
-EaCoN.l2rplot.chromo <- function(chr = NULL, l2r = NULL, l2r.seg = NULL, baf = NULL, baf.seg = NULL,
-                                 l2r.seg.col = list(gain = "blue", outscale.gain = "midnightblue", loss = "red", outscale.red = "darkred"),
-                                 l2r.seg.type = "block", baf.seg.col = list(Hetero = "black", Homo = "cadetblue4", Unbalanced = "coral1"),
-                                 baf.seg.type = "both", seg.normal = TRUE, genome.pkg = NULL, l2r.ylim = c(-1.5,1.5), baf.ylim = c(-.01,1.01)) {
+EaCoN.l2rplot.chromo <- function(chr = NULL, l2r = NULL, l2r.seg = NULL, baf = NULL, baf.seg = NULL, l2r.seg.col = list(gain = "blue", outscale.gain = "midnightblue", loss = "red", outscale.red = "darkred"), l2r.seg.type = "block", baf.seg.col = list(Hetero = "black", Homo = "cadetblue4", Unbalanced = "coral1"), baf.seg.type = "both", seg.normal = TRUE, genome.pkg = NULL, l2r.ylim = c(-1.5,1.5), baf.ylim = c(-.01,1.01)) {
 
   if (is.null(chr)) return()
   
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
-  genome <- BSgenome::providerVersion(BSg.obj)
-  # cs <- chromobjector(BSg.obj)
+  genome <- metadata(BSg.obj)$genome
   
   self.pkg.name <- "EaCoN"
   data(list = genome, package = self.pkg.name, envir = environment())

@@ -114,7 +114,8 @@ BedGC.fasta.chr <- function(binned.bed.file = NULL, genome = "hg19", fasta.dir =
       queryend <- k$end + a
       querystart[querystart < 1] <- 1
       queryend[queryend > klen] <- klen
-
+      
+      ## NOTE : test biovizBase::GCcontent()
       gcpc.k <- vapply(1:nrow(k), function(x) {
         aFreq <- Biostrings::alphabetFrequency(Biostrings::subseq(kdata, querystart[x], queryend[x]), baseOnly = TRUE)
         acgt.count <- sum(aFreq[colnames(aFreq) != "other"])
@@ -229,7 +230,7 @@ BedCheck <- function(bed.file = NULL, genome.pkg = "BSgenome.Hsapiens.UCSC.hg19"
   message(paste0("Loading ", genome.pkg, " ..."))
   suppressPackageStartupMessages(require(genome.pkg, character.only = TRUE))
   BSg.obj <- getExportedValue(genome.pkg, genome.pkg)
-  genome <- BSgenome::providerVersion(BSg.obj)
+  genome <- metadata(BSg.obj)$genome
 
   bed.data <- read.table(file = bed.file, header = FALSE, sep = "\t", comment.char = "#", stringsAsFactors = TRUE)
   if (ncol(bed.data) < 3) stop("BED file must contain at least 3 columns !", call. = FALSE)
