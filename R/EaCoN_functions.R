@@ -615,7 +615,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
         npk <- which(repr$values == -2)
 
         if (length(npk) == 1) {
-          fx <- my.den$x[repr$start[npk[1]]]
+          shifter <- my.den$x[repr$start[npk[1]]]
         } else {
           if (1 %in% npk) npk <- npk[-1]
           if (nrow(repr) %in% npk) npk <- npk[nrow(repr)]
@@ -645,6 +645,7 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
   colnames(data$data$Tumor_LogR_wins) <- samplename
   rm(list = c("cndf", "cndf.wins", "l2r.nona"))
 
+  `%do%` <- foreach::"%do%"
 
   ## PELT rescue
   if (!is.null(SER.pen)) {
@@ -677,7 +678,6 @@ Segment.FACETS <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, homoC
       EaCoN:::tmsg(paste0(" Found ", length(rescued), "."))
       if (length(rescued) > seg.maxn) tmsg("WARNING : Many small events found, profile may be noisy ! Consider using 'smooth.k', or for HTS data, strengthen low depth filtering !")
       data$meta$eacon[["PELT-nseg"]] <- length(rescued)
-      `%do%` <- foreach::"%do%"
       foreach::foreach(re = rescued, .combine = "c") %do% {
         interv <- mydf$idx.ori[seg.start[re]]:mydf$idx.ori[seg.end[re]]
         data$data$Tumor_LogR_segmented[interv] <- median(data$data$Tumor_LogR[interv, 1], na.rm = TRUE)
@@ -1058,7 +1058,7 @@ Segment.SEQUENZA <- function(data = NULL, smooth.k = NULL, BAF.filter = .75, hom
         npk <- which(repr$values == -2)
 
         if (length(npk) == 1) {
-          fx <- my.den$x[repr$start[npk[1]]]
+          shifter <- my.den$x[repr$start[npk[1]]]
         } else {
           if (1 %in% npk) npk <- npk[-1]
           if (nrow(repr) %in% npk) npk <- npk[nrow(repr)]
