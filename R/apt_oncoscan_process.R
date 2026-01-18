@@ -1,5 +1,5 @@
 ## Performs OS CEL pairs processing
-OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NULL, dual.norm = TRUE, l2r.level = "weighted", gc.renorm = TRUE, gc.rda = NULL, wave.renorm = TRUE, wave.rda = NULL, mingap = 1E+06, out.dir = getwd(), oschp.keep = FALSE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r2", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
+OS.Process <- function(ATChannelCel = NULL, GCChannelCel = NULL, samplename = NULL, dual.norm = TRUE, l2r.level = "weighted", gc.renorm = TRUE, gc.rda = NULL, wave.renorm = TRUE, wave.rda = NULL, mingap = 1E+06, out.dir = getwd(), oschp.keep = FALSE, force.OS = NULL, apt.version = "2.4.0", apt.build = "na33.r4", genome.pkg = "BSgenome.Hsapiens.UCSC.hg19", return.data = FALSE, write.data = TRUE, plot = TRUE, force = FALSE) {
   
   ## TEMP
   # setwd("/home/job/WORKSPACE/EaCoN_tests/OS")
